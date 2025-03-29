@@ -16,7 +16,7 @@ export async function POST(
       );
     }
 
-    const invitation = await prisma.VolunteerInvitation.findUnique({
+    const invitation = await prisma.volunteerInvitation.findUnique({
       where: {
         id: params.invitationId,
       },
@@ -53,7 +53,7 @@ export async function POST(
 
     // Update the invitation status and create the user-organization relationship
     await prisma.$transaction([
-      prisma.VolunteerInvitation.update({
+      prisma.volunteerInvitation.update({
         where: {
           id: params.invitationId,
         },

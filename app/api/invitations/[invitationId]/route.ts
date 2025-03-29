@@ -6,7 +6,7 @@ export async function GET(
   { params }: { params: { invitationId: string } }
 ) {
   try {
-    const invitation = await prisma.VolunteerInvitation.findUnique({
+    const invitation = await prisma.volunteerInvitation.findUnique({
       where: {
         id: params.invitationId,
       },

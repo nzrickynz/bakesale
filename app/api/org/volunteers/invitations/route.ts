@@ -31,12 +31,16 @@ export async function GET() {
     }
 
     // Get all invitations for the organization
-    const invitations = await prisma.VolunteerInvitation.findMany({
+    const invitations = await prisma.volunteerInvitation.findMany({
       where: {
         organizationId: userOrg.organizationId,
       },
-      orderBy: {
-        createdAt: "desc",
+      include: {
+        invitedBy: {
+          select: {
+            name: true,
+          },
+        },
       },
     });
 
