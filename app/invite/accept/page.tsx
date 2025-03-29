@@ -22,7 +22,7 @@ export default async function AcceptInvitationPage({
     notFound();
   }
 
-  const invitation = await prisma.invitation.findFirst({
+  const invitation = await prisma.volunteerInvitation.findFirst({
     where: {
       token,
       expiresAt: {
@@ -76,7 +76,7 @@ export default async function AcceptInvitationPage({
   });
 
   // Delete the invitation
-  await prisma.invitation.delete({
+  await prisma.volunteerInvitation.delete({
     where: { id: invitation.id },
   });
 

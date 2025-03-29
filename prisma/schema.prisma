@@ -220,6 +220,7 @@ model Donation {
 model VolunteerInvitation {
   id            String           @id @default(cuid())
   email         String
+  token         String           @unique
   status        InvitationStatus @default(PENDING)
   role          UserRole         @default(VOLUNTEER)
   expiresAt     DateTime
