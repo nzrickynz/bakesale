@@ -42,7 +42,10 @@ interface PageProps {
 
 export default async function CausePage({ params }: PageProps) {
   const cause = await prisma.cause.findUnique({
-    where: { id: params.causeId },
+    where: { 
+      id: params.causeId,
+      status: "ACTIVE"
+    },
     include: {
       organization: {
         select: {
@@ -56,7 +59,6 @@ export default async function CausePage({ params }: PageProps) {
         },
       },
       listings: {
-        where: { status: "ACTIVE" },
         include: {
           volunteer: {
             select: {
