@@ -27,11 +27,15 @@ export async function PATCH(request: Request) {
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
       include: {
-        organization: true,
+        userOrganizations: {
+          include: {
+            organization: true,
+          },
+        },
       },
     });
 
-    if (!user?.organization) {
+    if (!user?.userOrganizations?.[0]?.organization) {
       return NextResponse.json(
         { message: "Organization not found" },
         { status: 404 }
@@ -40,7 +44,7 @@ export async function PATCH(request: Request) {
 
     // Update the organization
     const updatedOrganization = await prisma.organization.update({
-      where: { id: user.organization.id },
+      where: { id: user.userOrganizations[0].organization.id },
       data: {
         name,
         description,
