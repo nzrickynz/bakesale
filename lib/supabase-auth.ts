@@ -15,21 +15,6 @@ export async function signUp(email: string, password: string, name?: string) {
   })
 
   if (authError) throw authError
-
-  if (authData.user) {
-    // Create user record in the users table
-    const { error: userError } = await supabase
-      .from('users')
-      .insert({
-        id: authData.user.id,
-        email,
-        name,
-        password_hash: '', // We don't store the password hash as Supabase handles it
-      })
-
-    if (userError) throw userError
-  }
-
   return authData
 }
 

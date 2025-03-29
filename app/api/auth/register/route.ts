@@ -24,36 +24,47 @@ export async function POST(request: Request) {
       )
     }
 
-    // Create user account
+    // Create user account in Supabase Auth
     const authData = await signUp(email, password, name)
 
     if (!authData.user) {
       throw new Error('Failed to create user account')
     }
 
+    // Create user record in our database
+    const user = await prisma.user.create({
+      data: {
+        id: authData.user.id,
+        email,
+        name,
+        passwordHash: '', // We don't store the password hash as Supabase handles it
+        role: role || 'ORG_ADMIN',
+      },
+    })
+
     // Create organization
     const organization = await prisma.organization.create({
       data: {
         name: organizationName,
-        description: organizationDescription,
+        description: organizationDescription || '',
         websiteUrl,
         facebookUrl,
         instagramUrl,
-        adminId: authData.user.id,
+        adminId: user.id,
       },
     })
 
     // Create user-organization relationship
     await prisma.userOrganization.create({
       data: {
-        userId: authData.user.id,
+        userId: user.id,
         organizationId: organization.id,
         role: role || 'ORG_ADMIN',
       },
     })
 
     return NextResponse.json({
-      user: authData.user,
+      user,
       organization,
       message: 'Registration successful',
     })
