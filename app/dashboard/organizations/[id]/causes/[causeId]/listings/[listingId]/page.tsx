@@ -45,7 +45,8 @@ interface Listing {
   } | null;
   orders: {
     id: string;
-    status: "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
+    paymentStatus: string;
+    fulfillmentStatus: string;
     createdAt: Date;
     buyerName: string;
     buyerEmail: string;
@@ -231,16 +232,16 @@ export default async function ListingDetailsPage({ params }: PageProps) {
                       </div>
                       <span
                         className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          order.status === "PENDING"
+                          order.paymentStatus === "PENDING"
                             ? "bg-yellow-100 text-yellow-800"
-                            : order.status === "CONFIRMED"
+                            : order.paymentStatus === "COMPLETED"
                             ? "bg-blue-100 text-blue-800"
-                            : order.status === "COMPLETED"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
+                            : order.paymentStatus === "FAILED"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-gray-100 text-gray-800"
                         }`}
                       >
-                        {order.status}
+                        {order.paymentStatus}
                       </span>
                     </div>
                     <p className="text-sm text-muted-foreground">
@@ -249,7 +250,7 @@ export default async function ListingDetailsPage({ params }: PageProps) {
                     </p>
                     {(isAdmin || isVolunteer) && (
                       <div className="flex gap-2">
-                        {order.status === "PENDING" && (
+                        {order.paymentStatus === "PENDING" && (
                           <>
                             <Button
                               variant="outline"
@@ -258,59 +259,19 @@ export default async function ListingDetailsPage({ params }: PageProps) {
                                 try {
                                   await prisma.order.update({
                                     where: { id: order.id },
-                                    data: { status: "CONFIRMED" },
+                                    data: { paymentStatus: "COMPLETED" },
                                   });
-                                  toast.success("Order confirmed");
+                                  toast.success("Order completed");
                                   window.location.reload();
                                 } catch (err) {
-                                  console.error("Failed to confirm order:", err);
-                                  toast.error("Failed to confirm order");
+                                  console.error("Failed to complete order:", err);
+                                  toast.error("Failed to complete order");
                                 }
                               }}
                             >
-                              Confirm
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={async () => {
-                                try {
-                                  await prisma.order.update({
-                                    where: { id: order.id },
-                                    data: { status: "CANCELLED" },
-                                  });
-                                  toast.success("Order cancelled");
-                                  window.location.reload();
-                                } catch (err) {
-                                  console.error("Failed to cancel order:", err);
-                                  toast.error("Failed to cancel order");
-                                }
-                              }}
-                            >
-                              Cancel
+                              Complete
                             </Button>
                           </>
-                        )}
-                        {order.status === "CONFIRMED" && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={async () => {
-                              try {
-                                await prisma.order.update({
-                                  where: { id: order.id },
-                                  data: { status: "COMPLETED" },
-                                });
-                                toast.success("Order completed");
-                                window.location.reload();
-                              } catch (err) {
-                                console.error("Failed to complete order:", err);
-                                toast.error("Failed to complete order");
-                              }
-                            }}
-                          >
-                            Complete
-                          </Button>
                         )}
                       </div>
                     )}
