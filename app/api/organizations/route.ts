@@ -34,7 +34,7 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json({ organizations });
+    return NextResponse.json({ organizations: organizations || [] });
   } catch (error) {
     console.error("[ORGANIZATIONS_GET]", error);
     return new NextResponse("Internal error", { status: 500 });
