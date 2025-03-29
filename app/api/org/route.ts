@@ -17,18 +17,22 @@ export async function GET() {
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
       include: {
-        organization: true,
+        userOrganizations: {
+          include: {
+            organization: true,
+          },
+        },
       },
     });
 
-    if (!user?.organization) {
+    if (!user?.userOrganizations?.[0]?.organization) {
       return NextResponse.json(
         { message: "Organization not found" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ organization: user.organization });
+    return NextResponse.json({ organization: user.userOrganizations[0].organization });
   } catch (error) {
     console.error("Error fetching organization:", error);
     return NextResponse.json(
