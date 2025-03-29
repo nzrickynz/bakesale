@@ -27,6 +27,13 @@ export async function POST(request: Request) {
       );
     }
 
+    if (!session.user.email) {
+      return NextResponse.json(
+        { message: "User email not found" },
+        { status: 400 }
+      );
+    }
+
     // For Super Admins, we'll create the organization without a specific admin
     const body = await request.json();
     const validatedData = createOrganizationSchema.parse(body);
