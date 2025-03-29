@@ -75,7 +75,7 @@ export async function POST(request: Request) {
     }
 
     // Create invitation
-    const invitation = await prisma.volunteerInvitation.create({
+    const invitation = await prisma.VolunteerInvitation.create({
       data: {
         email: validatedData.email,
         organizationId: validatedData.organizationId,

@@ -65,7 +65,7 @@ export async function POST(request: Request) {
     }
 
     // Check for existing pending invitation
-    const existingInvitation = await prisma.volunteerInvitation.findFirst({
+    const existingInvitation = await prisma.VolunteerInvitation.findFirst({
       where: {
         email,
         organizationId: userOrg.organizationId,
@@ -81,7 +81,7 @@ export async function POST(request: Request) {
     }
 
     // Create the invitation
-    const invitation = await prisma.volunteerInvitation.create({
+    const invitation = await prisma.VolunteerInvitation.create({
       data: {
         email,
         role,

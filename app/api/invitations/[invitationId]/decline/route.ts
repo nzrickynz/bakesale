@@ -16,7 +16,7 @@ export async function POST(
       );
     }
 
-    const invitation = await prisma.volunteerInvitation.findUnique({
+    const invitation = await prisma.VolunteerInvitation.findUnique({
       where: {
         id: params.invitationId,
       },
@@ -51,7 +51,7 @@ export async function POST(
       );
     }
 
-    await prisma.volunteerInvitation.update({
+    await prisma.VolunteerInvitation.update({
       where: {
         id: params.invitationId,
       },

@@ -31,7 +31,7 @@ export async function GET() {
     }
 
     // Get all invitations for the organization
-    const invitations = await prisma.volunteerInvitation.findMany({
+    const invitations = await prisma.VolunteerInvitation.findMany({
       where: {
         organizationId: userOrg.organizationId,
       },
