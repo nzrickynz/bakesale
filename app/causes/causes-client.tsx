@@ -19,7 +19,7 @@ interface Listing {
   description: string;
   price: number;
   imageUrl: string | null;
-  stripePaymentLink: string;
+  stripePaymentLink: string | null;
   volunteer: Volunteer;
 }
 
