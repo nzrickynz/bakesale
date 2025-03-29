@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,16 +51,7 @@ export function TeamMembers({ organizationId, listings, organizations }: TeamMem
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchTeamMembers();
-  }, [organizationId]);
-
-  // Reset selected assignments when role changes
-  useEffect(() => {
-    setSelectedAssignments([]);
-  }, [role]);
-
-  const fetchTeamMembers = async () => {
+  const fetchTeamMembers = useCallback(async () => {
     try {
       const response = await fetch(`/api/team-members?organizationId=${organizationId}`);
       if (!response.ok) {
@@ -74,7 +65,16 @@ export function TeamMembers({ organizationId, listings, organizations }: TeamMem
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [organizationId]);
+
+  useEffect(() => {
+    fetchTeamMembers();
+  }, [fetchTeamMembers]);
+
+  // Reset selected assignments when role changes
+  useEffect(() => {
+    setSelectedAssignments([]);
+  }, [role]);
 
   const handleAddMember = async (e: React.FormEvent) => {
     e.preventDefault();
