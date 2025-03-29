@@ -146,15 +146,15 @@ export default function LoginPage() {
               variant="outline" 
               type="button" 
               disabled={isLoading}
-              onClick={() => signIn("github")}
+              onClick={() => signIn("google")}
               className="w-full"
             >
               {isLoading ? (
                 <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
               ) : (
-                <Icons.gitHub className="mr-2 h-4 w-4" />
+                <Icons.google className="mr-2 h-4 w-4" />
               )}
-              GitHub
+              Google
             </Button>
           </div>
           <p className="px-8 text-center text-sm text-gray-700">

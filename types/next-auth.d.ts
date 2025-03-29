@@ -1,21 +1,22 @@
-import "next-auth";
+import NextAuth from 'next-auth'
+import { Database } from './supabase'
 
-declare module "next-auth" {
+type User = Database['public']['Tables']['users']['Row']
+
+declare module 'next-auth' {
   interface User {
-    id: string;
-    email: string;
-    role: "SUPER_ADMIN" | "ORG_ADMIN" | "VOLUNTEER";
+    role: User['role']
   }
 
   interface Session {
     user: User & {
-      role: "SUPER_ADMIN" | "ORG_ADMIN" | "VOLUNTEER";
-    };
+      role: User['role']
+    }
   }
 }
 
-declare module "next-auth/jwt" {
+declare module 'next-auth/jwt' {
   interface JWT {
-    role: "SUPER_ADMIN" | "ORG_ADMIN" | "VOLUNTEER";
+    role: User['role']
   }
 } 

@@ -1,43 +1,28 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { hashPassword } from "@/lib/password";
+import { NextResponse } from 'next/server'
+import { resetPassword } from '@/lib/supabase-auth'
 
 export async function POST(request: Request) {
   try {
-    const { email, newPassword } = await request.json();
+    const body = await request.json()
+    const { email } = body
 
-    // Find the user
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (!user) {
+    if (!email) {
       return NextResponse.json(
-        { message: "User not found" },
-        { status: 404 }
-      );
+        { error: 'Email is required' },
+        { status: 400 }
+      )
     }
 
-    // Hash the new password
-    const hashedPassword = await hashPassword(newPassword);
+    await resetPassword(email)
 
-    // Update the user's password
-    await prisma.user.update({
-      where: { email },
-      data: {
-        passwordHash: hashedPassword,
-      },
-    });
-
+    return NextResponse.json({
+      message: 'Password reset email sent',
+    })
+  } catch (error: any) {
+    console.error('Reset password error:', error)
     return NextResponse.json(
-      { message: "Password reset successfully" },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error("Error resetting password:", error);
-    return NextResponse.json(
-      { message: "Error resetting password" },
+      { error: error.message || 'Failed to send reset email' },
       { status: 500 }
-    );
+    )
   }
 } 

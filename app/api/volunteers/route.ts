@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { sendInvitationEmail } from "@/lib/email";
+import { supabase } from "@/lib/supabase";
+import { sendTempPasswordEmail } from "@/lib/email";
 import { hashPassword } from "@/lib/password";
 
 export async function POST(req: Request) {
@@ -16,69 +16,80 @@ export async function POST(req: Request) {
     const { email, causeId, organizationId } = await req.json();
 
     // Verify the user is an admin of the organization
-    const userOrg = await prisma.userOrganization.findFirst({
-      where: {
-        userId: session.user.id,
-        organizationId,
-        role: "ORG_ADMIN",
-      },
-    });
+    const { data: userOrg, error: userOrgError } = await supabase
+      .from('user_organizations')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .eq('organization_id', organizationId)
+      .eq('role', 'ORG_ADMIN')
+      .single();
 
-    if (!userOrg) {
+    if (userOrgError || !userOrg) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
     // Check if the cause belongs to the organization
-    const cause = await prisma.cause.findFirst({
-      where: {
-        id: causeId,
-        organizationId,
-      },
-    });
+    const { data: cause, error: causeError } = await supabase
+      .from('causes')
+      .select('*')
+      .eq('id', causeId)
+      .eq('organization_id', organizationId)
+      .single();
 
-    if (!cause) {
+    if (causeError || !cause) {
       return new NextResponse("Cause not found", { status: 404 });
     }
 
     // Check if the user already exists
-    let user = await prisma.user.findUnique({
-      where: { email },
-    });
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .single();
 
-    if (!user) {
+    let userId: string;
+
+    if (userError || !user) {
       // Create a new user with a temporary password
       const tempPassword = Math.random().toString(36).slice(-8);
       const hashedPassword = await hashPassword(tempPassword);
       
-      user = await prisma.user.create({
-        data: {
-          email,
-          passwordHash: hashedPassword,
-          role: "VOLUNTEER",
-        },
-      });
+      const { data: newUser, error: createError } = await supabase
+        .from('users')
+        .insert([
+          {
+            email,
+            password_hash: hashedPassword,
+            role: 'VOLUNTEER',
+          },
+        ])
+        .select()
+        .single();
+
+      if (createError) {
+        throw createError;
+      }
+
+      userId = newUser.id;
 
       // Send invitation email with temporary password
-      await sendInvitationEmail({ email, tempPassword });
+      await sendTempPasswordEmail({ email, tempPassword });
+    } else {
+      userId = user.id;
     }
 
     // Add user to organization if not already added
-    await prisma.userOrganization.upsert({
-      where: {
-        userId_organizationId: {
-          userId: user.id,
-          organizationId,
-        },
-      },
-      update: {
-        role: "VOLUNTEER",
-      },
-      create: {
-        userId: user.id,
-        organizationId,
-        role: "VOLUNTEER",
-      },
-    });
+    const { error: upsertError } = await supabase
+      .from('user_organizations')
+      .upsert({
+        user_id: userId,
+        organization_id: organizationId,
+        role: 'VOLUNTEER',
+      });
+
+    if (upsertError) {
+      throw upsertError;
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

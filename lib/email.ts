@@ -1,39 +1,20 @@
-import nodemailer from "nodemailer";
+import { Resend } from 'resend';
 
-if (!process.env.SMTP_HOST) {
-  throw new Error("SMTP_HOST environment variable is required");
+if (!process.env.RESEND_API_KEY) {
+  throw new Error("RESEND_API_KEY environment variable is required");
 }
 
-if (!process.env.SMTP_PORT) {
-  throw new Error("SMTP_PORT environment variable is required");
-}
-
-if (!process.env.SMTP_USER) {
-  throw new Error("SMTP_USER environment variable is required");
-}
-
-if (!process.env.SMTP_PASSWORD) {
-  throw new Error("SMTP_PASSWORD environment variable is required");
-}
-
-if (!process.env.SMTP_FROM) {
-  throw new Error("SMTP_FROM environment variable is required");
-}
-
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT || "587"),
-  secure: process.env.SMTP_SECURE === "true",
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 interface InvitationEmailParams {
   to: string;
   organizationName: string;
   invitationToken: string;
+}
+
+interface TempPasswordEmailParams {
+  email: string;
+  tempPassword: string;
 }
 
 export async function sendInvitationEmail({
@@ -43,8 +24,8 @@ export async function sendInvitationEmail({
 }: InvitationEmailParams) {
   const acceptUrl = `${process.env.NEXT_PUBLIC_APP_URL}/invite/accept?token=${invitationToken}`;
 
-  const mailOptions = {
-    from: process.env.SMTP_FROM,
+  await resend.emails.send({
+    from: 'Bake Sale <noreply@bakesale.co.nz>',
     to,
     subject: `You've been invited to join ${organizationName} on Bake Sale`,
     html: `
@@ -54,7 +35,27 @@ export async function sendInvitationEmail({
       <p>This invitation will expire in 7 days.</p>
       <p>If you didn't expect this invitation, you can safely ignore this email.</p>
     `,
-  };
+  });
+}
 
-  await transporter.sendMail(mailOptions);
+export async function sendTempPasswordEmail({
+  email,
+  tempPassword,
+}: TempPasswordEmailParams) {
+  const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/login`;
+
+  await resend.emails.send({
+    from: 'Bake Sale <noreply@bakesale.co.nz>',
+    to: email,
+    subject: "Welcome to Bake Sale - Your Temporary Password",
+    html: `
+      <h1>Welcome to Bake Sale!</h1>
+      <p>You've been added as a volunteer. Here are your login credentials:</p>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Temporary Password:</strong> ${tempPassword}</p>
+      <p>Please change your password after logging in.</p>
+      <p><a href="${loginUrl}">Click here to log in</a></p>
+      <p>If you didn't expect this email, you can safely ignore it.</p>
+    `,
+  });
 } 
