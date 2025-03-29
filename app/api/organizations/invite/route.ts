@@ -41,7 +41,7 @@ export async function POST(request: Request) {
       where: {
         userId: user.id,
         organizationId: validatedData.organizationId,
-        role: "ADMIN",
+        role: "ORG_ADMIN",
       },
     });
 
@@ -75,11 +75,12 @@ export async function POST(request: Request) {
     }
 
     // Create invitation
-    const invitation = await prisma.invitation.create({
+    const invitation = await prisma.volunteerInvitation.create({
       data: {
         email: validatedData.email,
         organizationId: validatedData.organizationId,
-        token: randomBytes(32).toString("hex"),
+        invitedById: user.id,
+        role: "ORG_ADMIN",
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
       },
     });
@@ -100,7 +101,9 @@ export async function POST(request: Request) {
     await sendInvitationEmail({
       to: validatedData.email,
       organizationName: organization.name,
-      invitationToken: invitation.token,
+      invitationId: invitation.id,
+      role: "ORG_ADMIN",
+      invitedByName: user.name || "Organization Admin",
     });
 
     return NextResponse.json({ success: true });
