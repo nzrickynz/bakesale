@@ -96,6 +96,7 @@ model Listing {
   price         Float
   imageUrl      String?
   quantity      Int?
+  stripePaymentLink String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
