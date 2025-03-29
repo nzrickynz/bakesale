@@ -17,7 +17,7 @@ interface EditListingFormProps {
     title: string;
     description: string;
     price: number;
-    stripePaymentLink: string;
+    stripePaymentLink: string | null;
   };
 }
 
@@ -31,7 +31,7 @@ export function EditListingForm({ causeId, listingId, listing }: EditListingForm
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
     const price = parseFloat(formData.get("price") as string);
-    const stripePaymentLink = formData.get("stripePaymentLink") as string;
+    const stripePaymentLink = formData.get("stripePaymentLink") as string || null;
 
     if (description.length > 100) {
       setIsSubmitting(false);
@@ -120,7 +120,7 @@ export function EditListingForm({ causeId, listingId, listing }: EditListingForm
           type="url"
           placeholder="Enter Stripe payment link"
           required
-          defaultValue={listing.stripePaymentLink}
+          defaultValue={listing.stripePaymentLink || ""}
         />
       </div>
       <Button 
