@@ -7,7 +7,7 @@ import { z } from "zod";
 const createCauseSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
-  goal: z.number().min(0, "Goal must be greater than 0"),
+  targetGoal: z.number().min(0, "Target goal must be greater than 0"),
   startDate: z.date(),
   endDate: z.date(),
   organizationId: z.string(),
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
       data: {
         title: validatedData.title,
         description: validatedData.description,
-        goal: validatedData.goal,
+        targetGoal: validatedData.targetGoal,
         startDate: validatedData.startDate,
         endDate: validatedData.endDate,
         status: "ACTIVE",
