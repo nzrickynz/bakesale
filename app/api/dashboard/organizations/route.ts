@@ -46,7 +46,6 @@ export async function GET(request: Request) {
             facebookUrl: true,
             instagramUrl: true,
             websiteUrl: true,
-            stripeAccountId: true,
           },
         },
       },
