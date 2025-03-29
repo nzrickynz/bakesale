@@ -53,10 +53,9 @@ export interface Database {
           facebook_url: string | null
           instagram_url: string | null
           website_url: string | null
-          stripe_account_id: string | null
-          admin_id: string
           created_at: string
           updated_at: string
+          admin_id: string
         }
         Insert: {
           id?: string
@@ -66,10 +65,9 @@ export interface Database {
           facebook_url?: string | null
           instagram_url?: string | null
           website_url?: string | null
-          stripe_account_id?: string | null
-          admin_id: string
           created_at?: string
           updated_at?: string
+          admin_id: string
         }
         Update: {
           id?: string
@@ -79,10 +77,79 @@ export interface Database {
           facebook_url?: string | null
           instagram_url?: string | null
           website_url?: string | null
-          stripe_account_id?: string | null
-          admin_id?: string
           created_at?: string
           updated_at?: string
+          admin_id?: string
+        }
+      }
+      listings: {
+        Row: {
+          id: string
+          title: string
+          description: string
+          price: number
+          image_url: string | null
+          quantity: number | null
+          created_at: string
+          updated_at: string
+          cause_id: string
+          volunteer_id: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          description: string
+          price: number
+          image_url?: string | null
+          quantity?: number | null
+          created_at?: string
+          updated_at?: string
+          cause_id: string
+          volunteer_id: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string
+          price?: number
+          image_url?: string | null
+          quantity?: number | null
+          created_at?: string
+          updated_at?: string
+          cause_id?: string
+          volunteer_id?: string
+        }
+      }
+      orders: {
+        Row: {
+          id: string
+          buyer_email: string
+          payment_status: string
+          fulfillment_status: string
+          created_at: string
+          updated_at: string
+          listing_id: string
+          creator_id: string
+        }
+        Insert: {
+          id?: string
+          buyer_email: string
+          payment_status: string
+          fulfillment_status: string
+          created_at?: string
+          updated_at?: string
+          listing_id: string
+          creator_id: string
+        }
+        Update: {
+          id?: string
+          buyer_email?: string
+          payment_status?: string
+          fulfillment_status?: string
+          created_at?: string
+          updated_at?: string
+          listing_id?: string
+          creator_id?: string
         }
       }
       causes: {
@@ -95,9 +162,9 @@ export interface Database {
           start_date: string
           end_date: string | null
           status: 'DRAFT' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED'
-          organization_id: string
           created_at: string
           updated_at: string
+          organization_id: string
         }
         Insert: {
           id?: string
@@ -108,9 +175,9 @@ export interface Database {
           start_date: string
           end_date?: string | null
           status?: 'DRAFT' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED'
-          organization_id: string
           created_at?: string
           updated_at?: string
+          organization_id: string
         }
         Update: {
           id?: string
@@ -121,114 +188,35 @@ export interface Database {
           start_date?: string
           end_date?: string | null
           status?: 'DRAFT' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED'
+          created_at?: string
+          updated_at?: string
           organization_id?: string
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      listings: {
-        Row: {
-          id: string
-          title: string
-          description: string
-          price: number
-          image_url: string | null
-          quantity: number | null
-          stripe_product_id: string | null
-          stripe_price_id: string | null
-          stripe_payment_link: string | null
-          cause_id: string
-          volunteer_id: string
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          title: string
-          description: string
-          price: number
-          image_url?: string | null
-          quantity?: number | null
-          stripe_product_id?: string | null
-          stripe_price_id?: string | null
-          stripe_payment_link?: string | null
-          cause_id: string
-          volunteer_id: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          title?: string
-          description?: string
-          price?: number
-          image_url?: string | null
-          quantity?: number | null
-          stripe_product_id?: string | null
-          stripe_price_id?: string | null
-          stripe_payment_link?: string | null
-          cause_id?: string
-          volunteer_id?: string
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      orders: {
-        Row: {
-          id: string
-          buyer_email: string
-          payment_status: string
-          fulfillment_status: string
-          listing_id: string
-          creator_id: string
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          buyer_email: string
-          payment_status: string
-          fulfillment_status: string
-          listing_id: string
-          creator_id: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          buyer_email?: string
-          payment_status?: string
-          fulfillment_status?: string
-          listing_id?: string
-          creator_id?: string
-          created_at?: string
-          updated_at?: string
         }
       }
       donations: {
         Row: {
           id: string
           amount: number
-          status: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED'
-          cause_id: string
           created_at: string
           updated_at: string
+          status: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED'
+          cause_id: string
         }
         Insert: {
           id?: string
           amount: number
-          status?: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED'
-          cause_id: string
           created_at?: string
           updated_at?: string
+          status?: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED'
+          cause_id: string
         }
         Update: {
           id?: string
           amount?: number
-          status?: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED'
-          cause_id?: string
           created_at?: string
           updated_at?: string
+          status?: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED'
+          cause_id?: string
         }
       }
       user_organizations: {

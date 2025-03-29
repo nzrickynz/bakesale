@@ -1,40 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import {
-  PaymentElement,
-  useStripe,
-  useElements,
-  Elements,
-} from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js";
-
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 interface DonationFormProps {
   causeId: string;
   onSuccess?: () => void;
 }
 
-function DonationFormContent({ causeId, onSuccess }: DonationFormProps) {
-  const stripe = useStripe();
-  const elements = useElements();
+export default function DonationForm({ causeId, onSuccess }: DonationFormProps) {
   const [amount, setAmount] = useState<number>(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-
-    if (!stripe || !elements) {
-      return;
-    }
-
     setIsProcessing(true);
     setError(null);
 
     try {
-      // Create payment intent
       const response = await fetch(`/api/causes/${causeId}/donate`, {
         method: "POST",
         headers: {
@@ -46,20 +29,6 @@ function DonationFormContent({ causeId, onSuccess }: DonationFormProps) {
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || "Failed to process donation");
-      }
-
-      const { clientSecret } = await response.json();
-
-      // Confirm payment
-      const { error: paymentError } = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: `${window.location.origin}/causes/${causeId}?payment=success`,
-        },
-      });
-
-      if (paymentError) {
-        throw new Error(paymentError.message || "Payment failed");
       }
 
       onSuccess?.();
@@ -94,23 +63,13 @@ function DonationFormContent({ causeId, onSuccess }: DonationFormProps) {
         />
       </div>
 
-      <PaymentElement />
-
       <button
         type="submit"
-        disabled={!stripe || isProcessing}
+        disabled={isProcessing}
         className="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isProcessing ? "Processing..." : "Donate Now"}
       </button>
     </form>
-  );
-}
-
-export default function DonationForm(props: DonationFormProps) {
-  return (
-    <Elements stripe={stripePromise}>
-      <DonationFormContent {...props} />
-    </Elements>
   );
 } 

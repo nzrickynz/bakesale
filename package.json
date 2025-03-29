@@ -49,23 +49,23 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20",
-    "@types/nodemailer": "^6.4.14",
-    "autoprefixer": "^10.4.17",
-    "bcryptjs": "^3.0.2",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "autoprefixer": "^10.0.1",
     "eslint": "^8",
     "eslint-config-next": "14.1.0",
     "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2",
-    "postcss": "^8.4.35",
+    "postcss": "^8",
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.5.11",
     "prisma": "^5.10.2",
-    "tailwindcss": "^3.4.1",
+    "tailwindcss": "^3.3.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
