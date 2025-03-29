@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { sendInvitationEmail } from "@/lib/email";
+import crypto from "crypto";
 
 export async function POST(request: Request) {
   try {
@@ -80,11 +81,15 @@ export async function POST(request: Request) {
       );
     }
 
+    // Generate a unique token
+    const token = crypto.randomBytes(32).toString('hex');
+
     // Create the invitation
     const invitation = await prisma.volunteerInvitation.create({
       data: {
         email,
         role,
+        token,
         organizationId: userOrg.organizationId,
         invitedById: session.user.id,
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
