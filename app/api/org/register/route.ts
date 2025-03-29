@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 
 export async function POST(request: Request) {
   try {
@@ -32,12 +32,12 @@ export async function POST(request: Request) {
     const hashedPassword = await hash(password, 12);
 
     // Create user and organization in a transaction
-    const result = await prisma.$transaction(async (tx: PrismaClient) => {
+    const result = await prisma.$transaction(async (tx) => {
       // Create user
       const user = await tx.user.create({
         data: {
           email,
-          password: hashedPassword,
+          passwordHash: hashedPassword,
           role: "ORG_ADMIN",
           name: name, // Use organization name as user name
         },
@@ -48,9 +48,9 @@ export async function POST(request: Request) {
         data: {
           name,
           description,
-          facebookURL,
-          instagramURL,
-          websiteURL,
+          facebookUrl: facebookURL,
+          instagramUrl: instagramURL,
+          websiteUrl: websiteURL,
           adminId: user.id,
         },
       });
