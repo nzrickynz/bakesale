@@ -1,0 +1,1719 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2821
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Arial-BoldMT;\f1\fswiss\fcharset0 ArialMT;\f2\froman\fcharset0 Times-Roman;
+}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red0\green0\blue233;\red16\green60\blue192;
+\red109\green109\blue109;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;\cssrgb\c0\c0\c93333;\cssrgb\c6667\c33333\c80000;
+\cssrgb\c50196\c50196\c50196;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Project Title
+\f1\b0 : Bake Sale
+\f2\fs24 \
+
+\f0\b\fs29\fsmilli14667 Technology Stack
+\f1\b0 :
+\f2\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	\'95	
+\f0\b Framework
+\f1\b0 :{\field{\*\fldinst{HYPERLINK "https://nextjs.org/"}}{\fldrslt \cf3  \cf4 \ul \ulc4 \strokec4 Next.js}} (React-based framework for server-rendered or static web apps)
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b Language
+\f1\b0 :{\field{\*\fldinst{HYPERLINK "https://www.typescriptlang.org/"}}{\fldrslt \cf3  \cf4 \ul \ulc4 \strokec4 TypeScript}} (strongly typed JavaScript)
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b Styling
+\f1\b0 :{\field{\*\fldinst{HYPERLINK "https://tailwindcss.com/"}}{\fldrslt \cf3  \cf4 \ul \ulc4 \strokec4 Tailwind CSS}} (utility-first CSS framework)
+\f2\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf0 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \strokec5 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 1. Overview
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 Bake Sale is a community fundraising platform that allows organisations to register, create \'93causes\'94 (fundraising campaigns), and list items for sale (donated or made-to-order). Each listing is fulfilled by a volunteer (or \'93listing admin\'94). The platform processes orders via Stripe and supports a multi-role model:
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b Super Admin
+\f1\b0  (Bake Sale staff)
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b Organisation Admin
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b Listing Volunteer
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b Public User
+\f1\b0  (buyer, no special admin privileges)
+\f2\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 1.1 Branding and Design
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	\'95	
+\f0\b Primary Accent Colour
+\f1\b0 : Orange (#E55937)
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b Primary Background
+\f1\b0 : White / Off-White (#F7F6F3)
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b Secondary Accent Colour
+\f1\b0 : Yellow (#FFE974)
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 These brand colours should be integrated into Tailwind\'92s configuration, ensuring consistency throughout the application (e.g., button styles, backgrounds, text highlights).
+\f2\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 1.2 Core Requirements Summary
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	1.	
+\f0\b Organisation Onboarding
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Organisation profile details: name, logo (250x250), description, social media links (Facebook, Instagram, website).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Stripe Connect account linking.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	2.	
+\f0\b Cause Management
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Ability for an Organisation Admin to create multiple causes, each with a title, description, and an image.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	A cause can contain multiple listings.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	3.	
+\f0\b Listing Management
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Each listing includes an image, title, description, price, \'93buy\'94 button (which directs to a Stripe Checkout link), and assigned volunteer.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Listing volunteer can see, track, and update the order statuses.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Order statuses: 
+\f0\b Ordered
+\f1\b0 , 
+\f0\b In Progress
+\f1\b0 , 
+\f0\b Ready
+\f1\b0 , 
+\f0\b Fulfilled
+\f1\b0 .
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	4.	
+\f0\b Orders & Payment
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Each listing has an associated Stripe payment link.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Once payment is confirmed, an order is created in the platform\'92s database with status = 
+\f0\b Ordered
+\f1\b0 .
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Volunteer can update that order\'92s status.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	5.	
+\f0\b Public Browsing
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	A home page explaining Bake Sale, emphasising that it is free, volunteer-run, etc.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	A \'93Causes\'94 page that lists all causes, with search and filter (e.g., by category: food, clothing, accessories, services).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	A single cause page with the cause\'92s detail, organisation\'92s info, and all listings for that cause.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	6.	
+\f0\b Administrative Roles
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b Super Admin
+\f1\b0 : Manage all data (organisations, causes, listings, user roles).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b Organisation Admin
+\f1\b0 : Can create causes and listings for their own organisation, manage volunteers.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b Listing Volunteer
+\f1\b0 : Assigned to specific listings and can update orders for those listings.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Note: Buyers do not need admin roles. They just view and purchase listings.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	7.	
+\f0\b Content Pages
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b About Us
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b Contact
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b Terms and Conditions
+\f1\b0  (usage terms, disclaimers, etc.)
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	8.	
+\f0\b Dummy Data
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Populate the system with sample organisations, causes, listings, volunteers, and orders for testing.
+\f2\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf0 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \strokec5 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 2. Functional Requirements
+\f2\b0\fs24 \
+
+\f0\b\fs29\fsmilli14667 2.1 Organisation Registration & Onboarding
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	1.	
+\f0\b Registration Form
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Fields: organisation name, logo upload (250x250), short description, social media links (Facebook, Instagram, website).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Admin user creation (user email, password, etc.).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	2.	
+\f0\b Stripe Connect Integration
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Provide a mechanism for the organisation admin to connect their Stripe account (using{\field{\*\fldinst{HYPERLINK "https://stripe.com/docs/connect"}}{\fldrslt \cf3  \cf4 \ul \ulc4 \strokec4 Stripe Connect}}).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Store the resulting Stripe account ID in the database so that the platform can create payment links for listings under that Stripe account.
+\f2\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 2.2 Cause Creation & Management
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	1.	
+\f0\b Create Cause
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Organisation Admin can create a cause with title, description, optional image, and target goal (optional).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Example fields:
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b title
+\f1\b0 : string
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b description
+\f1\b0 : string
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b imageURL
+\f1\b0 : string (optional)
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b organisationId
+\f1\b0 : foreign key to Organisation
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	2.	
+\f0\b View/Edit Causes
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Organisation Admin can see a list of all causes belonging to their organisation.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Can edit cause details or archive/delete a cause.
+\f2\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 2.3 Listings
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	1.	
+\f0\b Create Listing
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Each listing belongs to a cause.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Fields: title, description, price, main image, volunteer assignment, and quantity/availability (optional if indefinite).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	On creation, the system generates or updates a Stripe Checkout link. This can be done by:
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	1.	Creating a{\field{\*\fldinst{HYPERLINK "https://stripe.com/docs/api/prices"}}{\fldrslt \cf3  \cf4 \ul \ulc4 \strokec4 Stripe Price object}} tied to the connected account\'92s product.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	2.	Generating a{\field{\*\fldinst{HYPERLINK "https://stripe.com/docs/api/checkout/sessions/create"}}{\fldrslt \cf3  \cf4 \ul \ulc4 \strokec4 Checkout Session}}.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b Invite Volunteer
+\f1\b0 : The Organisation Admin can enter the email of a volunteer. The volunteer is sent an invite to manage that listing. On acceptance/registration, that user is assigned as the listing volunteer in the database.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	2.	
+\f0\b View Listings
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Each cause details page shows its listings.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Each listing includes an image, description, volunteer thumbnail, and \'93buy\'94 button (link to Stripe).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	3.	
+\f0\b Edit Listings
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Only the Organisation Admin or the assigned volunteer can edit the listing details (although volunteer might only have partial edit rights, e.g., item status or their own volunteer info).
+\f2\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 2.4 Orders & Fulfillment
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	1.	
+\f0\b Order Creation
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	When a buyer completes payment through Stripe Checkout, a webhook should notify the Bake Sale platform to create an Order record in the database.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Order fields: listing reference, buyer info (as returned from Stripe, including email), payment status (initially \'93Paid\'94), and fulfillment status (initially 
+\f0\b Ordered
+\f1\b0 ).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	2.	
+\f0\b Order Fulfillment
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	The assigned volunteer for that listing sees all orders for that listing in their volunteer dashboard.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	They can update each order\'92s fulfillment status: 
+\f0\b Ordered \uc0\u8594  In Progress \u8594  Ready \u8594  Fulfilled
+\f1\b0 .
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	The buyer does not necessarily need login credentials. All email notifications/updates about the order can be handled via email, if desired.
+\f2\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 2.5 Public-Side Pages & Navigation
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	1.	
+\f0\b Homepage
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Showcase Bake Sale\'92s mission, emphasise it\'92s free, volunteer-run, how it works, etc. (use the provided copy).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	2.	
+\f0\b Causes Page
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Lists all active causes from all organisations.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Filters by category (food, clothing, accessories, services), with a search bar.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	3.	
+\f0\b Cause Detail Page
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Displays cause title, description, an Organisation card on the right, and below it all listings for that cause.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Each listing has a quick view: image, price, short description, volunteer photo, and a \'93Buy\'94 link.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	4.	
+\f0\b About Us Page
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Explains Bake Sale\'92s background, emphasising it\'92s run by volunteers. Content is from the provided copy.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	5.	
+\f0\b Contact Page
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Simple form for users to get in touch (optional implementation detail).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	6.	
+\f0\b Terms and Conditions Page
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Explains site usage terms, disclaimers, and references to payment processing via Stripe.
+\f2\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 2.6 User Roles & Permissions
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	1.	
+\f0\b Super Admin (Bake Sale Staff)
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Access to a super admin dashboard to manage:
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Organisations (create, edit, archive).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Causes (create, edit, archive).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Listings (create, edit, archive).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Roles (grant Organisation Admin privileges, remove them, etc.).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Typically internal to Bake Sale team.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	2.	
+\f0\b Organisation Admin
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Manages only their own organisation(s):
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Create/edit causes.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Create/edit listings.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Assign volunteers to listings.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Onboard the organisation to Stripe Connect.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	3.	
+\f0\b Listing Volunteer
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Can see all orders for any listings they are assigned to.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Can update order fulfillment status.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Can edit certain details of the listings they manage (e.g., item status or volunteer introduction).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	4.	
+\f0\b Public User (Buyer)
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	No login required to browse causes, listings, or place orders.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Payment is handled by Stripe Checkout.
+\f2\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf0 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \strokec5 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 3. Technical Details
+\f2\b0\fs24 \
+
+\f0\b\fs29\fsmilli14667 3.1 Next.js Project Structure
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	\'95	
+\f0\b TypeScript
+\f1\b0 : Strict mode enabled.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b Tailwind CSS
+\f1\b0 : Configure tailwind.config.js to include brand colours, fonts, etc.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b Routing
+\f1\b0 :
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	pages/ (or app/ directory if using Next.js 13+).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Example route structure:
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	/ (Home)
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	/causes (List of causes)
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	/causes/[causeId] (Cause details + listings)
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	/org/[orgId]/dashboard (Org admin dashboard)
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	/admin/super (Super Admin panel)
+\f2\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 3.2 Data Modeling (High-Level)
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 Possible database schema (simplified):
+\f2\fs24 \
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 User \{
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0id: string
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0email: string
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0passwordHash: string
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0role: enum(SUPER_ADMIN, ORG_ADMIN, VOLUNTEER, PUBLIC) // or separate tables for roles
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \}
+\f2\fs24 \
+\
+
+\f1\fs29\fsmilli14667 Organisation \{
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0id: string
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0name: string
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0logoURL: string
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0description: text
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0facebookURL: string
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0instagramURL: string
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0websiteURL: string
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0stripeAccountId: string // from Stripe Connect
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0createdBy: foreign key -> User (the org admin)
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \}
+\f2\fs24 \
+\
+
+\f1\fs29\fsmilli14667 Cause \{
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0id: string
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0organisationId: string (FK -> Organisation)
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0title: string
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0description: text
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0imageURL: string
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \}
+\f2\fs24 \
+\
+
+\f1\fs29\fsmilli14667 Listing \{
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0id: string
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0causeId: string (FK -> Cause)
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0title: string
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0description: text
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0price: number
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0imageURL: string
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0volunteerId: string (FK -> User)
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0stripePriceId: string
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0stripeProductId: string
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \}
+\f2\fs24 \
+\
+
+\f1\fs29\fsmilli14667 Order \{
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0id: string
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0listingId: string (FK -> Listing)
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0buyerEmail: string
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0paymentStatus: string // e.g., "Paid", "Refunded"
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0fulfillmentStatus: string // "Ordered", "In Progress", "Ready", "Fulfilled"
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \'a0\'a0createdAt: date
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 \}
+\f2\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	\'95	Additional linking tables (for multi-volunteer or multi-admin scenarios) can be introduced if needed.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Use relationships to ensure an Organisation Admin only sees/edits their own data.
+\f2\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 3.3 Stripe Connect & Checkout Integration
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	1.	
+\f0\b Organisation Stripe Onboarding
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Provide a \'93Connect to Stripe\'94 button in the Org Admin dashboard.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	On click, the platform redirects to Stripe Connect onboarding flow.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	On success, store stripeAccountId.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	2.	
+\f0\b Listing Checkout Flow
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	On listing creation, create a Product and Price in Stripe under stripeAccountId.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Generate a reusable Checkout Session link or ephemeral link each time a buyer clicks \'93buy.\'94
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Alternatively, generate a Payment Link for that Price.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	3.	
+\f0\b Stripe Webhooks
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Implement an endpoint (/api/stripe-webhook) to handle events like checkout.session.completed.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Update the Order with buyer info, set payment status to \'93Paid,\'94 and fulfillment status to \'93Ordered.\'94
+\f2\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 3.4 Security & Authentication
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	\'95	Consider using{\field{\*\fldinst{HYPERLINK "https://next-auth.js.org/"}}{\fldrslt \cf3  \cf4 \ul \ulc4 \strokec4 NextAuth.js}} or a custom JWT-based solution.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Only Super Admin and Organisation Admin can access restricted dashboards.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Volunteers can log in to manage their assigned listings.
+\f2\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 3.5 Deployment & Hosting
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	\'95	Recommended to host on a platform that supports Next.js well, such as{\field{\*\fldinst{HYPERLINK "https://vercel.com/"}}{\fldrslt \cf3  \cf4 \ul \ulc4 \strokec4 Vercel}} or AWS.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Ensure environment variables for Stripe keys, database connection, etc. are handled securely.
+\f2\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 3.6 Testing & Dummy Data
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	\'95	
+\f0\b Testing
+\f1\b0 : Unit tests (Jest/React Testing Library) + integration tests for critical flows (Stripe webhooks, etc.).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b Dummy Data
+\f1\b0 :
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	At least 2\'963 organisations, each with a few causes.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Each cause with 3\'965 listings.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Use volunteer users to show the volunteer dashboard.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Generate some test orders to confirm the order dashboard and status updates.
+\f2\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf0 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \strokec5 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 4. UX & UI Considerations
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	1.	
+\f0\b Responsive Design
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Optimise for mobile, as volunteers and buyers may browse on phones.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Tailwind\'92s utility classes make it straightforward to manage breakpoints.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	2.	
+\f0\b Brand Look & Feel
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Vibrant, fun vibe\'97buttons and highlights in 
+\f0\b Orange (#E55937)
+\f1\b0 , backgrounds or subtle highlights in 
+\f0\b Yellow (#FFE974)
+\f1\b0 , and a clean white/off-white layout in #F7F6F3.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Encourage whimsical illustrations or icons to evoke the community \'93bake sale\'94 spirit.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	3.	
+\f0\b Cause Listings
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Eye-catching grid layout for listings.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Quick CTA to buy: a direct link to the Stripe Checkout.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	4.	
+\f0\b Volunteer Dashboard
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Clear table or card layout of orders.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Easy toggles for order status.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Summaries of total orders, statuses, etc.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	5.	
+\f0\b Admin Dashboard (Organisation)
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Straightforward forms for cause and listing creation.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Indicators for whether Stripe is connected (and if not, a prompt to connect).
+\f2\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf0 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \strokec5 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 5. Pages & Endpoints Summary
+\f2\b0\fs24 \
+
+\f0\b\fs29\fsmilli14667 5.1 Public-Facing Routes
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	\'95	
+\f0\b GET /
+\f1\b0 : Home page; marketing copy, how Bake Sale works.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b GET /causes
+\f1\b0 : All causes, filter & search.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b GET /causes/[causeId]
+\f1\b0 : Cause detail page with listings.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b GET /about
+\f1\b0 : Static about page.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b GET /contact
+\f1\b0 : Contact page.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b GET /terms
+\f1\b0 : Terms and conditions page.
+\f2\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 5.2 Organisation Admin
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	\'95	
+\f0\b GET /org/[orgId]/dashboard
+\f1\b0 : Lists the organisation\'92s causes, manage listings, and link to Stripe.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b GET /org/[orgId]/cause/create
+\f1\b0 : Form to create a new cause.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b GET /org/[orgId]/cause/[causeId]/listings
+\f1\b0 : Manage listings for a specific cause.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b GET /org/[orgId]/listing/create
+\f1\b0 : Form to create a new listing.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b POST /api/org/[orgId]/listing
+\f1\b0 : API endpoint for listing creation, which triggers Stripe product/price creation.
+\f2\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 5.3 Volunteer
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	\'95	
+\f0\b GET /volunteer/dashboard
+\f1\b0 : Lists all listings the volunteer is assigned to, plus orders.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b GET /volunteer/orders/[listingId]
+\f1\b0 : Shows orders for a given listing.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b PATCH /api/orders/[orderId]
+\f1\b0 : Updates fulfillment status.
+\f2\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 5.4 Super Admin
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	\'95	
+\f0\b GET /admin/super
+\f1\b0 : Admin panel for Bake Sale staff (manage everything).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b PATCH /api/admin/users/[userId]/role
+\f1\b0 : Assign or remove roles.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b DELETE /api/admin/organisation/[orgId]
+\f1\b0 : Archive or delete an organisation.
+\f2\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 5.5 Stripe
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	\'95	
+\f0\b POST /api/stripe-webhook
+\f1\b0 : Receives webhook events to confirm order completions.
+\f2\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf0 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \strokec5 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 6. Timeline / Milestones
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	1.	
+\f0\b Phase 1
+\f1\b0 : Project Setup
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Configure Next.js with TypeScript and Tailwind CSS.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Set up basic routing structure.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Implement initial database schema and migrations (if using a relational DB).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Integrate authentication (NextAuth or custom).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	2.	
+\f0\b Phase 2
+\f1\b0 : Organisation Onboarding & Stripe Connect
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Create Organisation model, forms, and admin interface.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Implement Stripe Connect flow and store stripeAccountId.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	3.	
+\f0\b Phase 3
+\f1\b0 : Cause & Listing Management
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Build the Organisation Admin dashboard for creating causes and listings.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Implement volunteer assignment and invitation flow.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Integrate Stripe product/price creation for each listing.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	4.	
+\f0\b Phase 4
+\f1\b0 : Orders & Fulfillment
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Implement the Stripe Checkout process and webhook.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Create volunteer dashboard to view and update order status.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	5.	
+\f0\b Phase 5
+\f1\b0 : Public-Facing Pages
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Build homepage, about, contact, terms pages.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Build causes directory and cause detail page with listing purchase options.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	6.	
+\f0\b Phase 6
+\f1\b0 : Super Admin & Final Polishing
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Implement super admin role and admin panel.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Improve UI/UX with final styling (Tailwind + brand colours).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Add dummy data for demonstration.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Test, refine, and prepare for launch.
+\f2\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf0 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \strokec5 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 7. Acceptance Criteria
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	\'95	
+\f0\b Organisations
+\f1\b0  can be registered, have a profile (logo, description, links).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b Stripe Connect
+\f1\b0  is successfully integrated, allowing each organisation to receive funds directly.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b Causes
+\f1\b0  can be created, edited, and displayed publicly.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b Listings
+\f1\b0  can be added, displayed, and purchased.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b Volunteers
+\f1\b0  can view and update orders for their assigned listings.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b Order statuses
+\f1\b0  flow from \'93Ordered\'94 to \'93Fulfilled\'94 is functional.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b Super Admin
+\f1\b0  role can view and manage all data.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b UI
+\f1\b0  is responsive and incorporates brand colours.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b Dummy data
+\f1\b0  is present for demo and testing.
+\f2\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf0 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \strokec5 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 Conclusion
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 This brief outlines the key requirements, roles, data models, and technical approach for 
+\f0\b Bake Sale
+\f1\b0 , using Next.js, TypeScript, and Tailwind CSS. The end goal is a volunteer-run fundraising platform where organisations can quickly create fundraising causes, volunteers can manage orders, and buyers can easily support causes via Stripe Checkout.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 Below is a 
+\f0\b revised project plan
+\f1\b0  without specific timing estimates, assuming 
+\f0\b everything remains local
+\f1\b0  for now and the team will work in shifts. The plan still follows a logical sequence of development milestones.
+\f2\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf0 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \strokec5 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 Phase 1: Project Setup & Fundamentals
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	1.	
+\f0\b Repo Initialization & Basic Configuration
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Create a local Git repository.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Scaffold a 
+\f0\b Next.js
+\f1\b0  application with 
+\f0\b TypeScript
+\f1\b0 .
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Install and configure 
+\f0\b Tailwind CSS
+\f1\b0  (add custom brand colours to tailwind.config.js).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Set up linters and formatters (e.g., ESLint, Prettier).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	2.	
+\f0\b Local Environment & Secrets Management
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Use local environment variables for Stripe keys, database credentials, etc. (e.g., .env.local).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Keep all services (DB, etc.) running locally or within local containers (e.g., Docker if preferred).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	3.	
+\f0\b File/Folder Structure
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Establish core directories: pages/ (or app/ in Next.js 13+), components/, lib/, types/, etc.
+\f2\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 Deliverables
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	\'95	A working local Next.js + TypeScript + Tailwind project.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Basic linting/formatting pipeline.
+\f2\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf0 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \strokec5 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 Phase 2: Database & Authentication
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	1.	
+\f0\b Database Schema & Migrations
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Decide on a local database solution (e.g., Postgres running locally, or a Docker container).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Create and run migrations for the main tables/models:
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b User
+\f1\b0 , 
+\f0\b Organisation
+\f1\b0 , 
+\f0\b Cause
+\f1\b0 , 
+\f0\b Listing
+\f1\b0 , 
+\f0\b Order
+\f1\b0 .
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Verify local DB connectivity.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	2.	
+\f0\b Authentication & User Roles
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Implement a local authentication setup (e.g.,{\field{\*\fldinst{HYPERLINK "https://next-auth.js.org/"}}{\fldrslt \cf3  \cf4 \ul \ulc4 \strokec4 NextAuth.js}} with credentials provider) or a simple JWT-based approach.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Map out roles: 
+\f0\b Super Admin
+\f1\b0 , 
+\f0\b Organisation Admin
+\f1\b0 , 
+\f0\b Volunteer
+\f1\b0 , 
+\f0\b Public User
+\f1\b0 .
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Confirm you can log in/out locally and test restricted routes or pages.
+\f2\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 Deliverables
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	\'95	A local DB with initial schema.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Working auth, role checks, and restricted routes in a local environment.
+\f2\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf0 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \strokec5 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 Phase 3: Organisation Onboarding & Stripe Connect
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	1.	
+\f0\b Organisation Model & Registration
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Build a local form for creating an organisation (name, logo file upload, description, social links).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	The user creating the organisation becomes 
+\f0\b Organisation Admin
+\f1\b0 .
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	2.	
+\f0\b Stripe Connect Integration (Local)
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Incorporate a \'93Connect to Stripe\'94 button that redirects to Stripe\'92s test onboarding (using test keys).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	After successful onboarding, capture and store stripeAccountId locally in the DB.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	3.	
+\f0\b Organisation Admin Dashboard (Skeleton)
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Create a minimal dashboard for an organisation to view its details and see if Stripe is connected.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Let the org admin re-initiate Stripe Connect if needed.
+\f2\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 Deliverables
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	\'95	Local flow to create and store organisation data.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Stripe Connect working in 
+\f0\b test mode
+\f1\b0  with a local webhook endpoint placeholder (to be fleshed out later).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Simple Org Admin Dashboard page.
+\f2\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf0 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \strokec5 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 Phase 4: Cause & Listing Management
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	1.	
+\f0\b Cause Creation & Management
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Add a form in the Org Admin Dashboard to create a cause (title, description, optional image).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Store cause data in the local DB.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Implement cause CRUD for the Org Admin.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	2.	
+\f0\b Listing Creation & Management
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Extend the Org Admin Dashboard to create listings for each cause.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Fields: title, description, price, image, volunteer assignment (email).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b Volunteer Invitation
+\f1\b0 : If volunteer does not exist, send an invite link; if they do exist, assign them.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Integrate with Stripe in 
+\f0\b test mode
+\f1\b0  to create a local product and price (store stripeProductId, stripePriceId).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	3.	
+\f0\b Listing CRUD
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Org Admin can edit or delete listings, and reassign volunteers if needed.
+\f2\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 Deliverables
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	\'95	Local cause creation and display under each organisation.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Listing creation integrated with Stripe test products/prices.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Volunteer invitation flow (local user creation).
+\f2\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf0 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \strokec5 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 Phase 5: Orders & Fulfillment
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	1.	
+\f0\b Stripe Webhook Integration
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Implement a local webhook endpoint (e.g., http://localhost:3000/api/stripe-webhook) to process checkout.session.completed.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	When a purchase succeeds, create an 
+\f0\b Order
+\f1\b0  record with:
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	paymentStatus = "Paid"
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	fulfillmentStatus = "Ordered"
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	listingId reference, buyer info from Stripe.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	2.	
+\f0\b Volunteer Dashboard
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	A route (e.g., /volunteer/dashboard) listing all the volunteer\'92s assigned listings.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Each listing shows incoming orders, including buyer email, date, current status.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	3.	
+\f0\b Order Fulfillment Workflow
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Volunteers can update 
+\f0\b fulfillmentStatus
+\f1\b0  from \'93Ordered\'94 \uc0\u8594  \'93In Progress\'94 \u8594  \'93Ready\'94 \u8594  \'93Fulfilled.\'94
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Provide a simple UI (dropdown or buttons).
+\f2\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 Deliverables
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	\'95	Fully tested local Stripe checkout flow (test mode) creating orders in the DB.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Volunteer can see and update orders for listings they manage.
+\f2\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf0 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \strokec5 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 Phase 6: Public-Facing Pages & Navigation
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	1.	
+\f0\b Home Page
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Local homepage with Bake Sale\'92s mission, brand colours, relevant copy.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	2.	
+\f0\b Causes Directory
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	A public route (/causes) that lists all published causes.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Provide filter (food, clothing, accessories, services) and search.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	3.	
+\f0\b Cause Detail Page
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Displays cause info (title, description), associated organisation info.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Lists items (listings) with a 
+\f0\b Buy
+\f1\b0  button linking to the Stripe checkout/payment link (in test mode).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	4.	
+\f0\b Static Pages
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b About Us
+\f1\b0 : Use the provided Bake Sale background copy.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b Contact
+\f1\b0 : A simple form or an email link.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b Terms and Conditions
+\f1\b0 : Basic T&C text for local usage.
+\f2\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 Deliverables
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	\'95	Fully navigable local site showcasing causes and listings.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Branding (Orange #E55937, off-white #F7F6F3, yellow #FFE974) integrated with Tailwind.
+\f2\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf0 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \strokec5 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 Phase 7: Super Admin Panel
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	1.	
+\f0\b Super Admin Role & Dashboard
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Restrict access to /admin/super for 
+\f0\b Super Admin
+\f1\b0  only.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Provide overview of organisations, causes, listings, and users.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	2.	
+\f0\b Global Management
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	CRUD for any organisation.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Manage user roles (promote/demote to Org Admin, Volunteer, etc.).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	3.	
+\f0\b Archive or Delete Resources
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Ability to archive or remove organisations, causes, listings if needed.
+\f2\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 Deliverables
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	\'95	A top-level admin interface for complete control, all running locally.
+\f2\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf0 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \strokec5 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 Phase 8: Testing, Dummy Data & Final Polishing
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	1.	
+\f0\b Local Dummy Data
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Write a local seed script to populate the DB with:
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	2\'963 sample organisations
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Several causes per organisation
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Listings with assigned volunteers
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	A few orders for demonstration.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	2.	
+\f0\b Testing
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b Unit Tests
+\f1\b0  for core components (using a test runner like Jest).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	
+\f0\b Integration Tests
+\f1\b0  for local routes, Stripe webhook, volunteer flows.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Verify flows: org registration \uc0\u8594  cause/listing creation \u8594  purchase \u8594  volunteer updates.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	3.	
+\f0\b UI/UX Review & Cleanup
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Ensure responsiveness across breakpoints.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Apply final brand styling with Tailwind.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Check that roles, dashboards, and data are displayed consistently.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	4.	
+\f0\b Local \'93Release\'94
+\f2\b0\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Confirm everything works as expected in a fully local environment (Stripe test mode, local DB).
+\f2\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 Deliverables
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	\'95	Well-seeded local environment with test data.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Automated tests verifying major flows.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	\'95	Polished local UI/UX.
+\f2\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf0 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \strokec5 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b\fs29\fsmilli14667 \cf0 Summary: Local-First Approach
+\f2\b0\fs24 \
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf0 	1.	
+\f0\b Set up project skeleton
+\f1\b0  with Next.js/TypeScript/Tailwind.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	2.	
+\f0\b Build out database
+\f1\b0  schemas and migrations for local usage.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	3.	
+\f0\b Implement authentication
+\f1\b0  and role-based access (local only).
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	4.	
+\f0\b Enable Stripe Connect
+\f1\b0  in test mode, storing stripeAccountId locally.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	5.	
+\f0\b Develop cause & listing
+\f1\b0  modules with local invitation flows.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	6.	
+\f0\b Handle orders
+\f1\b0  via Stripe webhooks, fulfill them locally in volunteer dashboards.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	7.	
+\f0\b Create a super admin panel
+\f1\b0  for overarching control.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 	8.	
+\f0\b Seed with dummy data
+\f1\b0  and polish with brand design.
+\f2\fs24 \
+
+\f1\fs29\fsmilli14667 By following these phases in order\'97while keeping everything strictly 
+\f0\b local
+\f1\b0 \'97the developer will have a straightforward path to build, test, and refine Bake Sale without worrying about production environments until a later stage.
+\f2\fs24 \
+}
