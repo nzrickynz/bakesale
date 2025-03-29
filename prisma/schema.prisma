@@ -220,6 +220,9 @@ model VolunteerInvitation {
   id            String           @id @default(cuid())
   email         String
   status        InvitationStatus @default(PENDING)
+  role          UserRole         @default(VOLUNTEER)
+  expiresAt     DateTime
+  acceptedAt    DateTime?
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
 
