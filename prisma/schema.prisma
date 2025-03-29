@@ -223,6 +223,7 @@ model VolunteerInvitation {
   role          UserRole         @default(VOLUNTEER)
   expiresAt     DateTime
   acceptedAt    DateTime?
+  declinedAt    DateTime?
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
 
