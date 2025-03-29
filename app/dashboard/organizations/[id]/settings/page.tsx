@@ -27,7 +27,7 @@ interface UserOrganization {
     id: string;
     name: string;
     description: string | null;
-    website: string | null;
+    websiteUrl: string | null;
   };
 }
 
@@ -116,7 +116,7 @@ export default async function OrganizationSettingsPage({
                   "use server";
                   const name = formData.get("name") as string;
                   const description = formData.get("description") as string;
-                  const website = formData.get("website") as string;
+                  const websiteUrl = formData.get("website") as string;
 
                   try {
                     await prisma.organization.update({
@@ -124,7 +124,7 @@ export default async function OrganizationSettingsPage({
                       data: {
                         name,
                         description,
-                        website,
+                        websiteUrl,
                       },
                     });
 
@@ -158,7 +158,7 @@ export default async function OrganizationSettingsPage({
                     id="website"
                     name="website"
                     type="url"
-                    defaultValue={userOrganization.organization.website || ""}
+                    defaultValue={userOrganization.organization.websiteUrl || ""}
                   />
                 </div>
                 <Button type="submit">Save Changes</Button>
