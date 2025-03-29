@@ -1,29 +1,28 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { supabase } from "@/lib/supabase";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    if (!session?.user?.email) {
+    if (authError || !user) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
     });
 
-    if (!user) {
+    if (!dbUser) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
     const organizations = await prisma.userOrganization.findMany({
       where: {
-        userId: user.id,
+        userId: dbUser.id,
       },
       include: {
         organization: {
