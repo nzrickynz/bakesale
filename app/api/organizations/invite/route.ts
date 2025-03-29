@@ -74,6 +74,9 @@ export async function POST(request: Request) {
       }
     }
 
+    // Generate a unique token
+    const token = randomBytes(32).toString('hex');
+
     // Create invitation
     const invitation = await prisma.volunteerInvitation.create({
       data: {
@@ -81,6 +84,7 @@ export async function POST(request: Request) {
         organizationId: validatedData.organizationId,
         invitedById: user.id,
         role: "ORG_ADMIN",
+        token,
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
       },
     });
