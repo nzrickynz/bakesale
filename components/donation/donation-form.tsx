@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useStripe, useElements, PaymentElement } from "@stripe/react-stripe-js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,38 +8,23 @@ import { toast } from "sonner";
 
 interface DonationFormProps {
   causeId: string;
-  clientSecret: string;
+  paymentLink: string;
 }
 
-export function DonationForm({ causeId, clientSecret }: DonationFormProps) {
-  const stripe = useStripe();
-  const elements = useElements();
+export function DonationForm({ causeId, paymentLink }: DonationFormProps) {
   const [amount, setAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!stripe || !elements) {
-      return;
-    }
-
     setIsLoading(true);
 
     try {
-      const { error } = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: `${window.location.origin}/dashboard/causes/${causeId}`,
-        },
-      });
-
-      if (error) {
-        toast.error(error.message || "Payment failed");
-      }
+      // Redirect to the payment link
+      window.location.href = paymentLink;
     } catch (err) {
-      console.error("Payment error:", err);
-      toast.error("Payment failed");
+      console.error("Error redirecting to payment:", err);
+      toast.error("Failed to redirect to payment");
     } finally {
       setIsLoading(false);
     }
@@ -61,10 +45,9 @@ export function DonationForm({ causeId, clientSecret }: DonationFormProps) {
           required
         />
       </div>
-      <PaymentElement />
       <Button
         type="submit"
-        disabled={!stripe || isLoading}
+        disabled={isLoading}
         className="w-full"
       >
         {isLoading ? "Processing..." : "Donate"}
