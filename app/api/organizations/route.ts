@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 // Force deployment
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     console.log("[ORGANIZATIONS_GET] Starting request")
     
@@ -67,7 +67,12 @@ export async function GET() {
       }))
     });
 
-    return NextResponse.json({ organizations: organizations || [] });
+    // Set cache control headers to prevent caching
+    const response = NextResponse.json({ organizations: organizations || [] });
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+    return response;
   } catch (error) {
     console.error("[ORGANIZATIONS_GET] Unexpected error:", {
       message: error instanceof Error ? error.message : 'Unknown error',
