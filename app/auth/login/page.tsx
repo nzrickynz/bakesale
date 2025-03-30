@@ -14,10 +14,12 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsLoading(true);
+    setError(null);
 
     const formData = new FormData(event.currentTarget);
     const email = formData.get("email") as string;
@@ -32,6 +34,8 @@ function LoginForm() {
       });
 
       if (result?.error) {
+        console.error("Login error:", result.error);
+        setError(result.error);
         toast.error(result.error);
         setIsLoading(false);
         return;
@@ -61,6 +65,7 @@ function LoginForm() {
       toast.success("Successfully logged in!");
     } catch (error) {
       console.error("Login error:", error);
+      setError("Something went wrong. Please try again.");
       toast.error("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
@@ -97,6 +102,11 @@ function LoginForm() {
           </div>
           <div className="grid gap-6">
             <form onSubmit={onSubmit}>
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4">
+                  {error}
+                </div>
+              )}
               <div className="grid gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="email" className="text-gray-700">Email</Label>
