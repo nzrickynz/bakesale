@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -23,21 +24,32 @@ export default function LoginPage() {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
+    console.log("[LOGIN] Attempting login for:", email);
+
     try {
       const result = await signIn("credentials", {
         email,
         password,
         redirect: false,
+        callbackUrl: searchParams?.get("callbackUrl") || "/dashboard",
       });
 
+      console.log("[LOGIN] Sign in result:", result);
+
       if (result?.error) {
-        setError("Invalid email or password");
+        console.error("[LOGIN] Error:", result.error);
+        setError(result.error);
         return;
       }
 
-      router.push("/");
+      if (result?.url) {
+        router.push(result.url);
+      } else {
+        router.push("/dashboard");
+      }
       router.refresh();
     } catch (error) {
+      console.error("[LOGIN] Unexpected error:", error);
       setError("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);

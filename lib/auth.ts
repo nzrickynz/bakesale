@@ -2,8 +2,6 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-import { supabase } from './supabase'
-import { Database } from '@/types/supabase'
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -23,7 +21,10 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
+        console.log("[AUTH] Attempting login for email:", credentials?.email);
+
         if (!credentials?.email || !credentials?.password) {
+          console.log("[AUTH] Missing credentials");
           throw new Error("Missing credentials");
         }
 
@@ -33,21 +34,28 @@ export const authOptions: NextAuthOptions = {
           },
         });
 
+        console.log("[AUTH] User found:", user ? "yes" : "no");
+
         if (!user) {
+          console.log("[AUTH] User not found");
           throw new Error("Invalid email or password");
         }
 
         const isPasswordValid = await compare(credentials.password, user.passwordHash);
+        console.log("[AUTH] Password valid:", isPasswordValid);
 
         if (!isPasswordValid) {
+          console.log("[AUTH] Invalid password");
           throw new Error("Invalid email or password");
         }
 
         // Allow all valid roles to login
         if (!["SUPER_ADMIN", "ORG_ADMIN", "VOLUNTEER"].includes(user.role)) {
+          console.log("[AUTH] Invalid role:", user.role);
           throw new Error("Invalid user role");
         }
 
+        console.log("[AUTH] Login successful for user:", user.email);
         return {
           id: user.id,
           email: user.email,
