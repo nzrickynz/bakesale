@@ -21,7 +21,8 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        console.log("[AUTH] Attempting login for email:", credentials?.email);
+        console.log("[AUTH] Starting authorization process");
+        console.log("[AUTH] Email provided:", credentials?.email);
 
         if (!credentials?.email || !credentials?.password) {
           console.log("[AUTH] Missing credentials");
@@ -35,12 +36,16 @@ export const authOptions: NextAuthOptions = {
         });
 
         console.log("[AUTH] User found:", user ? "yes" : "no");
+        if (user) {
+          console.log("[AUTH] User role:", user.role);
+        }
 
         if (!user) {
           console.log("[AUTH] User not found");
           throw new Error("Invalid email or password");
         }
 
+        console.log("[AUTH] Attempting password comparison");
         const isPasswordValid = await compare(credentials.password, user.passwordHash);
         console.log("[AUTH] Password valid:", isPasswordValid);
 
