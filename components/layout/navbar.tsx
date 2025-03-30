@@ -83,7 +83,7 @@ export function Navbar() {
               </DropdownMenu>
             ) : (
               <div className="flex space-x-4">
-                <Link href="/auth/login">
+                <Link href="/login">
                   <Button variant="ghost">Sign in</Button>
                 </Link>
                 <Link href="/register">
@@ -132,7 +132,7 @@ export function Navbar() {
                 ) : (
                   <>
                     <DropdownMenuItem asChild>
-                      <Link href="/auth/login">Sign in</Link>
+                      <Link href="/login">Sign in</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link href="/register">Get Started</Link>
