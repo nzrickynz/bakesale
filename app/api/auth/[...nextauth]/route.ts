@@ -1,12 +1,10 @@
 import NextAuth from 'next-auth'
-import { SupabaseAdapter } from '@/lib/auth-adapter'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
-import { signIn } from '@/lib/supabase-auth'
-import { User } from 'next-auth'
+import { compare } from 'bcryptjs'
+import { prisma } from '@/lib/prisma'
 
 const handler = NextAuth({
-  adapter: SupabaseAdapter(),
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -16,22 +14,35 @@ const handler = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
+          console.log("[AUTH] Missing credentials");
           throw new Error('Email and password are required')
         }
 
         try {
-          const data = await signIn(credentials.email, credentials.password)
-          if (!data.user) return null
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email }
+          })
 
-          // Convert Supabase user to NextAuth user
-          const user: User = {
-            id: data.user.id,
-            email: data.user.email!,
-            name: data.user.user_metadata?.full_name || null,
-            role: data.user.user_metadata?.role || 'user',
+          if (!user) {
+            console.log("[AUTH] User not found");
+            throw new Error('Invalid credentials')
           }
-          return user
+
+          const isValid = await compare(credentials.password, user.passwordHash)
+          if (!isValid) {
+            console.log("[AUTH] Invalid password");
+            throw new Error('Invalid credentials')
+          }
+
+          console.log("[AUTH] Login successful for user:", user.email);
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          }
         } catch (error) {
+          console.error("[AUTH] Authorization error:", error);
           throw new Error('Invalid credentials')
         }
       },
@@ -45,19 +56,21 @@ const handler = NextAuth({
     strategy: 'jwt',
   },
   pages: {
-    signIn: '/auth/login',
-    error: '/auth/error',
+    signIn: '/login',
+    error: '/error',
   },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
         token.role = user.role
+        token.id = user.id
       }
       return token
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.role = token.role
+        session.user.role = token.role as string
+        session.user.id = token.id as string
       }
       return session
     },

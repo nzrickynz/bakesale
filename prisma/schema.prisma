@@ -45,6 +45,8 @@ model User {
   accounts       Account[]
   sessions       Session[]
 
+  passwordResets PasswordReset[]
+
   @@map("users")
 }
 
@@ -240,4 +242,15 @@ model VolunteerInvitation {
 
   @@unique([email, organizationId])
   @@map("volunteer_invitations")
+}
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expires   DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
 } 

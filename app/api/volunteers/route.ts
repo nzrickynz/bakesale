@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { supabase } from "@/lib/supabase";
-import { sendTempPasswordEmail } from "@/lib/email";
-import { hashPassword } from "@/lib/password";
+import { prisma } from "@/lib/prisma";
+import { Resend } from "resend";
+import { hash } from "bcryptjs";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
   try {
@@ -16,80 +18,79 @@ export async function POST(req: Request) {
     const { email, causeId, organizationId } = await req.json();
 
     // Verify the user is an admin of the organization
-    const { data: userOrg, error: userOrgError } = await supabase
-      .from('user_organizations')
-      .select('*')
-      .eq('user_id', session.user.id)
-      .eq('organization_id', organizationId)
-      .eq('role', 'ORG_ADMIN')
-      .single();
+    const userOrg = await prisma.userOrganization.findFirst({
+      where: {
+        userId: session.user.id,
+        organizationId,
+        role: 'ORG_ADMIN',
+      },
+    });
 
-    if (userOrgError || !userOrg) {
+    if (!userOrg) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
     // Check if the cause belongs to the organization
-    const { data: cause, error: causeError } = await supabase
-      .from('causes')
-      .select('*')
-      .eq('id', causeId)
-      .eq('organization_id', organizationId)
-      .single();
+    const cause = await prisma.cause.findFirst({
+      where: {
+        id: causeId,
+        organizationId,
+      },
+    });
 
-    if (causeError || !cause) {
+    if (!cause) {
       return new NextResponse("Cause not found", { status: 404 });
     }
 
     // Check if the user already exists
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('*')
-      .eq('email', email)
-      .single();
+    let user = await prisma.user.findUnique({
+      where: { email },
+    });
 
-    let userId: string;
-
-    if (userError || !user) {
+    if (!user) {
       // Create a new user with a temporary password
       const tempPassword = Math.random().toString(36).slice(-8);
-      const hashedPassword = await hashPassword(tempPassword);
+      const hashedPassword = await hash(tempPassword, 12);
       
-      const { data: newUser, error: createError } = await supabase
-        .from('users')
-        .insert([
-          {
-            email,
-            password_hash: hashedPassword,
-            role: 'VOLUNTEER',
-          },
-        ])
-        .select()
-        .single();
-
-      if (createError) {
-        throw createError;
-      }
-
-      userId = newUser.id;
+      user = await prisma.user.create({
+        data: {
+          email,
+          passwordHash: hashedPassword,
+          role: 'VOLUNTEER',
+        },
+      });
 
       // Send invitation email with temporary password
-      await sendTempPasswordEmail({ email, tempPassword });
-    } else {
-      userId = user.id;
+      await resend.emails.send({
+        from: "Bakesale <noreply@bakesale.co.nz>",
+        to: email,
+        subject: "Welcome to Bakesale - Your Temporary Password",
+        html: `
+          <p>Hello,</p>
+          <p>You've been invited to join Bakesale as a volunteer.</p>
+          <p>Your temporary password is: <strong>${tempPassword}</strong></p>
+          <p>Please log in at ${process.env.NEXT_PUBLIC_APP_URL}/login and change your password.</p>
+        `,
+      });
     }
 
     // Add user to organization if not already added
-    const { error: upsertError } = await supabase
-      .from('user_organizations')
-      .upsert({
-        user_id: userId,
-        organization_id: organizationId,
+    await prisma.userOrganization.upsert({
+      where: {
+        userId_organizationId: {
+          userId: user.id,
+          organizationId,
+        },
+      },
+      update: {
         role: 'VOLUNTEER',
-      });
-
-    if (upsertError) {
-      throw upsertError;
-    }
+      },
+      create: {
+        userId: user.id,
+        organizationId,
+        role: 'VOLUNTEER',
+      },
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {
