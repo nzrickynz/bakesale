@@ -1,29 +1,25 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const session = await getServerSession(authOptions);
 
-    if (authError) {
-      console.error("[ORGANIZATIONS_GET] Auth error:", authError);
-      return NextResponse.json({ organizations: [] });
-    }
-
-    if (!user) {
+    if (!session?.user?.email) {
       console.log("[ORGANIZATIONS_GET] No authenticated user");
       return NextResponse.json({ organizations: [] });
     }
 
     const dbUser = await prisma.user.findUnique({
-      where: { id: user.id },
+      where: { email: session.user.email },
     });
 
     if (!dbUser) {
-      console.log("[ORGANIZATIONS_GET] No database user found for auth user:", user.id);
+      console.log("[ORGANIZATIONS_GET] No database user found for email:", session.user.email);
       return NextResponse.json({ organizations: [] });
     }
 
