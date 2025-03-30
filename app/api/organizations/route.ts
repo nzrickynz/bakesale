@@ -8,7 +8,13 @@ export async function GET() {
   try {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    if (authError || !user) {
+    if (authError) {
+      console.error("[ORGANIZATIONS_GET] Auth error:", authError);
+      return NextResponse.json({ organizations: [] });
+    }
+
+    if (!user) {
+      console.log("[ORGANIZATIONS_GET] No authenticated user");
       return NextResponse.json({ organizations: [] });
     }
 
@@ -17,6 +23,7 @@ export async function GET() {
     });
 
     if (!dbUser) {
+      console.log("[ORGANIZATIONS_GET] No database user found for auth user:", user.id);
       return NextResponse.json({ organizations: [] });
     }
 
@@ -34,9 +41,10 @@ export async function GET() {
       },
     });
 
+    console.log("[ORGANIZATIONS_GET] Found organizations:", organizations.length);
     return NextResponse.json({ organizations: organizations || [] });
   } catch (error) {
-    console.error("[ORGANIZATIONS_GET]", error);
+    console.error("[ORGANIZATIONS_GET] Unexpected error:", error);
     return NextResponse.json({ organizations: [] });
   }
 } 
