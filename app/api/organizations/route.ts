@@ -7,7 +7,22 @@ export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
+    console.log("[ORGANIZATIONS_GET] Starting request")
+    
+    // Log auth options
+    console.log("[ORGANIZATIONS_GET] Auth options:", {
+      providers: authOptions.providers?.map(p => p.id),
+      callbacks: Object.keys(authOptions.callbacks || {}),
+      secret: !!authOptions.secret
+    })
+
     const session = await getServerSession(authOptions);
+    console.log("[ORGANIZATIONS_GET] Session:", {
+      hasSession: !!session,
+      hasUser: !!session?.user,
+      hasEmail: !!session?.user?.email,
+      email: session?.user?.email
+    });
 
     if (!session?.user?.email) {
       console.log("[ORGANIZATIONS_GET] No authenticated user");
@@ -16,6 +31,11 @@ export async function GET() {
 
     const dbUser = await prisma.user.findUnique({
       where: { email: session.user.email },
+    });
+    console.log("[ORGANIZATIONS_GET] Database user:", {
+      found: !!dbUser,
+      id: dbUser?.id,
+      email: dbUser?.email
     });
 
     if (!dbUser) {
@@ -37,10 +57,22 @@ export async function GET() {
       },
     });
 
-    console.log("[ORGANIZATIONS_GET] Found organizations:", organizations.length);
+    console.log("[ORGANIZATIONS_GET] Found organizations:", {
+      count: organizations.length,
+      organizations: organizations.map(org => ({
+        id: org.organization.id,
+        name: org.organization.name,
+        role: org.role
+      }))
+    });
+
     return NextResponse.json({ organizations: organizations || [] });
   } catch (error) {
-    console.error("[ORGANIZATIONS_GET] Unexpected error:", error);
+    console.error("[ORGANIZATIONS_GET] Unexpected error:", {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      error
+    });
     return NextResponse.json({ organizations: [] });
   }
 } 

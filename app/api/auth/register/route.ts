@@ -7,7 +7,12 @@ export const dynamic = 'force-dynamic'
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    console.log("[REGISTER] Received registration request:", { email: body.email, name: body.name })
+    console.log("[REGISTER] Received registration request:", { 
+      email: body.email, 
+      name: body.name,
+      hasPassword: !!body.password,
+      hasOrgName: !!body.organizationName
+    })
     
     const { 
       email, 
@@ -22,7 +27,12 @@ export async function POST(request: Request) {
     } = body
 
     if (!email || !password || !name || !organizationName) {
-      console.log("[REGISTER] Missing required fields:", { email: !!email, password: !!password, name: !!name, organizationName: !!organizationName })
+      console.log("[REGISTER] Missing required fields:", { 
+        email: !!email, 
+        password: !!password, 
+        name: !!name, 
+        organizationName: !!organizationName 
+      })
       return NextResponse.json(
         { error: 'Email, password, name, and organization name are required' },
         { status: 400 }
@@ -33,10 +43,16 @@ export async function POST(request: Request) {
     console.log("[REGISTER] Creating Supabase user account")
     try {
       const authData = await signUp(email, password, name)
-      console.log("[REGISTER] Supabase signup response:", { success: !!authData.user })
+      console.log("[REGISTER] Supabase signup response:", { 
+        success: !!authData.user,
+        userId: authData.user?.id,
+        hasSession: !!authData.session
+      })
 
       if (!authData.user) {
-        console.error("[REGISTER] Failed to create Supabase user account")
+        console.error("[REGISTER] Failed to create Supabase user account:", {
+          session: authData.session
+        })
         return NextResponse.json(
           { error: 'Failed to create user account in authentication service' },
           { status: 500 }
@@ -60,6 +76,7 @@ export async function POST(request: Request) {
               role: role || 'ORG_ADMIN',
             },
           })
+          console.log("[REGISTER] Created database user:", { id: user.id, email: user.email })
 
           // Create organization
           console.log("[REGISTER] Creating organization")
@@ -73,6 +90,7 @@ export async function POST(request: Request) {
               adminId: user.id,
             },
           })
+          console.log("[REGISTER] Created organization:", { id: organization.id, name: organization.name })
 
           // Create user-organization relationship
           console.log("[REGISTER] Creating user-organization relationship")
@@ -83,6 +101,7 @@ export async function POST(request: Request) {
               role: role || 'ORG_ADMIN',
             },
           })
+          console.log("[REGISTER] Created user-organization relationship")
 
           return { user, organization }
         })
@@ -98,7 +117,9 @@ export async function POST(request: Request) {
           message: dbError.message,
           code: dbError.code,
           meta: dbError.meta,
-          stack: dbError.stack
+          stack: dbError.stack,
+          name: dbError.name,
+          cause: dbError.cause
         })
         // If database operations fail, we should clean up the Supabase user
         // TODO: Add cleanup of Supabase user
@@ -115,7 +136,9 @@ export async function POST(request: Request) {
       console.error('[REGISTER] Supabase error:', {
         message: supabaseError.message,
         status: supabaseError.status,
-        stack: supabaseError.stack
+        stack: supabaseError.stack,
+        name: supabaseError.name,
+        cause: supabaseError.cause
       })
       return NextResponse.json(
         { 
@@ -129,7 +152,9 @@ export async function POST(request: Request) {
   } catch (error: any) {
     console.error('[REGISTER] Unexpected error during registration:', {
       message: error.message,
-      stack: error.stack
+      stack: error.stack,
+      name: error.name,
+      cause: error.cause
     })
     return NextResponse.json(
       { 
