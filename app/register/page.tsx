@@ -12,19 +12,37 @@ import { toast } from "sonner";
 
 export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsLoading(true);
+    setError(null);
 
     const formData = new FormData(event.currentTarget);
+    const password = formData.get("password") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
+
+    // Validate password match
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      setIsLoading(false);
+      return;
+    }
+
+    // Validate password length
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long");
+      setIsLoading(false);
+      return;
+    }
+
     const data = {
       // User account details
       name: formData.get("name") as string,
       email: formData.get("email") as string,
-      password: formData.get("password") as string,
-      confirmPassword: formData.get("confirmPassword") as string,
+      password: password,
       role: "ORG_ADMIN" as const,
       
       // Organization details
@@ -44,15 +62,18 @@ export default function RegisterPage() {
         body: JSON.stringify(data),
       });
 
+      const result = await response.json();
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Something went wrong");
+        throw new Error(result.error || "Something went wrong");
       }
 
       // Redirect to organization dashboard
       router.push("/dashboard/organizations");
       toast.success("Organization registered successfully!");
     } catch (error) {
+      console.error("Registration error:", error);
+      setError(error instanceof Error ? error.message : "Something went wrong");
       toast.error(error instanceof Error ? error.message : "Something went wrong");
     } finally {
       setIsLoading(false);
@@ -78,6 +99,12 @@ export default function RegisterPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={onSubmit} className="space-y-8">
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
+                  {error}
+                </div>
+              )}
+
               {/* Organization Name */}
               <div className="space-y-2">
                 <Label htmlFor="organizationName" className="text-gray-900">Organization Name</Label>
@@ -169,6 +196,7 @@ export default function RegisterPage() {
                       name="password"
                       type="password"
                       required
+                      minLength={8}
                       className="text-gray-900"
                     />
                   </div>
@@ -179,6 +207,7 @@ export default function RegisterPage() {
                       name="confirmPassword"
                       type="password"
                       required
+                      minLength={8}
                       className="text-gray-900"
                     />
                   </div>
