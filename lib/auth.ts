@@ -38,6 +38,7 @@ export const authOptions: NextAuthOptions = {
         console.log("[AUTH] User found:", user ? "yes" : "no");
         if (user) {
           console.log("[AUTH] User role:", user.role);
+          console.log("[AUTH] Password hash length:", user.passwordHash?.length);
         }
 
         if (!user) {
@@ -46,8 +47,17 @@ export const authOptions: NextAuthOptions = {
         }
 
         console.log("[AUTH] Attempting password comparison");
-        const isPasswordValid = await compare(credentials.password, user.passwordHash);
-        console.log("[AUTH] Password valid:", isPasswordValid);
+        console.log("[AUTH] Input password length:", credentials.password.length);
+        console.log("[AUTH] Stored hash:", user.passwordHash);
+        
+        let isPasswordValid = false;
+        try {
+          isPasswordValid = await compare(credentials.password, user.passwordHash);
+          console.log("[AUTH] Password valid:", isPasswordValid);
+        } catch (error) {
+          console.error("[AUTH] Password comparison error:", error);
+          throw new Error("Error comparing passwords");
+        }
 
         if (!isPasswordValid) {
           console.log("[AUTH] Invalid password");
