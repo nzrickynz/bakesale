@@ -30,6 +30,8 @@ async function getFeaturedCauses() {
   return causes;
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function HomePage() {
   const causes = await getFeaturedCauses();
 
