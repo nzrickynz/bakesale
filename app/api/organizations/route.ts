@@ -2,9 +2,14 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { UserOrganization, Organization } from "@prisma/client";
 
 // Force deployment
 export const dynamic = 'force-dynamic'
+
+type UserOrgWithOrg = UserOrganization & {
+  organization: Organization;
+};
 
 export async function GET(request: Request) {
   try {
@@ -49,26 +54,34 @@ export async function GET(request: Request) {
         userId: dbUser.id,
       },
       include: {
-        organization: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
+        organization: true,
       },
     });
 
     console.log("[ORGANIZATIONS_GET] Found organizations:", {
       count: organizations.length,
-      organizations: organizations.map(org => ({
+      organizations: organizations.map((org: UserOrgWithOrg) => ({
         id: org.organization.id,
         name: org.organization.name,
-        role: org.role
-      }))
+        role: org.role,
+      })),
     });
 
     // Set cache control headers to prevent caching
-    const response = NextResponse.json({ organizations: organizations || [] });
+    const response = NextResponse.json({
+      organizations: organizations.map((org: UserOrgWithOrg) => ({
+        id: org.organization.id,
+        name: org.organization.name,
+        description: org.organization.description,
+        logoUrl: org.organization.logoUrl,
+        facebookUrl: org.organization.facebookUrl,
+        instagramUrl: org.organization.instagramUrl,
+        websiteUrl: org.organization.websiteUrl,
+        role: org.role,
+        createdAt: org.organization.createdAt,
+        updatedAt: org.organization.updatedAt,
+      })),
+    });
     response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     response.headers.set('Pragma', 'no-cache');
     response.headers.set('Expires', '0');

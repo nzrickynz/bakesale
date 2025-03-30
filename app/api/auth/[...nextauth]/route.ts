@@ -19,15 +19,17 @@ const handler = NextAuth({
         }
 
         try {
+          console.log("[AUTH] Attempting to find user:", credentials.email);
           const user = await prisma.user.findUnique({
             where: { email: credentials.email }
-          })
+          });
 
           if (!user) {
             console.log("[AUTH] User not found");
             throw new Error('Invalid credentials')
           }
 
+          console.log("[AUTH] User found, comparing passwords");
           const isValid = await compare(credentials.password, user.passwordHash)
           if (!isValid) {
             console.log("[AUTH] Invalid password");
@@ -43,6 +45,7 @@ const handler = NextAuth({
           }
         } catch (error) {
           console.error("[AUTH] Authorization error:", error);
+          // Don't expose database errors to the client
           throw new Error('Invalid credentials')
         }
       },

@@ -1,6 +1,17 @@
 import { NextResponse } from 'next/server'
 import { hash } from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
+import { PrismaClient, Prisma } from '@prisma/client'
+import { z } from 'zod'
+
+// Validation schema for registration input
+const registerSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+  name: z.string().min(1),
+  organizationName: z.string().min(1),
+  organizationDescription: z.string().min(1),
+})
 
 export const dynamic = 'force-dynamic'
 
@@ -103,7 +114,7 @@ export async function POST(request: Request) {
 
         if (existingUser) {
           console.log("[REGISTER] User already exists:", email)
-          throw new Error("User with this email already exists")
+          throw new Error("User already exists")
         }
 
         // Check if organization name already exists
@@ -113,7 +124,7 @@ export async function POST(request: Request) {
 
         if (existingOrg) {
           console.log("[REGISTER] Organization already exists:", organizationName)
-          throw new Error("Organization with this name already exists")
+          throw new Error("Organization already exists")
         }
 
         // Hash password
@@ -174,48 +185,47 @@ export async function POST(request: Request) {
         organization: result.organization,
         message: 'Registration successful',
       })
-    } catch (dbError: any) {
+    } catch (error: any) {
       console.error('[REGISTER] Database error during registration:', {
-        message: dbError.message,
-        code: dbError.code,
-        meta: dbError.meta,
-        stack: dbError.stack,
-        name: dbError.name,
-        cause: dbError.cause,
-        target: dbError.target,
-        clientVersion: dbError.clientVersion,
-        prismaError: dbError
+        message: error.message,
+        code: error.code,
+        meta: error.meta,
+        stack: error.stack,
+        name: error.name,
+        cause: error.cause,
+        target: error.target,
+        clientVersion: error.clientVersion,
       })
 
       // Handle specific Prisma errors
-      if (dbError.code === 'P2002') {
+      if (error.code === 'P2002') {
         return NextResponse.json(
           { 
             error: 'A user or organization with these details already exists',
-            details: dbError.message
+            details: error.message
           },
           { status: 409 }
         )
       }
 
-      if (dbError.code === 'P2003') {
+      if (error.code === 'P2003') {
         return NextResponse.json(
           { 
             error: 'Invalid reference to related record',
-            details: dbError.message
+            details: error.message
           },
           { status: 400 }
         )
       }
 
       // Log the full error object for debugging
-      console.error('[REGISTER] Full database error object:', JSON.stringify(dbError, null, 2))
+      console.error('[REGISTER] Full database error object:', JSON.stringify(error, null, 2))
 
       return NextResponse.json(
         { 
           error: 'Failed to create user profile and organization',
-          details: dbError.message || dbError.toString(),
-          code: dbError.code
+          details: error.message || error.toString(),
+          code: error.code
         },
         { status: 500 }
       )

@@ -7,6 +7,20 @@ import { Package, Clock, CheckCircle } from "lucide-react";
 import Image from "next/image";
 import { format } from "date-fns";
 import { notFound } from "next/navigation";
+import { Listing, Order, Cause, Organization } from "@prisma/client";
+
+type CauseWithOrg = Cause & {
+  organization: Organization;
+};
+
+type ListingWithOrders = Listing & {
+  orders: Order[];
+  cause: CauseWithOrg;
+};
+
+type UserWithListings = {
+  managedListings: ListingWithOrders[];
+};
 
 export default async function VolunteerDashboard() {
   const session = await getServerSession(authOptions);
@@ -33,7 +47,7 @@ export default async function VolunteerDashboard() {
         },
       },
     },
-  });
+  }) as UserWithListings;
 
   if (!user) {
     notFound();
@@ -41,11 +55,13 @@ export default async function VolunteerDashboard() {
 
   const totalListings = user.managedListings.length;
   const pendingOrders = user.managedListings.reduce(
-    (acc, listing) => acc + listing.orders.filter(order => order.fulfillmentStatus !== "FULFILLED").length,
+    (acc: number, listing: ListingWithOrders) => 
+      acc + listing.orders.filter(order => order.fulfillmentStatus !== "FULFILLED").length,
     0
   );
   const fulfilledOrders = user.managedListings.reduce(
-    (acc, listing) => acc + listing.orders.filter(order => order.fulfillmentStatus === "FULFILLED").length,
+    (acc: number, listing: ListingWithOrders) => 
+      acc + listing.orders.filter(order => order.fulfillmentStatus === "FULFILLED").length,
     0
   );
 

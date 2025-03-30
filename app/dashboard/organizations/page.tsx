@@ -1,69 +1,62 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Organization, UserOrganization } from "@prisma/client";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Card } from "@/components/ui/card";
+
+type UserOrgWithOrg = UserOrganization & {
+  organization: Organization;
+};
 
 export default async function OrganizationsPage() {
   const session = await getServerSession(authOptions);
-
-  if (!session?.user?.email) {
+  if (!session?.user?.id) {
     return null;
   }
 
-  // First find the user
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-  });
-
-  if (!user) {
-    return null;
-  }
-
-  // Then get their organizations through the UserOrganization model
   const userOrganizations = await prisma.userOrganization.findMany({
-    where: { userId: user.id },
+    where: {
+      userId: session.user.id,
+    },
     include: {
       organization: true,
     },
-  });
+  }) as UserOrgWithOrg[];
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight text-gray-900">Organizations</h2>
-        <div>
-          <Link href="/dashboard/organizations/new">
-            <Button className="bg-[#F15A2B] text-white hover:bg-[#F15A2B]/90">
-              <Plus className="mr-2 h-4 w-4" />
-              New Organization
-            </Button>
-          </Link>
-        </div>
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Organizations</h1>
+        <Link
+          href="/dashboard/organizations/new"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md text-sm font-medium"
+        >
+          Create Organization
+        </Link>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {userOrganizations.map(({ organization }) => (
+        {userOrganizations.map(({ organization }: UserOrgWithOrg) => (
           <Link
             key={organization.id}
             href={`/dashboard/organizations/${organization.id}`}
-            className="block"
           >
-            <Card className="hover:bg-accent/5 transition-colors cursor-pointer bg-white shadow-md">
-              <CardHeader>
-                <CardTitle className="text-xl text-gray-900">{organization.name}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-600 line-clamp-2">
-                  {organization.description}
-                </p>
-                {organization.websiteUrl && (
-                  <p className="text-sm text-gray-600 mt-2">
-                    {organization.websiteUrl}
-                  </p>
+            <Card className="p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-4">
+                {organization.logoUrl && (
+                  <img
+                    src={organization.logoUrl}
+                    alt={organization.name}
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
                 )}
-              </CardContent>
+                <div>
+                  <h2 className="text-lg font-semibold">{organization.name}</h2>
+                  <p className="text-sm text-gray-500">
+                    {organization.description}
+                  </p>
+                </div>
+              </div>
             </Card>
           </Link>
         ))}

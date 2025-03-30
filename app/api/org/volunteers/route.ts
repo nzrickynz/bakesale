@@ -1,33 +1,48 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { UserOrganization, User } from "@prisma/client";
+
+type VolunteerWithUser = UserOrganization & {
+  user: User;
+};
 
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    if (!session) {
       return NextResponse.json(
-        { message: "You must be logged in to view volunteers" },
+        { error: "Unauthorized" },
         { status: 401 }
       );
     }
 
-    // Get the user's organization
-    const userOrg = await prisma.userOrganization.findFirst({
+    const { searchParams } = new URL(req.url);
+    const organizationId = searchParams.get("organizationId");
+
+    if (!organizationId) {
+      return NextResponse.json(
+        { error: "Organization ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Check if user has access to the organization
+    const userOrg = await prisma.userOrganization.findUnique({
       where: {
-        userId: session.user.id,
-      },
-      include: {
-        organization: true,
+        userId_organizationId: {
+          userId: session.user.id,
+          organizationId,
+        },
       },
     });
 
-    if (!userOrg) {
+    if (!userOrg || !["ORG_ADMIN", "SUPER_ADMIN"].includes(userOrg.role)) {
       return NextResponse.json(
-        { message: "You must be part of an organization to view volunteers" },
+        { error: "Unauthorized to view volunteers" },
         { status: 403 }
       );
     }
@@ -35,35 +50,27 @@ export async function GET() {
     // Get all volunteers for the organization
     const volunteers = await prisma.userOrganization.findMany({
       where: {
-        organizationId: userOrg.organizationId,
+        organizationId,
+        role: "VOLUNTEER",
       },
       include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: "desc",
+        user: true,
       },
     });
 
     return NextResponse.json({
-      volunteers: volunteers.map((v) => ({
+      volunteers: volunteers.map((v: VolunteerWithUser) => ({
         id: v.user.id,
         name: v.user.name,
         email: v.user.email,
         role: v.role,
-        joinedAt: v.createdAt,
+        createdAt: v.createdAt,
       })),
     });
   } catch (error) {
-    console.error("Error fetching volunteers:", error);
+    console.error("[VOLUNTEERS] Error fetching volunteers:", error);
     return NextResponse.json(
-      { message: "Failed to fetch volunteers" },
+      { error: "Failed to fetch volunteers" },
       { status: 500 }
     );
   }

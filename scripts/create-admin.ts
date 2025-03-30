@@ -1,29 +1,34 @@
-const { PrismaClient } = require('@prisma/client');
-const { hash } = require('bcryptjs');
+import { PrismaClient } from '@prisma/client';
+import { hash } from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const passwordHash = await hash('admin123', 12);
-  
-  const admin = await prisma.user.upsert({
-    where: { email: 'admin@admin.com' },
-    update: {},
-    create: {
-      email: 'admin@admin.com',
-      passwordHash,
-      role: 'SUPER_ADMIN',
-    },
-  });
+  try {
+    const email = process.env.ADMIN_EMAIL;
+    const password = process.env.ADMIN_PASSWORD;
 
-  console.log('Admin user created:', admin);
+    if (!email || !password) {
+      console.error('Please provide ADMIN_EMAIL and ADMIN_PASSWORD environment variables');
+      process.exit(1);
+    }
+
+    const hashedPassword = await hash(password, 12);
+
+    const user = await prisma.user.create({
+      data: {
+        email,
+        passwordHash: hashedPassword,
+        role: 'SUPER_ADMIN',
+      },
+    });
+
+    console.log('Admin user created:', user);
+  } catch (error) {
+    console.error('Error creating admin user:', error);
+  } finally {
+    await prisma.$disconnect();
+  }
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  }); 
+main(); 
