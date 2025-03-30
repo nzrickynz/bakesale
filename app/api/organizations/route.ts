@@ -9,7 +9,7 @@ export async function GET() {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return NextResponse.json({ organizations: [] });
     }
 
     const dbUser = await prisma.user.findUnique({
@@ -17,7 +17,7 @@ export async function GET() {
     });
 
     if (!dbUser) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return NextResponse.json({ organizations: [] });
     }
 
     const organizations = await prisma.userOrganization.findMany({
@@ -37,6 +37,6 @@ export async function GET() {
     return NextResponse.json({ organizations: organizations || [] });
   } catch (error) {
     console.error("[ORGANIZATIONS_GET]", error);
-    return new NextResponse("Internal error", { status: 500 });
+    return NextResponse.json({ organizations: [] });
   }
 } 
