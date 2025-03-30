@@ -6,8 +6,33 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json()
-    console.log("[REGISTER] Received registration request:", { 
+    // Log the raw request
+    console.log("[REGISTER] Raw request headers:", Object.fromEntries(request.headers.entries()))
+    
+    // Validate request content type
+    const contentType = request.headers.get('content-type')
+    if (!contentType?.includes('application/json')) {
+      console.error("[REGISTER] Invalid content type:", contentType)
+      return NextResponse.json(
+        { error: 'Content-Type must be application/json' },
+        { status: 400 }
+      )
+    }
+
+    // Parse and validate request body
+    let body;
+    try {
+      body = await request.json()
+    } catch (parseError) {
+      console.error("[REGISTER] Failed to parse request body:", parseError)
+      return NextResponse.json(
+        { error: 'Invalid JSON in request body' },
+        { status: 400 }
+      )
+    }
+
+    // Log the parsed request body
+    console.log("[REGISTER] Parsed request body:", { 
       email: body.email, 
       name: body.name,
       hasPassword: !!body.password,
@@ -33,15 +58,36 @@ export async function POST(request: Request) {
       instagramUrl
     } = body
 
-    if (!email || !password || !name || !organizationName) {
-      console.log("[REGISTER] Missing required fields:", { 
-        email: !!email, 
-        password: !!password, 
-        name: !!name, 
-        organizationName: !!organizationName 
-      })
+    // Validate required fields
+    const missingFields = []
+    if (!email) missingFields.push('email')
+    if (!password) missingFields.push('password')
+    if (!name) missingFields.push('name')
+    if (!organizationName) missingFields.push('organizationName')
+
+    if (missingFields.length > 0) {
+      console.log("[REGISTER] Missing required fields:", missingFields)
       return NextResponse.json(
-        { error: 'Email, password, name, and organization name are required' },
+        { error: `Missing required fields: ${missingFields.join(', ')}` },
+        { status: 400 }
+      )
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      console.log("[REGISTER] Invalid email format:", email)
+      return NextResponse.json(
+        { error: 'Invalid email format' },
+        { status: 400 }
+      )
+    }
+
+    // Validate password strength
+    if (password.length < 8) {
+      console.log("[REGISTER] Password too short")
+      return NextResponse.json(
+        { error: 'Password must be at least 8 characters long' },
         { status: 400 }
       )
     }
@@ -71,6 +117,7 @@ export async function POST(request: Request) {
         }
 
         // Hash password
+        console.log("[REGISTER] Hashing password")
         const hashedPassword = await hash(password, 12)
 
         // Create user record in our database
@@ -136,7 +183,8 @@ export async function POST(request: Request) {
         name: dbError.name,
         cause: dbError.cause,
         target: dbError.target,
-        clientVersion: dbError.clientVersion
+        clientVersion: dbError.clientVersion,
+        prismaError: dbError
       })
 
       // Handle specific Prisma errors
@@ -160,6 +208,9 @@ export async function POST(request: Request) {
         )
       }
 
+      // Log the full error object for debugging
+      console.error('[REGISTER] Full database error object:', JSON.stringify(dbError, null, 2))
+
       return NextResponse.json(
         { 
           error: 'Failed to create user profile and organization',
@@ -174,7 +225,8 @@ export async function POST(request: Request) {
       message: error.message,
       stack: error.stack,
       name: error.name,
-      cause: error.cause
+      cause: error.cause,
+      error: JSON.stringify(error, null, 2)
     })
     return NextResponse.json(
       { 
