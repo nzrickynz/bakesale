@@ -11,7 +11,14 @@ export async function POST(request: Request) {
       email: body.email, 
       name: body.name,
       hasPassword: !!body.password,
-      hasOrgName: !!body.organizationName
+      hasOrgName: !!body.organizationName,
+      organizationData: {
+        name: body.organizationName,
+        description: body.organizationDescription,
+        websiteUrl: body.websiteUrl,
+        facebookUrl: body.facebookUrl,
+        instagramUrl: body.instagramUrl
+      }
     })
     
     const { 
@@ -53,6 +60,16 @@ export async function POST(request: Request) {
           throw new Error("User with this email already exists")
         }
 
+        // Check if organization name already exists
+        const existingOrg = await tx.organization.findUnique({
+          where: { name: organizationName },
+        })
+
+        if (existingOrg) {
+          console.log("[REGISTER] Organization already exists:", organizationName)
+          throw new Error("Organization with this name already exists")
+        }
+
         // Hash password
         const hashedPassword = await hash(password, 12)
 
@@ -68,15 +85,23 @@ export async function POST(request: Request) {
         })
         console.log("[REGISTER] Created database user:", { id: user.id, email: user.email })
 
-        // Create organization
-        console.log("[REGISTER] Creating organization")
+        // Create organization with a default description if none provided
+        console.log("[REGISTER] Creating organization with data:", {
+          name: organizationName,
+          description: organizationDescription || `${organizationName} is a charitable organization dedicated to making a positive impact in the community.`,
+          websiteUrl,
+          facebookUrl,
+          instagramUrl,
+          adminId: user.id,
+        })
+
         const organization = await tx.organization.create({
           data: {
             name: organizationName,
-            description: organizationDescription || '',
-            websiteUrl,
-            facebookUrl,
-            instagramUrl,
+            description: organizationDescription || `${organizationName} is a charitable organization dedicated to making a positive impact in the community.`,
+            websiteUrl: websiteUrl || null,
+            facebookUrl: facebookUrl || null,
+            instagramUrl: instagramUrl || null,
             adminId: user.id,
           },
         })
@@ -109,8 +134,32 @@ export async function POST(request: Request) {
         meta: dbError.meta,
         stack: dbError.stack,
         name: dbError.name,
-        cause: dbError.cause
+        cause: dbError.cause,
+        target: dbError.target,
+        clientVersion: dbError.clientVersion
       })
+
+      // Handle specific Prisma errors
+      if (dbError.code === 'P2002') {
+        return NextResponse.json(
+          { 
+            error: 'A user or organization with these details already exists',
+            details: dbError.message
+          },
+          { status: 409 }
+        )
+      }
+
+      if (dbError.code === 'P2003') {
+        return NextResponse.json(
+          { 
+            error: 'Invalid reference to related record',
+            details: dbError.message
+          },
+          { status: 400 }
+        )
+      }
+
       return NextResponse.json(
         { 
           error: 'Failed to create user profile and organization',
