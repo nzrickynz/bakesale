@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { CausesClient } from "./causes-client";
 
+export const dynamic = 'force-dynamic'
+
 export default async function CausesPage() {
   // Fetch all active causes with their organizations and listings
   const causes = await prisma.cause.findMany({
