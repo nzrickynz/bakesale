@@ -28,6 +28,8 @@ function LoginForm() {
     console.log("[LOGIN] Starting login process");
     console.log("[LOGIN] Email:", email);
     console.log("[LOGIN] Callback URL:", callbackUrl);
+    console.log("[LOGIN] Environment:", process.env.NODE_ENV);
+    console.log("[LOGIN] NextAuth URL:", process.env.NEXTAUTH_URL);
 
     try {
       console.log("[LOGIN] Calling signIn with credentials");
