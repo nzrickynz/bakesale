@@ -13,6 +13,9 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "prisma db seed",
+    "db:reset": "ts-node scripts/reset-and-seed.ts",
+    "db:snapshot": "ts-node scripts/export-db.ts",
+    "db:restore": "ts-node scripts/import-db.ts",
     "format": "prettier --write .",
     "prepare": "husky install",
     "create-admin": "ts-node scripts/create-admin.ts"

@@ -101,15 +101,17 @@ model Cause {
 }
 
 model Listing {
-  id          String   @id @default(cuid())
-  title       String   @unique
-  description String
-  price       Float
-  imageUrl    String?
-  quantity    Int?
-  paymentLink String? // User-provided payment link
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(cuid())
+  title           String   @unique
+  description     String
+  price           Float
+  imageUrl        String?
+  quantity        Int?
+  paymentLink     String? // User-provided payment link
+  stripeProductId String?
+  stripePriceId   String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   // Relationships
   cause       Cause   @relation(fields: [causeId], references: [id])
