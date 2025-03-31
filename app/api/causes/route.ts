@@ -76,7 +76,9 @@ export async function POST(request: Request) {
     }
 
     const user = await userService.findUnique({
-      email: session.user.email,
+      where: {
+        email: session.user.email,
+      },
     });
 
     if (!user) {
