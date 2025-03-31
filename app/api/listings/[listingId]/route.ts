@@ -51,6 +51,9 @@ export async function PATCH(
           organizationId: userOrg.organization.id,
         },
       },
+      include: {
+        cause: true,
+      },
     });
 
     if (!listing) {
