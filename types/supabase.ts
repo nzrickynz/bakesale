@@ -195,32 +195,6 @@ export interface Database {
           organization_id?: string
         }
       }
-      donations: {
-        Row: {
-          id: string
-          amount: number
-          created_at: string
-          updated_at: string
-          status: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED'
-          cause_id: string
-        }
-        Insert: {
-          id?: string
-          amount: number
-          created_at?: string
-          updated_at?: string
-          status?: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED'
-          cause_id: string
-        }
-        Update: {
-          id?: string
-          amount?: number
-          created_at?: string
-          updated_at?: string
-          status?: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED'
-          cause_id?: string
-        }
-      }
       user_organizations: {
         Row: {
           id: string

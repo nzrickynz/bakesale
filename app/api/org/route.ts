@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { UserService } from "@/lib/services/user";
+import { OrganizationService } from "@/lib/services/organization";
+
+const userService = new UserService();
+const organizationService = new OrganizationService();
 
 export const dynamic = 'force-dynamic'
 
@@ -16,7 +20,7 @@ export async function GET() {
       );
     }
 
-    const user = await prisma.user.findUnique({
+    const user = await userService.findUnique({
       where: { email: session.user.email },
       include: {
         userOrganizations: {

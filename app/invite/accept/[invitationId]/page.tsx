@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
 
 interface Invitation {
   id: string;
@@ -29,44 +30,64 @@ export default function AcceptInvitationPage({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const MAX_RETRIES = 3;
 
   useEffect(() => {
     async function fetchInvitation() {
       try {
         const response = await fetch(`/api/invitations/${params.invitationId}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch invitation");
-        }
         const data = await response.json();
-        setInvitation(data.invitation);
+
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to fetch invitation");
+        }
+
+        setInvitation(data.data);
       } catch (error) {
         console.error("Error fetching invitation:", error);
-        setError("Failed to load invitation");
+        const errorMessage = error instanceof Error ? error.message : "Failed to load invitation";
+        setError(errorMessage);
+
+        // Handle token expiration with retry logic
+        if (errorMessage.includes("expired") && retryCount < MAX_RETRIES) {
+          toast.error("Your invitation link has expired. Refreshing...");
+          setRetryCount(prev => prev + 1);
+          setTimeout(fetchInvitation, 2000); // Retry after 2 seconds
+        }
       } finally {
         setIsLoading(false);
       }
     }
 
     fetchInvitation();
-  }, [params.invitationId]);
+  }, [params.invitationId, retryCount]);
 
   async function handleAccept() {
     setIsProcessing(true);
     setError(null);
 
     try {
-      const response = await fetch(`/api/invitations/${params.invitationId}/accept`, {
+      const response = await fetch(`/api/invitations/${params.invitationId}`, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ action: "accept" }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to accept invitation");
+        throw new Error(data.error || "Failed to accept invitation");
       }
 
+      toast.success("Invitation accepted successfully!");
       router.push("/auth/login?message=invitation_accepted");
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Something went wrong");
+      const errorMessage = error instanceof Error ? error.message : "Something went wrong";
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsProcessing(false);
     }
@@ -77,7 +98,9 @@ export default function AcceptInvitationPage({
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <p className="mt-4 text-gray-600">
+            {retryCount > 0 ? "Refreshing invitation..." : "Loading invitation..."}
+          </p>
         </div>
       </div>
     );
@@ -88,6 +111,12 @@ export default function AcceptInvitationPage({
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600">Invitation not found</p>
+          <Link
+            href="/"
+            className="mt-4 inline-block text-sm text-primary hover:text-primary-dark"
+          >
+            Return to Home
+          </Link>
         </div>
       </div>
     );
@@ -101,6 +130,12 @@ export default function AcceptInvitationPage({
             This invitation has already been{" "}
             {invitation.status.toLowerCase()}.
           </p>
+          <Link
+            href="/"
+            className="mt-4 inline-block text-sm text-primary hover:text-primary-dark"
+          >
+            Return to Home
+          </Link>
         </div>
       </div>
     );
@@ -112,6 +147,12 @@ export default function AcceptInvitationPage({
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600">This invitation has expired.</p>
+          <Link
+            href="/"
+            className="mt-4 inline-block text-sm text-primary hover:text-primary-dark"
+          >
+            Return to Home
+          </Link>
         </div>
       </div>
     );
@@ -146,7 +187,14 @@ export default function AcceptInvitationPage({
               disabled={isProcessing}
               className="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isProcessing ? "Processing..." : "Accept Invitation"}
+              {isProcessing ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  Processing...
+                </>
+              ) : (
+                "Accept Invitation"
+              )}
             </button>
           </div>
 

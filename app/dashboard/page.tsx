@@ -34,7 +34,6 @@ export default function DashboardPage() {
   const router = useRouter();
   const [userOrganizations, setUserOrganizations] = useState<UserOrganization[]>([]);
   const [causes, setCauses] = useState<Cause[]>([]);
-  const [totalDonations, setTotalDonations] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -54,12 +53,6 @@ export default function DashboardPage() {
 
         setUserOrganizations(orgsData.organizations);
         setCauses(causesData.causes);
-
-        // Calculate total donations
-        const donations = causesData.causes.reduce((acc: number, cause: Cause) => {
-          return acc + (cause.currentAmount || 0);
-        }, 0);
-        setTotalDonations(donations);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -130,22 +123,6 @@ export default function DashboardPage() {
               {causes.filter((cause) => cause.status === "ACTIVE").length !== 1
                 ? "s"
                 : ""}
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="bg-white shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-900">
-              Total Donations
-            </CardTitle>
-            <DollarSign className="h-4 w-4 text-gray-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-gray-900">
-              ${totalDonations.toFixed(2)}
-            </div>
-            <p className="text-xs text-gray-600">
-              Total amount raised across all causes
             </p>
           </CardContent>
         </Card>

@@ -1,97 +1,183 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { OrganizationService } from "@/lib/services/organization";
+import { UserService } from "@/lib/services/user";
+import { UserRole } from "@prisma/client";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { UserOrganization, Organization } from "@prisma/client";
 
 // Force deployment
 export const dynamic = 'force-dynamic'
 
-type UserOrgWithOrg = UserOrganization & {
-  organization: Organization;
-};
+// Organization creation schema
+const createOrganizationSchema = z.object({
+  name: z.string().min(1, "Organization name is required"),
+  description: z.string().min(1, "Description is required"),
+  logoUrl: z.string().url("Invalid logo URL").optional(),
+  facebookUrl: z.string().url("Invalid Facebook URL").optional(),
+  instagramUrl: z.string().url("Invalid Instagram URL").optional(),
+  websiteUrl: z.string().url("Invalid website URL").optional(),
+});
+
+export async function POST(request: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { error: "You must be logged in" },
+        { status: 401 }
+      );
+    }
+
+    const userService = new UserService();
+    const user = await userService.findByEmail(session.user.email);
+    
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    // Check if user has super admin role
+    if (user.role !== UserRole.SUPER_ADMIN) {
+      return NextResponse.json(
+        { error: "Only super admins can create organizations" },
+        { status: 403 }
+      );
+    }
+
+    const body = await request.json();
+    
+    // Validate request body
+    const validatedData = createOrganizationSchema.safeParse(body);
+    if (!validatedData.success) {
+      return NextResponse.json(
+        { error: "Invalid request data", details: validatedData.error.errors },
+        { status: 400 }
+      );
+    }
+
+    // Check for duplicate organization name
+    const organizationService = new OrganizationService();
+    const existingOrg = await organizationService.findByName(validatedData.data.name);
+    if (existingOrg) {
+      return NextResponse.json(
+        { error: "An organization with this name already exists" },
+        { status: 409 }
+      );
+    }
+
+    // Create organization
+    const organization = await organizationService.create({
+      ...validatedData.data,
+      admin: {
+        connect: {
+          id: user.id
+        }
+      }
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: organization,
+    });
+  } catch (error) {
+    console.error("[ORGANIZATIONS] Error creating organization:", error);
+    return NextResponse.json(
+      { error: "Failed to create organization" },
+      { status: 500 }
+    );
+  }
+}
 
 export async function GET(request: Request) {
   try {
-    console.log("[ORGANIZATIONS_GET] Starting request")
-    
-    // Log auth options
-    console.log("[ORGANIZATIONS_GET] Auth options:", {
-      providers: authOptions.providers?.map(p => p.id),
-      callbacks: Object.keys(authOptions.callbacks || {}),
-      secret: !!authOptions.secret
-    })
-
     const session = await getServerSession(authOptions);
-    console.log("[ORGANIZATIONS_GET] Session:", {
-      hasSession: !!session,
-      hasUser: !!session?.user,
-      hasEmail: !!session?.user?.email,
-      email: session?.user?.email
-    });
-
     if (!session?.user?.email) {
-      console.log("[ORGANIZATIONS_GET] No authenticated user");
-      return NextResponse.json({ organizations: [] });
+      return NextResponse.json(
+        { error: "You must be logged in" },
+        { status: 401 }
+      );
     }
 
-    const dbUser = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-    console.log("[ORGANIZATIONS_GET] Database user:", {
-      found: !!dbUser,
-      id: dbUser?.id,
-      email: dbUser?.email
-    });
-
-    if (!dbUser) {
-      console.log("[ORGANIZATIONS_GET] No database user found for email:", session.user.email);
-      return NextResponse.json({ organizations: [] });
+    const userService = new UserService();
+    const user = await userService.findByEmail(session.user.email);
+    
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
     }
 
-    const organizations = await prisma.userOrganization.findMany({
+    const organizationService = new OrganizationService();
+    
+    // First get the organizations
+    const organizations = await organizationService.findMany({
       where: {
-        userId: dbUser.id,
-      },
-      include: {
-        organization: true,
+        OR: [
+          { adminId: user.id },
+          {
+            userOrganizations: {
+              some: {
+                userId: user.id,
+              },
+            },
+          },
+        ],
       },
     });
 
-    console.log("[ORGANIZATIONS_GET] Found organizations:", {
-      count: organizations.length,
-      organizations: organizations.map((org: UserOrgWithOrg) => ({
-        id: org.organization.id,
-        name: org.organization.name,
-        role: org.role,
-      })),
+    // Then get the user roles for these organizations
+    const orgIds = organizations.map(org => org.id);
+    const userOrgs = await prisma.userOrganization.findMany({
+      where: {
+        userId: user.id,
+        organizationId: {
+          in: orgIds,
+        },
+      },
+      select: {
+        organizationId: true,
+        role: true,
+      },
     });
 
-    // Set cache control headers to prevent caching
+    // Create a map of organization ID to role
+    const orgRoleMap = new Map(userOrgs.map(uo => [uo.organizationId, uo.role]));
+
+    // Transform the response to match the expected format
+    const transformedOrganizations = organizations.map(org => ({
+      id: org.id,
+      name: org.name,
+      description: org.description,
+      logoUrl: org.logoUrl,
+      facebookUrl: org.facebookUrl,
+      instagramUrl: org.instagramUrl,
+      websiteUrl: org.websiteUrl,
+      role: org.adminId === user.id ? UserRole.ORG_ADMIN : orgRoleMap.get(org.id),
+      createdAt: org.createdAt,
+      updatedAt: org.updatedAt,
+    }));
+
     const response = NextResponse.json({
-      organizations: organizations.map((org: UserOrgWithOrg) => ({
-        id: org.organization.id,
-        name: org.organization.name,
-        description: org.organization.description,
-        logoUrl: org.organization.logoUrl,
-        facebookUrl: org.organization.facebookUrl,
-        instagramUrl: org.organization.instagramUrl,
-        websiteUrl: org.organization.websiteUrl,
-        role: org.role,
-        createdAt: org.organization.createdAt,
-        updatedAt: org.organization.updatedAt,
-      })),
+      success: true,
+      data: transformedOrganizations,
     });
+
+    // Set cache control headers
     response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     response.headers.set('Pragma', 'no-cache');
     response.headers.set('Expires', '0');
+
     return response;
   } catch (error) {
-    console.error("[ORGANIZATIONS_GET] Unexpected error:", {
-      message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined,
-      error
-    });
-    return NextResponse.json({ organizations: [] });
+    console.error("[ORGANIZATIONS] Error fetching organizations:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch organizations" },
+      { status: 500 }
+    );
   }
 } 

@@ -83,10 +83,6 @@ export default async function CausePage({ params }: PageProps) {
     notFound();
   }
 
-  // Calculate current amount
-  const currentAmount = cause.donations.reduce((sum, donation) => sum + donation.amount, 0);
-  const progress = cause.targetGoal ? Math.round((currentAmount / cause.targetGoal) * 100) : 0;
-
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center space-x-4">
@@ -119,17 +115,6 @@ export default async function CausePage({ params }: PageProps) {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-gray-600">{cause.description}</p>
-            <div className="mt-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <DollarSign className="h-4 w-4 text-gray-600" />
-                  <span className="text-sm text-gray-600">Progress</span>
-                </div>
-                <span className="text-sm font-medium text-gray-900">
-                  ${currentAmount.toFixed(2)} of ${cause.targetGoal?.toFixed(2) || "0.00"} ({progress}%)
-                </span>
-              </div>
-            </div>
           </CardContent>
         </Card>
 

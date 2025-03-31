@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { UserService } from "@/lib/services/user";
+import { CauseService } from "@/lib/services/cause";
+
+const userService = new UserService();
+const causeService = new CauseService();
 
 export async function GET() {
   try {
@@ -15,18 +19,18 @@ export async function GET() {
     }
 
     // Get the user's organization through UserOrganization
-    const userOrg = await prisma.userOrganization.findFirst({
-      where: {
-        user: {
-          email: session.user.email,
-        },
-      },
+    const user = await userService.findUnique({
+      where: { email: session.user.email },
       include: {
-        organization: true,
+        userOrganizations: {
+          include: {
+            organization: true,
+          },
+        },
       },
     });
 
-    if (!userOrg?.organization) {
+    if (!user?.userOrganizations?.[0]?.organization) {
       return NextResponse.json(
         { message: "Organization not found" },
         { status: 404 }
@@ -34,9 +38,9 @@ export async function GET() {
     }
 
     // Get all causes for the organization
-    const causes = await prisma.cause.findMany({
+    const causes = await causeService.findMany({
       where: {
-        organizationId: userOrg.organization.id,
+        organizationId: user.userOrganizations[0].organization.id,
       },
       orderBy: {
         createdAt: "desc",
@@ -75,18 +79,18 @@ export async function POST(request: Request) {
     } = body;
 
     // Get the user's organization through UserOrganization
-    const userOrg = await prisma.userOrganization.findFirst({
-      where: {
-        user: {
-          email: session.user.email,
-        },
-      },
+    const userOrg = await userService.findUnique({
+      where: { email: session.user.email },
       include: {
-        organization: true,
+        userOrganizations: {
+          include: {
+            organization: true,
+          },
+        },
       },
     });
 
-    if (!userOrg?.organization) {
+    if (!userOrg?.userOrganizations?.[0]?.organization) {
       return NextResponse.json(
         { message: "Organization not found" },
         { status: 404 }
@@ -94,7 +98,7 @@ export async function POST(request: Request) {
     }
 
     // Create the cause
-    const cause = await prisma.cause.create({
+    const cause = await causeService.create({
       data: {
         title,
         description,
@@ -102,7 +106,7 @@ export async function POST(request: Request) {
         status,
         startDate,
         endDate,
-        organizationId: userOrg.organization.id,
+        organizationId: userOrg.userOrganizations[0].organization.id,
       },
     });
 

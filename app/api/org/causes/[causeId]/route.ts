@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { UserService } from "@/lib/services/user";
+import { CauseService } from "@/lib/services/cause";
+
+const userService = new UserService();
+const causeService = new CauseService();
 
 export async function GET(
   request: Request,
@@ -18,18 +22,18 @@ export async function GET(
     }
 
     // Get the user's organization through UserOrganization
-    const userOrg = await prisma.userOrganization.findFirst({
-      where: {
-        user: {
-          email: session.user.email,
-        },
-      },
+    const user = await userService.findUnique({
+      where: { email: session.user.email },
       include: {
-        organization: true,
+        userOrganizations: {
+          include: {
+            organization: true,
+          },
+        },
       },
     });
 
-    if (!userOrg?.organization) {
+    if (!user?.userOrganizations?.[0]?.organization) {
       return NextResponse.json(
         { message: "Organization not found" },
         { status: 404 }
@@ -37,10 +41,10 @@ export async function GET(
     }
 
     // Get the cause
-    const cause = await prisma.cause.findUnique({
+    const cause = await causeService.findUnique({
       where: {
         id: params.causeId,
-        organizationId: userOrg.organization.id,
+        organizationId: user.userOrganizations[0].organization.id,
       },
       include: {
         listings: true,

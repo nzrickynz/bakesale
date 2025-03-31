@@ -1,21 +1,10 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { hash } from "bcryptjs";
-import { UserOrganization, User } from "@prisma/client";
+import { UserService } from "@/lib/services/user";
+import { UserRole } from "@prisma/client";
 
-type TeamMember = UserOrganization & {
-  user: {
-    id: string;
-    name: string | null;
-    email: string;
-  };
-};
-
-type UserWithOrgs = User & {
-  userOrganizations: UserOrganization[];
-};
+const userService = new UserService();
 
 export async function POST(request: Request) {
   try {
@@ -37,24 +26,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Get the current user with their organization memberships
-    const currentUser = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      include: { userOrganizations: true },
-    }) as UserWithOrgs | null;
-
-    if (!currentUser) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
-    }
-
-    // Verify the user has admin access to the organization they're trying to add members to
-    const hasAdminAccess = currentUser.userOrganizations.some(
-      (uo: UserOrganization) => uo.organizationId === organizationId && ["ORG_ADMIN", "SUPER_ADMIN"].includes(uo.role)
-    );
-
+    // Verify the user has admin access
+    const hasAdminAccess = await userService.hasAdminAccess(session.user.id, organizationId);
     if (!hasAdminAccess) {
       return NextResponse.json(
         { error: "Unauthorized to add team members" },
@@ -73,7 +46,7 @@ export async function POST(request: Request) {
     }
 
     // Check if the user already exists
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await userService.findUnique({
       where: { email },
     });
 
@@ -85,14 +58,8 @@ export async function POST(request: Request) {
     }
 
     // Check if the user is already a member of the organization
-    const existingMember = await prisma.userOrganization.findFirst({
-      where: {
-        userId: existingUser.id,
-        organizationId,
-      },
-    });
-
-    if (existingMember) {
+    const isTeamMember = await userService.isTeamMember(existingUser.id, organizationId);
+    if (isTeamMember) {
       return NextResponse.json(
         { error: "User is already a member of this organization" },
         { status: 400 }
@@ -100,21 +67,10 @@ export async function POST(request: Request) {
     }
 
     // Add the user to the organization
-    const newMember = await prisma.userOrganization.create({
-      data: {
-        userId: existingUser.id,
-        organizationId,
-        role,
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
+    const newMember = await userService.addTeamMember({
+      userId: existingUser.id,
+      organizationId,
+      role: role as UserRole,
     });
 
     return NextResponse.json({
@@ -156,24 +112,8 @@ export async function GET(request: Request) {
       );
     }
 
-    // Get the current user with their organization memberships
-    const currentUser = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      include: { userOrganizations: true },
-    }) as UserWithOrgs | null;
-
-    if (!currentUser) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
-    }
-
-    // Verify the user has admin access to the organization they're trying to add members to
-    const hasAdminAccess = currentUser.userOrganizations.some(
-      (uo: UserOrganization) => uo.organizationId === organizationId && ["ORG_ADMIN", "SUPER_ADMIN"].includes(uo.role)
-    );
-
+    // Verify the user has admin access
+    const hasAdminAccess = await userService.hasAdminAccess(session.user.id, organizationId);
     if (!hasAdminAccess) {
       return NextResponse.json(
         { error: "Unauthorized to view team members" },
@@ -182,21 +122,10 @@ export async function GET(request: Request) {
     }
 
     // Get all team members for the organization
-    const teamMembers = await prisma.userOrganization.findMany({
-      where: { organizationId },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
-    });
+    const teamMembers = await userService.getTeamMembers(organizationId);
 
     return NextResponse.json({
-      teamMembers: teamMembers.map((member: TeamMember) => ({
+      teamMembers: teamMembers.map((member) => ({
         id: member.user.id,
         name: member.user.name,
         email: member.user.email,

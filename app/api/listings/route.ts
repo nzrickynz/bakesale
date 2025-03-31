@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { ListingService } from "@/lib/services/listing";
 
 // Validation schema for listing creation
 const listingSchema = z.object({
@@ -13,6 +14,8 @@ const listingSchema = z.object({
   paymentLink: z.string().url(),
   causeId: z.string(),
 });
+
+const listingService = new ListingService();
 
 export async function POST(request: Request) {
   try {
@@ -69,7 +72,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const causeId = searchParams.get("causeId");
 
-    const listings = await prisma.listing.findMany({
+    const listings = await listingService.findMany({
       where: causeId ? { causeId } : undefined,
       include: {
         cause: true,

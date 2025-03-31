@@ -2,6 +2,8 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { UserRole } from "@prisma/client";
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -98,4 +100,84 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-}; 
+};
+
+export async function getUserRole() {
+  const session = await getServerSession(authOptions);
+  return session?.user?.role as UserRole | undefined;
+}
+
+export async function requireRole(requiredRole: UserRole) {
+  const userRole = await getUserRole();
+  if (!userRole || userRole !== requiredRole) {
+    throw new Error(`Access denied. Required role: ${requiredRole}`);
+  }
+}
+
+export async function requireAnyRole(requiredRoles: UserRole[]) {
+  const userRole = await getUserRole();
+  if (!userRole || !requiredRoles.includes(userRole)) {
+    throw new Error(`Access denied. Required roles: ${requiredRoles.join(", ")}`);
+  }
+}
+
+export async function requireOrganizationAccess(organizationId: string) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email) {
+    throw new Error("Not authenticated");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+    include: {
+      userOrganizations: {
+        where: { organizationId },
+      },
+    },
+  });
+
+  if (!user || user.userOrganizations.length === 0) {
+    throw new Error("No access to this organization");
+  }
+
+  return user.userOrganizations[0].role;
+}
+
+export async function requireSuperAdmin() {
+  const userRole = await getUserRole();
+  if (!userRole || userRole !== UserRole.SUPER_ADMIN) {
+    throw new Error("Access denied. Super admin role required.");
+  }
+}
+
+export async function requireApiAuth() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email) {
+    throw new Error("Not authenticated");
+  }
+  return session.user;
+}
+
+export async function requireApiRole(requiredRole: UserRole) {
+  const user = await requireApiAuth();
+  if (user.role !== requiredRole) {
+    throw new Error(`Access denied. Required role: ${requiredRole}`);
+  }
+  return user;
+}
+
+export async function requireApiOrganizationAccess(organizationId: string) {
+  const user = await requireApiAuth();
+  const userOrg = await prisma.userOrganization.findFirst({
+    where: {
+      userId: user.id,
+      organizationId,
+    },
+  });
+
+  if (!userOrg) {
+    throw new Error("No access to this organization");
+  }
+
+  return userOrg.role;
+} 

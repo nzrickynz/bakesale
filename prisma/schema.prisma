@@ -71,6 +71,13 @@ model Organization {
   @@map("organizations")
 }
 
+enum CauseCategory {
+  FOOD
+  CLOTHING
+  ACCESSORIES
+  SERVICES
+}
+
 model Cause {
   id            String   @id @default(cuid())
   title         String   @unique
@@ -80,6 +87,7 @@ model Cause {
   startDate     DateTime
   endDate       DateTime?
   status        CauseStatus @default(ACTIVE)
+  category      CauseCategory @default(SERVICES)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -89,6 +97,7 @@ model Cause {
   listings      Listing[]
 
   @@map("causes")
+  @@index([organizationId])
 }
 
 model Listing {
@@ -115,7 +124,7 @@ model Listing {
 model Order {
   id            String   @id @default(cuid())
   buyerEmail    String
-  fulfillmentStatus String // "Ordered", "In Progress", "Ready", "Fulfilled"
+  fulfillmentStatus OrderStatus @default(ORDERED)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 

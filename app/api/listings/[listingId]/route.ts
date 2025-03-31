@@ -22,7 +22,7 @@ export async function PATCH(
     const description = formData.get("description") as string;
     const price = parseFloat(formData.get("price") as string);
     const imageUrl = formData.get("imageUrl") as string;
-    const stripePaymentLink = formData.get("stripePaymentLink") as string;
+    const paymentLink = formData.get("paymentLink") as string;
 
     // Get the user's organization through UserOrganization
     const userOrg = await prisma.userOrganization.findFirst({
@@ -68,7 +68,7 @@ export async function PATCH(
         description,
         price,
         imageUrl,
-        stripePaymentLink,
+        paymentLink,
       },
     });
 

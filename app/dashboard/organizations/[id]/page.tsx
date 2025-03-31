@@ -40,10 +40,6 @@ interface Cause {
     id: string;
     name: string;
   };
-  donations: {
-    amount: number;
-    status: string;
-  }[];
 }
 
 interface CauseWithAmount extends Cause {
@@ -85,30 +81,14 @@ export default async function OrganizationPage({ params }: PageProps) {
     },
     include: {
       organization: true,
-      donations: {
-        where: {
-          status: "COMPLETED"
-        }
-      }
     },
   }) as Cause[];
 
   // Calculate current amount for each cause
   const causesWithAmounts = causes.map(cause => ({
     ...cause,
-    currentAmount: cause.donations.reduce((sum: number, donation: { amount: number }) => sum + donation.amount, 0)
+    currentAmount: 0 // Assuming currentAmount is not available in the cause type
   })) as CauseWithAmount[];
-
-  const totalDonations = await prisma.donation.aggregate({
-    where: {
-      causeId: {
-        in: causes.map((cause) => cause.id),
-      },
-    },
-    _sum: {
-      amount: true,
-    },
-  });
 
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
@@ -156,22 +136,6 @@ export default async function OrganizationPage({ params }: PageProps) {
               {causes.filter((cause) => cause.status === "ACTIVE").length !== 1
                 ? "s"
                 : ""}
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="bg-white shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-900">
-              Total Donations
-            </CardTitle>
-            <Heart className="h-4 w-4 text-gray-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-gray-900">
-              ${totalDonations._sum.amount?.toFixed(2) || "0.00"}
-            </div>
-            <p className="text-xs text-gray-600">
-              Total amount raised across all causes
             </p>
           </CardContent>
         </Card>

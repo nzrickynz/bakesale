@@ -13,7 +13,6 @@ interface Organization {
   facebookURL: string | null;
   instagramURL: string | null;
   websiteURL: string | null;
-  stripeAccountId: string | null;
 }
 
 export default function DashboardPage() {
@@ -150,14 +149,6 @@ export default function DashboardPage() {
               >
                 View All Causes
               </Link>
-              {!organization.stripeAccountId && (
-                <Link
-                  href="/org/stripe/connect"
-                  className="bg-secondary text-gray-900 px-4 py-2 rounded-lg text-center hover:bg-secondary-dark transition-colors"
-                >
-                  Connect Stripe
-                </Link>
-              )}
             </div>
           </div>
         </div>

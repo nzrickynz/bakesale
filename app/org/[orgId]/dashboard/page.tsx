@@ -58,8 +58,6 @@ const mockListings = [
 ];
 
 export default function DashboardPage() {
-  const [isStripeConnected] = useState(false);
-
   return (
     <div className="min-h-screen bg-[#F7F6F3] py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -117,26 +115,6 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
-
-        {/* Stripe Connect Status */}
-        {!isStripeConnected && (
-          <Card className="mb-8">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Connect with Stripe</h3>
-                  <p className="text-sm text-gray-700">
-                    Connect your Stripe account to start receiving payments
-                  </p>
-                </div>
-                <Button variant="outline">
-                  <CreditCard className="w-4 h-4 mr-2" />
-                  Connect Stripe
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Recent Causes */}
         <div className="mb-8">

@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { UserService } from "@/lib/services/user";
+import { VolunteerInvitationService } from "@/lib/services/volunteer-invitation";
 
 export const dynamic = 'force-dynamic'
+
+const userService = new UserService();
+const invitationService = new VolunteerInvitationService();
 
 export async function GET() {
   try {
@@ -16,35 +20,28 @@ export async function GET() {
     }
 
     // Get the user's organization
-    const userOrg = await prisma.userOrganization.findFirst({
-      where: {
-        userId: session.user.id,
-      },
+    const userOrg = await userService.findUnique({
+      where: { id: session.user.id },
       include: {
-        organization: true,
+        userOrganizations: {
+          include: {
+            organization: true,
+          },
+        },
       },
     });
 
-    if (!userOrg) {
+    if (!userOrg?.userOrganizations?.[0]) {
       return NextResponse.json(
         { message: "You must be part of an organization to view invitations" },
         { status: 403 }
       );
     }
 
+    const organizationId = userOrg.userOrganizations[0].organizationId;
+
     // Get all invitations for the organization
-    const invitations = await prisma.volunteerInvitation.findMany({
-      where: {
-        organizationId: userOrg.organizationId,
-      },
-      include: {
-        invitedBy: {
-          select: {
-            name: true,
-          },
-        },
-      },
-    });
+    const invitations = await invitationService.findByOrganization(organizationId);
 
     return NextResponse.json({ invitations });
   } catch (error) {

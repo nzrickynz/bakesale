@@ -19,7 +19,7 @@ interface Listing {
   description: string;
   price: number;
   imageUrl: string | null;
-  stripePaymentLink: string | null;
+  paymentLink: string | null;
   volunteer: Volunteer;
 }
 
@@ -152,8 +152,8 @@ export function CausesClient({ causes }: CausesClientProps) {
                               className="w-full bg-[#E55937] hover:bg-[#E55937]/90"
                               asChild
                             >
-                              {listing.stripePaymentLink ? (
-                                <Link href={listing.stripePaymentLink} target="_blank" rel="noopener noreferrer">
+                              {listing.paymentLink ? (
+                                <Link href={listing.paymentLink} target="_blank" rel="noopener noreferrer">
                                   Buy Now
                                 </Link>
                               ) : (

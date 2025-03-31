@@ -136,23 +136,6 @@ async function main() {
     },
   });
 
-  // Create donations
-  await prisma.donation.create({
-    data: {
-      amount: 1000,
-      status: 'COMPLETED',
-      causeId: foodDrive.id,
-    },
-  });
-
-  await prisma.donation.create({
-    data: {
-      amount: 500,
-      status: 'COMPLETED',
-      causeId: petCare.id,
-    },
-  });
-
   console.log('Seed data created successfully');
 }
 

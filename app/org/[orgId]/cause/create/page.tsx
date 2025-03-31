@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Upload, ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { CauseCategory } from "@prisma/client";
 
 export default function CreateCausePage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -134,10 +135,10 @@ export default function CreateCausePage() {
                   required
                 >
                   <option value="">Select a category</option>
-                  <option value="food">Food & Beverages</option>
-                  <option value="clothing">Clothing & Accessories</option>
-                  <option value="services">Services</option>
-                  <option value="other">Other</option>
+                  <option value={CauseCategory.FOOD}>Food</option>
+                  <option value={CauseCategory.CLOTHING}>Clothing</option>
+                  <option value={CauseCategory.ACCESSORIES}>Accessories</option>
+                  <option value={CauseCategory.SERVICES}>Services</option>
                 </select>
               </div>
 

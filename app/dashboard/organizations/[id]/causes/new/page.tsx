@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, notFound } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,11 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { createCause } from "../actions";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { requireOrganizationAccess } from "@/lib/auth";
+import { UserRole } from "@prisma/client";
 
 interface PageProps {
   params: {
@@ -19,7 +24,22 @@ interface PageProps {
   };
 }
 
-export default function NewCausePage({ params }: PageProps) {
+export default async function NewCausePage({ params }: PageProps) {
+  const userRole = await requireOrganizationAccess(params.id);
+  
+  // Only allow ORG_ADMIN to create causes
+  if (userRole !== UserRole.ORG_ADMIN) {
+    notFound();
+  }
+
+  const organization = await prisma.organization.findUnique({
+    where: { id: params.id },
+  });
+
+  if (!organization) {
+    notFound();
+  }
+
   const router = useRouter();
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);

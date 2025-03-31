@@ -57,7 +57,7 @@ export default function TermsPage() {
                 <ul className="list-disc pl-6 space-y-2 text-gray-600">
                   <li>Must provide accurate organization information</li>
                   <li>Are responsible for managing their causes and listings</li>
-                  <li>Must maintain appropriate Stripe Connect integration</li>
+                  <li>Must maintain appropriate payment processing integration</li>
                   <li>Are responsible for volunteer management and oversight</li>
                 </ul>
               </div>
@@ -89,13 +89,12 @@ export default function TermsPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-gray-600">
-                Bake Sale uses Stripe for payment processing. By using our platform, you agree to Stripe&apos;s Terms of Service and Privacy Policy.
+                Bake Sale processes payments securely. By using our platform, you agree to our Terms of Service and Privacy Policy.
               </p>
               <ul className="list-disc pl-6 space-y-2 text-gray-600">
-                <li>All payments are processed securely through Stripe</li>
-                <li>Organizations receive funds directly to their connected Stripe account</li>
-                <li>Bake Sale does not hold or process any funds directly</li>
-                <li>Refunds are handled by the organization through Stripe</li>
+                <li>All payments are processed securely</li>
+                <li>Organizations receive funds directly to their connected account</li>
+                <li>Refunds are handled by the organization</li>
               </ul>
             </CardContent>
           </Card>
@@ -128,7 +127,7 @@ export default function TermsPage() {
                 We collect and process personal data as described in our Privacy Policy. By using Bake Sale, you consent to our data practices.
               </p>
               <ul className="list-disc pl-6 space-y-2 text-gray-600">
-                <li>We share necessary information with Stripe for payment processing</li>
+                <li>We share necessary information with payment processors for payment processing</li>
                 <li>Organizations receive buyer information needed for order fulfillment</li>
                 <li>We may use your data to improve our platform and services</li>
                 <li>You can request deletion of your data as described in our Privacy Policy</li>

@@ -161,8 +161,8 @@ export default function ContactPage() {
                     How are payments processed?
                   </h3>
                   <p className="text-gray-600">
-                    We use Stripe to process payments securely. All funds go directly to
-                    the organization&apos;s connected Stripe account.
+                    We process payments securely. All funds go directly to
+                    the organization&apos;s connected account.
                   </p>
                 </div>
               </CardContent>

@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Image } from "@/components/ui/image";
 import { toast } from "sonner";
+import { requireOrganizationAccess } from "@/lib/auth";
+import { UserRole } from "@prisma/client";
 
 interface PageProps {
   params: {
@@ -32,10 +34,12 @@ interface Listing {
   description: string;
   price: number;
   imageUrl: string | null;
+  quantity: number | null;
+  paymentLink: string | null;
   createdAt: Date;
   updatedAt: Date;
   causeId: string;
-  volunteerId: string | null;
+  volunteerId: string;
   cause: {
     title: string;
   };
@@ -51,29 +55,6 @@ interface Listing {
     buyerName: string;
     buyerEmail: string;
   }[];
-}
-
-async function createCheckoutSession(listingId: string) {
-  "use server";
-  try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/checkout`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ listingId }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to create checkout session");
-    }
-
-    const { url } = await response.json();
-    return url;
-  } catch (error) {
-    console.error("Error creating checkout session:", error);
-    throw error;
-  }
 }
 
 export default async function ListingDetailsPage({ params }: PageProps) {
@@ -102,6 +83,13 @@ export default async function ListingDetailsPage({ params }: PageProps) {
   }) as UserOrganization | null;
 
   if (!userOrganization) {
+    notFound();
+  }
+
+  const userRole = await requireOrganizationAccess(params.id);
+  
+  // Only allow VOLUNTEER and ORG_ADMIN to access listings
+  if (userRole !== UserRole.VOLUNTEER && userRole !== UserRole.ORG_ADMIN) {
     notFound();
   }
 
@@ -185,13 +173,12 @@ export default async function ListingDetailsPage({ params }: PageProps) {
               <div className="flex items-center justify-between">
                 <p className="text-muted-foreground">${listing.price.toFixed(2)}</p>
                 <Button
-                  onClick={async () => {
-                    try {
-                      const url = await createCheckoutSession(listing.id);
-                      window.location.href = url;
-                    } catch (error) {
-                      toast.error("Failed to create checkout session");
+                  onClick={() => {
+                    if (!listing.paymentLink) {
+                      toast.error("No payment link available");
+                      return;
                     }
+                    window.location.href = listing.paymentLink;
                   }}
                 >
                   Buy Now

@@ -17,11 +17,11 @@ interface PageProps {
   };
 }
 
-export default async function NewListingPage({ params }: PageProps) {
+export default async function EditCausePage({ params }: PageProps) {
   const userRole = await requireOrganizationAccess(params.id);
   
-  // Only allow VOLUNTEER and ORG_ADMIN to create listings
-  if (userRole !== UserRole.VOLUNTEER && userRole !== UserRole.ORG_ADMIN) {
+  // Only allow ORG_ADMIN to edit causes
+  if (userRole !== UserRole.ORG_ADMIN) {
     notFound();
   }
 
@@ -39,12 +39,12 @@ export default async function NewListingPage({ params }: PageProps) {
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Create New Listing</h2>
+        <h2 className="text-3xl font-bold tracking-tight">Edit Cause</h2>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Listing Details</CardTitle>
+          <CardTitle>Cause Details</CardTitle>
         </CardHeader>
         <CardContent>
           <form className="space-y-4">
@@ -52,42 +52,28 @@ export default async function NewListingPage({ params }: PageProps) {
               <Label htmlFor="title">Title</Label>
               <Input
                 id="title"
-                placeholder="Enter listing title"
+                defaultValue={cause.title}
+                placeholder="Enter cause title"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
-                placeholder="Enter listing description"
+                defaultValue={cause.description || ""}
+                placeholder="Enter cause description"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="price">Price</Label>
+              <Label htmlFor="goal">Fundraising Goal</Label>
               <Input
-                id="price"
+                id="goal"
                 type="number"
-                step="0.01"
-                placeholder="Enter price"
+                defaultValue={cause.targetGoal || ""}
+                placeholder="Enter fundraising goal"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="quantity">Quantity</Label>
-              <Input
-                id="quantity"
-                type="number"
-                placeholder="Enter quantity"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="paymentLink">Payment Link</Label>
-              <Input
-                id="paymentLink"
-                type="url"
-                placeholder="Enter payment link"
-              />
-            </div>
-            <Button type="submit">Create Listing</Button>
+            <Button type="submit">Save Changes</Button>
           </form>
         </CardContent>
       </Card>

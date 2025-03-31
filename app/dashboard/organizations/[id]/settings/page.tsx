@@ -7,10 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "sonner";
-import { Settings, Users } from "lucide-react";
-import { InviteForm } from "@/components/organization/invite-form";
+import { requireOrganizationAccess } from "@/lib/auth";
+import { UserRole } from "@prisma/client";
 
 interface PageProps {
   params: {
@@ -18,216 +16,94 @@ interface PageProps {
   };
 }
 
-interface UserOrganization {
-  id: string;
-  userId: string;
-  organizationId: string;
-  role: "ADMIN" | "VOLUNTEER";
-  organization: {
-    id: string;
-    name: string;
-    description: string | null;
-    websiteUrl: string | null;
-  };
-}
-
-interface Member {
-  id: string;
-  userId: string;
-  role: "ADMIN" | "VOLUNTEER";
-  user: {
-    id: string;
-    name: string | null;
-    email: string;
-  };
-}
-
-export default async function OrganizationSettingsPage({
-  params,
-}: PageProps) {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.email) {
+export default async function OrganizationSettingsPage({ params }: PageProps) {
+  const userRole = await requireOrganizationAccess(params.id);
+  
+  // Only allow ORG_ADMIN to access settings
+  if (userRole !== UserRole.ORG_ADMIN) {
     notFound();
   }
 
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
+  const organization = await prisma.organization.findUnique({
+    where: { id: params.id },
   });
 
-  if (!user) {
+  if (!organization) {
     notFound();
   }
-
-  const userOrganization = await prisma.userOrganization.findFirst({
-    where: {
-      userId: user.id,
-      organizationId: params.id,
-    },
-    include: {
-      organization: true,
-    },
-  }) as UserOrganization | null;
-
-  if (!userOrganization || userOrganization.role !== "ADMIN") {
-    notFound();
-  }
-
-  const members = await prisma.userOrganization.findMany({
-    where: {
-      organizationId: params.id,
-    },
-    include: {
-      user: true,
-    },
-  }) as Member[];
 
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
-          <p className="text-muted-foreground">
-            Manage your organization&apos;s information and members
-          </p>
-        </div>
+        <h2 className="text-3xl font-bold tracking-tight">Organization Settings</h2>
       </div>
 
-      <Tabs defaultValue="general" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="general">
-            <Settings className="mr-2 h-4 w-4" />
-            General
-          </TabsTrigger>
-          <TabsTrigger value="members">
-            <Users className="mr-2 h-4 w-4" />
-            Members
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="general" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Organization Information</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form
-                action={async (formData: FormData) => {
-                  "use server";
-                  const name = formData.get("name") as string;
-                  const description = formData.get("description") as string;
-                  const websiteUrl = formData.get("website") as string;
-
-                  try {
-                    await prisma.organization.update({
-                      where: { id: params.id },
-                      data: {
-                        name,
-                        description,
-                        websiteUrl,
-                      },
-                    });
-
-                    toast.success("Organization updated successfully");
-                  } catch (err) {
-                    console.error("Failed to update organization:", err);
-                    toast.error("Failed to update organization");
-                  }
-                }}
-                className="space-y-4"
-              >
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    defaultValue={userOrganization.organization.name}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    name="description"
-                    defaultValue={userOrganization.organization.description || ""}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="website">Website</Label>
-                  <Input
-                    id="website"
-                    name="website"
-                    type="url"
-                    defaultValue={userOrganization.organization.websiteUrl || ""}
-                  />
-                </div>
-                <Button type="submit">Save Changes</Button>
-              </form>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="members" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Organization Members</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {members.map((member) => (
-                  <div
-                    key={member.id}
-                    className="flex items-center justify-between"
-                  >
-                    <div>
-                      <p className="text-sm font-medium leading-none">
-                        {member.user.name || member.user.email}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {member.user.email}
-                      </p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm text-muted-foreground">
-                        {member.role.toLowerCase()}
-                      </span>
-                      {member.userId !== user.id && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={async () => {
-                            "use server";
-                            try {
-                              await prisma.userOrganization.delete({
-                                where: { id: member.id },
-                              });
-                              toast.success("Member removed successfully");
-                            } catch (err) {
-                              console.error("Failed to remove member:", err);
-                              toast.error("Failed to remove member");
-                            }
-                          }}
-                        >
-                          Remove
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Basic Information</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Organization Name</Label>
+                <Input
+                  id="name"
+                  defaultValue={organization.name}
+                  placeholder="Enter organization name"
+                />
               </div>
-            </CardContent>
-          </Card>
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  defaultValue={organization.description || ""}
+                  placeholder="Enter organization description"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="website">Website</Label>
+                <Input
+                  id="website"
+                  type="url"
+                  defaultValue={organization.websiteUrl || ""}
+                  placeholder="https://example.com"
+                />
+              </div>
+              <Button type="submit">Save Changes</Button>
+            </form>
+          </CardContent>
+        </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Invite Members</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <InviteForm organizationId={params.id} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        <Card>
+          <CardHeader>
+            <CardTitle>Social Media</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="facebook">Facebook URL</Label>
+                <Input
+                  id="facebook"
+                  type="url"
+                  defaultValue={organization.facebookUrl || ""}
+                  placeholder="https://facebook.com/your-org"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="instagram">Instagram URL</Label>
+                <Input
+                  id="instagram"
+                  type="url"
+                  defaultValue={organization.instagramUrl || ""}
+                  placeholder="https://instagram.com/your-org"
+                />
+              </div>
+              <Button type="submit">Save Changes</Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 } 

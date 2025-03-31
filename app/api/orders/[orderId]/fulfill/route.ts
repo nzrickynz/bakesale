@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { OrderService } from "@/lib/services/order";
+import { UserService } from "@/lib/services/user";
+
+const orderService = new OrderService();
+const userService = new UserService();
 
 export async function POST(
   request: Request,
@@ -11,44 +15,48 @@ export async function POST(
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return new NextResponse(
+        JSON.stringify({ error: "You must be logged in" }), 
+        { status: 401 }
+      );
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-
+    const user = await userService.findByEmail(session.user.email);
     if (!user) {
-      return new NextResponse("User not found", { status: 404 });
+      return new NextResponse(
+        JSON.stringify({ error: "User not found" }), 
+        { status: 404 }
+      );
     }
 
-    // Verify the order belongs to a listing managed by this volunteer
-    const order = await prisma.order.findUnique({
-      where: { id: params.orderId },
-      include: {
-        listing: true,
-      },
-    });
-
-    if (!order) {
-      return new NextResponse("Order not found", { status: 404 });
+    try {
+      const updatedOrder = await orderService.fulfillOrder(params.orderId, user.id);
+      return NextResponse.json({ 
+        success: true, 
+        data: updatedOrder 
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === "Unauthorized to fulfill this order") {
+          return new NextResponse(
+            JSON.stringify({ error: error.message }), 
+            { status: 401 }
+          );
+        }
+        if (error.message === "Order not found") {
+          return new NextResponse(
+            JSON.stringify({ error: error.message }), 
+            { status: 404 }
+          );
+        }
+      }
+      throw error; // Re-throw unexpected errors
     }
-
-    if (order.listing.volunteerId !== user.id) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
-
-    // Update the order status to fulfilled
-    const updatedOrder = await prisma.order.update({
-      where: { id: params.orderId },
-      data: {
-        fulfillmentStatus: "FULFILLED",
-      },
-    });
-
-    return NextResponse.json(updatedOrder);
   } catch (error) {
     console.error("[ORDER_FULFILL]", error);
-    return new NextResponse("Internal error", { status: 500 });
+    return new NextResponse(
+      JSON.stringify({ error: "Internal server error" }), 
+      { status: 500 }
+    );
   }
 } 

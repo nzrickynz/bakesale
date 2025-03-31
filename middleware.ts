@@ -1,56 +1,59 @@
-import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 
-export default withAuth(
-  function middleware(req) {
-    const token = req.nextauth.token;
-    const path = req.nextUrl.pathname;
+export async function middleware(request: NextRequest) {
+  const token = await getToken({ req: request });
+  const isAuth = !!token;
+  const isAuthPage = request.nextUrl.pathname.startsWith("/auth");
+  const isDashboardPage = request.nextUrl.pathname.startsWith("/dashboard");
 
-    // Super Admin routes
-    if (path.startsWith("/admin/super")) {
-      if (token?.role !== "SUPER_ADMIN") {
-        return NextResponse.redirect(new URL("/", req.url));
-      }
+  if (isAuthPage) {
+    if (isAuth) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+    return null;
+  }
+
+  if (!isAuth) {
+    let from = request.nextUrl.pathname;
+    if (request.nextUrl.search) {
+      from += request.nextUrl.search;
     }
 
-    // Organization Admin routes
-    if (path.startsWith("/org/")) {
-      if (token?.role !== "ORG_ADMIN") {
-        return NextResponse.redirect(new URL("/", req.url));
+    return NextResponse.redirect(
+      new URL(`/auth/login?from=${encodeURIComponent(from)}`, request.url)
+    );
+  }
+
+  // Role-based access control for dashboard routes
+  if (isDashboardPage) {
+    const userRole = token.role as string;
+    const path = request.nextUrl.pathname;
+
+    // Super admin can access everything
+    if (userRole === "SUPER_ADMIN") {
+      return null;
+    }
+
+    // Organization admin routes
+    if (path.includes("/organizations/") && path.includes("/settings")) {
+      if (userRole !== "ORG_ADMIN") {
+        return NextResponse.redirect(new URL("/dashboard", request.url));
       }
     }
 
     // Volunteer routes
-    if (path.startsWith("/volunteer-dashboard")) {
-      if (token?.role !== "VOLUNTEER") {
-        return NextResponse.redirect(new URL("/", req.url));
+    if (path.includes("/listings/")) {
+      if (userRole !== "VOLUNTEER" && userRole !== "ORG_ADMIN") {
+        return NextResponse.redirect(new URL("/dashboard", request.url));
       }
     }
-
-    // Dashboard routes - prevent volunteers from accessing
-    if (path.startsWith("/dashboard")) {
-      if (token?.role === "VOLUNTEER") {
-        return NextResponse.redirect(new URL("/volunteer-dashboard", req.url));
-      }
-    }
-
-    return NextResponse.next();
-  },
-  {
-    callbacks: {
-      authorized: ({ token }) => !!token,
-    },
   }
-);
+
+  return null;
+}
 
 export const config = {
-  matcher: [
-    "/org/:path*",
-    "/volunteer-dashboard/:path*",
-    "/admin/:path*",
-    "/dashboard/:path*",
-    "/dashboard",
-    "/api/dashboard/:path*",
-    "/api/orgs/:path*",
-  ],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 }; 

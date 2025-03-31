@@ -42,7 +42,7 @@ export default function PrivacyPage() {
                   <li>Name and contact information (email, phone)</li>
                   <li>Account credentials</li>
                   <li>Profile information and photos</li>
-                  <li>Payment information (processed securely by Stripe)</li>
+                  <li>Payment information (processed securely)</li>
                 </ul>
               </div>
               <div>
@@ -51,7 +51,7 @@ export default function PrivacyPage() {
                   <li>Organization name and details</li>
                   <li>Logo and branding materials</li>
                   <li>Social media links</li>
-                  <li>Stripe Connect account information</li>
+                  <li>Payment account information</li>
                 </ul>
               </div>
               <div>
@@ -93,7 +93,7 @@ export default function PrivacyPage() {
                 We may share your information with:
               </p>
               <ul className="list-disc pl-6 space-y-2 text-gray-600">
-                <li>Stripe for payment processing</li>
+                <li>Payment processors for payment processing</li>
                 <li>Organizations (for order fulfillment)</li>
                 <li>Service providers who assist our operations</li>
                 <li>Law enforcement when required by law</li>

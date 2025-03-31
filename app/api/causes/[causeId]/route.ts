@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { CauseService } from "@/lib/services/cause";
+
+const causeService = new CauseService();
 
 export async function GET(
   request: Request,
   { params }: { params: { causeId: string } }
 ) {
   try {
-    const cause = await prisma.cause.findUnique({
+    const cause = await causeService.findUnique({
       where: { id: params.causeId },
       include: {
         organization: {

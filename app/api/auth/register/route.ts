@@ -1,247 +1,180 @@
 import { NextResponse } from 'next/server'
-import { hash } from 'bcryptjs'
-import { prisma } from '@/lib/prisma'
-import { PrismaClient, Prisma } from '@prisma/client'
 import { z } from 'zod'
+import { UserService } from '@/lib/services/user'
+import { OrganizationService } from '@/lib/services/organization'
+import { UserRole } from '@prisma/client'
 
 // Validation schema for registration input
 const registerSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
-  name: z.string().min(1),
-  organizationName: z.string().min(1),
-  organizationDescription: z.string().min(1),
+  email: z.string()
+    .email('Invalid email format')
+    .max(255, 'Email must be less than 255 characters'),
+  password: z.string()
+    .min(8, 'Password must be at least 8 characters long')
+    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+    .regex(/[0-9]/, 'Password must contain at least one number')
+    .max(100, 'Password must be less than 100 characters'),
+  name: z.string()
+    .min(1, 'Name is required')
+    .max(100, 'Name must be less than 100 characters'),
+  role: z.enum([UserRole.ORG_ADMIN, UserRole.VOLUNTEER]).optional(),
+  organizationName: z.string()
+    .min(1, 'Organization name is required')
+    .max(100, 'Organization name must be less than 100 characters'),
+  organizationDescription: z.string()
+    .min(1, 'Organization description is required')
+    .max(1000, 'Organization description must be less than 1000 characters'),
+  websiteUrl: z.string().url().optional().nullable(),
+  facebookUrl: z.string().url().optional().nullable(),
+  instagramUrl: z.string().url().optional().nullable(),
 })
+
+const userService = new UserService()
+const organizationService = new OrganizationService()
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
   try {
-    // Log the raw request
-    console.log("[REGISTER] Raw request headers:", Object.fromEntries(request.headers.entries()))
-    
     // Validate request content type
     const contentType = request.headers.get('content-type')
     if (!contentType?.includes('application/json')) {
-      console.error("[REGISTER] Invalid content type:", contentType)
       return NextResponse.json(
-        { error: 'Content-Type must be application/json' },
+        { 
+          success: false,
+          error: 'Content-Type must be application/json' 
+        },
         { status: 400 }
       )
     }
 
     // Parse and validate request body
-    let body;
+    let body
     try {
       body = await request.json()
     } catch (parseError) {
-      console.error("[REGISTER] Failed to parse request body:", parseError)
       return NextResponse.json(
-        { error: 'Invalid JSON in request body' },
+        { 
+          success: false,
+          error: 'Invalid JSON in request body' 
+        },
         { status: 400 }
       )
     }
 
-    // Log the parsed request body
-    console.log("[REGISTER] Parsed request body:", { 
-      email: body.email, 
-      name: body.name,
-      hasPassword: !!body.password,
-      hasOrgName: !!body.organizationName,
-      organizationData: {
-        name: body.organizationName,
-        description: body.organizationDescription,
-        websiteUrl: body.websiteUrl,
-        facebookUrl: body.facebookUrl,
-        instagramUrl: body.instagramUrl
-      }
-    })
-    
-    const { 
-      email, 
-      password, 
+    // Validate input using Zod schema
+    const validationResult = registerSchema.safeParse(body)
+    if (!validationResult.success) {
+      return NextResponse.json(
+        { 
+          success: false,
+          error: 'Validation failed',
+          details: validationResult.error.errors.map(e => ({
+            field: e.path.join('.'),
+            message: e.message
+          }))
+        },
+        { status: 400 }
+      )
+    }
+
+    const {
+      email,
+      password,
       name,
-      role,
+      role = UserRole.ORG_ADMIN,
       organizationName,
       organizationDescription,
       websiteUrl,
       facebookUrl,
       instagramUrl
-    } = body
-
-    // Validate required fields
-    const missingFields = []
-    if (!email) missingFields.push('email')
-    if (!password) missingFields.push('password')
-    if (!name) missingFields.push('name')
-    if (!organizationName) missingFields.push('organizationName')
-
-    if (missingFields.length > 0) {
-      console.log("[REGISTER] Missing required fields:", missingFields)
-      return NextResponse.json(
-        { error: `Missing required fields: ${missingFields.join(', ')}` },
-        { status: 400 }
-      )
-    }
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
-      console.log("[REGISTER] Invalid email format:", email)
-      return NextResponse.json(
-        { error: 'Invalid email format' },
-        { status: 400 }
-      )
-    }
-
-    // Validate password strength
-    if (password.length < 8) {
-      console.log("[REGISTER] Password too short")
-      return NextResponse.json(
-        { error: 'Password must be at least 8 characters long' },
-        { status: 400 }
-      )
-    }
+    } = validationResult.data
 
     try {
-      // Use a transaction to ensure all database operations succeed or fail together
-      console.log("[REGISTER] Starting database transaction")
-      const result = await prisma.$transaction(async (tx) => {
-        // Check if user already exists
-        const existingUser = await tx.user.findUnique({
-          where: { email },
-        })
-
-        if (existingUser) {
-          console.log("[REGISTER] User already exists:", email)
-          throw new Error("User already exists")
-        }
-
-        // Check if organization name already exists
-        const existingOrg = await tx.organization.findUnique({
-          where: { name: organizationName },
-        })
-
-        if (existingOrg) {
-          console.log("[REGISTER] Organization already exists:", organizationName)
-          throw new Error("Organization already exists")
-        }
-
-        // Hash password
-        console.log("[REGISTER] Hashing password")
-        const hashedPassword = await hash(password, 12)
-
-        // Create user record in our database
-        console.log("[REGISTER] Creating database user record")
-        const user = await tx.user.create({
-          data: {
-            email,
-            name,
-            passwordHash: hashedPassword,
-            role: role || 'ORG_ADMIN',
-          },
-        })
-        console.log("[REGISTER] Created database user:", { id: user.id, email: user.email })
-
-        // Create organization with a default description if none provided
-        console.log("[REGISTER] Creating organization with data:", {
-          name: organizationName,
-          description: organizationDescription || `${organizationName} is a charitable organization dedicated to making a positive impact in the community.`,
-          websiteUrl,
-          facebookUrl,
-          instagramUrl,
-          adminId: user.id,
-        })
-
-        const organization = await tx.organization.create({
-          data: {
-            name: organizationName,
-            description: organizationDescription || `${organizationName} is a charitable organization dedicated to making a positive impact in the community.`,
-            websiteUrl: websiteUrl || null,
-            facebookUrl: facebookUrl || null,
-            instagramUrl: instagramUrl || null,
-            adminId: user.id,
-          },
-        })
-        console.log("[REGISTER] Created organization:", { id: organization.id, name: organization.name })
-
-        // Create user-organization relationship
-        console.log("[REGISTER] Creating user-organization relationship")
-        await tx.userOrganization.create({
-          data: {
-            userId: user.id,
-            organizationId: organization.id,
-            role: role || 'ORG_ADMIN',
-          },
-        })
-        console.log("[REGISTER] Created user-organization relationship")
-
-        return { user, organization }
-      })
-
-      console.log("[REGISTER] Successfully completed registration")
-      return NextResponse.json({
-        user: result.user,
-        organization: result.organization,
-        message: 'Registration successful',
-      })
-    } catch (error: any) {
-      console.error('[REGISTER] Database error during registration:', {
-        message: error.message,
-        code: error.code,
-        meta: error.meta,
-        stack: error.stack,
-        name: error.name,
-        cause: error.cause,
-        target: error.target,
-        clientVersion: error.clientVersion,
-      })
-
-      // Handle specific Prisma errors
-      if (error.code === 'P2002') {
+      // Check if user already exists
+      const existingUser = await userService.findByEmail(email)
+      if (existingUser) {
         return NextResponse.json(
           { 
-            error: 'A user or organization with these details already exists',
-            details: error.message
-          },
-          { status: 409 }
-        )
-      }
-
-      if (error.code === 'P2003') {
-        return NextResponse.json(
-          { 
-            error: 'Invalid reference to related record',
-            details: error.message
+            success: false,
+            error: 'User already exists' 
           },
           { status: 400 }
         )
       }
 
-      // Log the full error object for debugging
-      console.error('[REGISTER] Full database error object:', JSON.stringify(error, null, 2))
+      // Check if organization name already exists
+      const existingOrg = await organizationService.findByName(organizationName)
+      if (existingOrg) {
+        return NextResponse.json(
+          { 
+            success: false,
+            error: 'Organization already exists' 
+          },
+          { status: 400 }
+        )
+      }
 
-      return NextResponse.json(
-        { 
-          error: 'Failed to create user profile and organization',
-          details: error.message || error.toString(),
-          code: error.code
-        },
-        { status: 500 }
-      )
+      // Create user and organization
+      const result = await userService.createWithOrganization({
+        email,
+        password,
+        name,
+        role,
+        organization: {
+          name: organizationName,
+          description: organizationDescription,
+          websiteUrl,
+          facebookUrl,
+          instagramUrl,
+        }
+      })
+
+      return NextResponse.json({
+        success: true,
+        data: {
+          user: {
+            id: result.user.id,
+            email: result.user.email,
+            name: result.user.name,
+            role: result.user.role
+          },
+          organization: {
+            id: result.organization.id,
+            name: result.organization.name
+          }
+        }
+      })
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === 'User already exists') {
+          return NextResponse.json(
+            { 
+              success: false,
+              error: error.message 
+            },
+            { status: 400 }
+          )
+        }
+        if (error.message === 'Organization already exists') {
+          return NextResponse.json(
+            { 
+              success: false,
+              error: error.message 
+            },
+            { status: 400 }
+          )
+        }
+      }
+      throw error
     }
-  } catch (error: any) {
-    console.error('[REGISTER] Unexpected error during registration:', {
-      message: error.message,
-      stack: error.stack,
-      name: error.name,
-      cause: error.cause,
-      error: JSON.stringify(error, null, 2)
-    })
+  } catch (error) {
+    console.error('[REGISTER]', error)
     return NextResponse.json(
       { 
-        error: error.message || 'Registration failed',
-        details: error.stack || error.toString()
+        success: false,
+        error: 'Failed to create account' 
       },
       { status: 500 }
     )

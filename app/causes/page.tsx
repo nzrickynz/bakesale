@@ -1,33 +1,39 @@
 import { prisma } from "@/lib/prisma";
-import { CausesClient } from "./causes-client";
+import { CauseCard } from "@/components/causes/cause-card";
+import { SearchFilter } from "@/components/causes/search-filter";
+import { Prisma, CauseCategory } from "@prisma/client";
 
-export const dynamic = 'force-dynamic'
+interface PageProps {
+  searchParams: {
+    search?: string;
+    category?: CauseCategory | "ALL";
+  };
+}
 
-export default async function CausesPage() {
-  // Fetch all active causes with their organizations and listings
+export default async function CausesPage({ searchParams }: PageProps) {
+  const { search = "", category = "ALL" } = searchParams;
+
+  const where: Prisma.CauseWhereInput = {
+    status: "ACTIVE",
+  };
+
+  if (search) {
+    where.OR = [
+      { title: { contains: search, mode: "insensitive" } },
+      { description: { contains: search, mode: "insensitive" } },
+    ];
+  }
+
+  if (category !== "ALL") {
+    where.category = category;
+  }
+
   const causes = await prisma.cause.findMany({
-    where: {
-      status: "ACTIVE",
-    },
+    where,
     include: {
-      organization: {
-        select: {
-          id: true,
-          name: true,
-          description: true,
-          websiteUrl: true,
-          facebookUrl: true,
-          instagramUrl: true,
-        },
-      },
       listings: {
         include: {
-          volunteer: {
-            select: {
-              name: true,
-              image: true,
-            },
-          },
+          volunteer: true,
         },
       },
     },
@@ -36,5 +42,29 @@ export default async function CausesPage() {
     },
   });
 
-  return <CausesClient causes={causes} />;
+  return (
+    <div className="container py-8">
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold">Causes</h1>
+          <p className="text-muted-foreground">
+            Browse and support causes from various organizations
+          </p>
+        </div>
+
+        <SearchFilter
+          search={search}
+          onSearchChange={() => {}}
+          category={category}
+          onCategoryChange={() => {}}
+        />
+
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {causes.map((cause) => (
+            <CauseCard key={cause.id} cause={cause} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 } 
