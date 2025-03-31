@@ -2,12 +2,36 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
+// Define public routes that don't require authentication
+const publicRoutes = [
+  "/",
+  "/about",
+  "/contact",
+  "/privacy",
+  "/terms",
+  "/register",
+  "/_not-found",
+];
+
 export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request });
   const isAuth = !!token;
   const isAuthPage = request.nextUrl.pathname.startsWith("/auth");
   const isDashboardPage = request.nextUrl.pathname.startsWith("/dashboard");
+  const isPublicRoute = publicRoutes.includes(request.nextUrl.pathname);
+  const isApiRoute = request.nextUrl.pathname.startsWith("/api");
 
+  // Allow public routes without any checks
+  if (isPublicRoute) {
+    return null;
+  }
+
+  // Allow API routes to handle their own auth
+  if (isApiRoute) {
+    return null;
+  }
+
+  // Handle auth pages (login, register)
   if (isAuthPage) {
     if (isAuth) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
@@ -15,6 +39,7 @@ export async function middleware(request: NextRequest) {
     return null;
   }
 
+  // Handle protected routes
   if (!isAuth) {
     let from = request.nextUrl.pathname;
     if (request.nextUrl.search) {
@@ -55,5 +80,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 }; 
