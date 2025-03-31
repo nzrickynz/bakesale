@@ -1,140 +1,70 @@
-import { PrismaClient, UserRole } from '@prisma/client';
-import bcrypt from 'bcryptjs';
+import { PrismaClient } from '@prisma/client';
+import { hash } from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  // Create super admin user
-  const hashedPassword = await bcrypt.hash('admin123', 10);
+  // Create a super admin user
+  const superAdminPassword = await hash('admin123', 12);
   const superAdmin = await prisma.user.upsert({
-    where: { email: 'admin@bakesale.com' },
+    where: { email: 'admin@example.com' },
     update: {},
     create: {
-      email: 'admin@bakesale.com',
-      passwordHash: hashedPassword,
-      role: UserRole.SUPER_ADMIN,
+      email: 'admin@example.com',
+      name: 'Super Admin',
+      passwordHash: superAdminPassword,
+      role: 'SUPER_ADMIN',
     },
   });
 
-  // Create organization admin user
-  const orgAdmin = await prisma.user.upsert({
-    where: { email: 'orgadmin@bakesale.com' },
+  // Create an organization
+  const organization = await prisma.organization.upsert({
+    where: { name: 'Bake for Good' },
     update: {},
     create: {
-      email: 'orgadmin@bakesale.com',
-      passwordHash: hashedPassword,
-      role: UserRole.ORG_ADMIN,
+      name: 'Bake for Good',
+      description: 'A community-driven organization focused on making a difference through baking.',
+      admin: {
+        connect: { id: superAdmin.id }
+      }
     },
   });
 
-  // Create organizations
-  const foodBank = await prisma.organization.create({
-    data: {
-      name: 'Local Food Bank',
-      description: 'Providing food security to our community',
-      adminId: orgAdmin.id,
-      userOrganizations: {
-        create: [
-          {
-            userId: orgAdmin.id,
-            role: UserRole.ORG_ADMIN,
-          },
-          {
-            userId: superAdmin.id,
-            role: UserRole.SUPER_ADMIN,
-          },
-        ],
-      },
-    },
-  });
-
-  const animalRescue = await prisma.organization.create({
-    data: {
-      name: 'Animal Rescue Center',
-      description: 'Helping animals find their forever homes',
-      adminId: orgAdmin.id,
-      userOrganizations: {
-        create: [
-          {
-            userId: orgAdmin.id,
-            role: UserRole.ORG_ADMIN,
-          },
-          {
-            userId: superAdmin.id,
-            role: UserRole.SUPER_ADMIN,
-          },
-        ],
-      },
-    },
-  });
-
-  // Create causes
-  const foodDrive = await prisma.cause.create({
-    data: {
-      title: 'Summer Food Drive',
-      description: 'Help us provide food for families in need this summer',
-      targetGoal: 5000,
+  // Create sample causes
+  const causes = [
+    {
+      title: 'Support Local Food Banks',
+      description: 'Help provide food to families in need through our network of local food banks.',
+      organizationId: organization.id,
       startDate: new Date(),
       endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-      organizationId: foodBank.id,
+      targetGoal: 5000,
     },
-  });
-
-  const petCare = await prisma.cause.create({
-    data: {
-      title: 'Pet Care Fund',
-      description: 'Support medical care for rescued animals',
-      targetGoal: 3000,
+    {
+      title: 'Education for All',
+      description: 'Support educational initiatives that help children access quality education.',
+      organizationId: organization.id,
+      startDate: new Date(),
+      endDate: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000), // 45 days from now
+      targetGoal: 7500,
+    },
+    {
+      title: 'Environmental Conservation',
+      description: 'Fund projects that protect and preserve our environment for future generations.',
+      organizationId: organization.id,
       startDate: new Date(),
       endDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000), // 60 days from now
-      organizationId: animalRescue.id,
+      targetGoal: 10000,
     },
-  });
+  ];
 
-  // Create listings
-  await prisma.listing.create({
-    data: {
-      title: "Chocolate Chip Cookies",
-      description: "Classic homemade chocolate chip cookies",
-      price: 5.00,
-      quantity: 20,
-      paymentLink: "https://example.com/pay",
-      cause: {
-        connect: { id: foodDrive.id }
-      },
-      volunteer: {
-        connect: { id: orgAdmin.id }
-      }
-    }
-  });
-
-  await prisma.listing.create({
-    data: {
-      title: "Brownies",
-      description: "Fudgy chocolate brownies",
-      price: 8.00,
-      quantity: 15,
-      paymentLink: "https://example.com/pay",
-      cause: {
-        connect: { id: foodDrive.id }
-      },
-      volunteer: {
-        connect: { id: orgAdmin.id }
-      }
-    }
-  });
-
-  await prisma.listing.create({
-    data: {
-      title: 'Homemade Dog Treats',
-      description: 'Healthy, homemade treats for your furry friends',
-      price: 12,
-      quantity: 25,
-      imageUrl: '/placeholder.svg?height=300&width=300',
-      causeId: petCare.id,
-      volunteerId: orgAdmin.id,
-    },
-  });
+  for (const cause of causes) {
+    await prisma.cause.upsert({
+      where: { title: cause.title },
+      update: {},
+      create: cause,
+    });
+  }
 
   console.log('Seed data created successfully');
 }
