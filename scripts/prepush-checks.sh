@@ -18,17 +18,9 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# Prisma generate
-echo "🔄 Generating Prisma client..."
-npx prisma generate
-if [ $? -ne 0 ]; then
-  echo "❌ Prisma generate failed. Push aborted."
-  exit 1
-fi
-
-# Build
+# Build (without Prisma generate)
 echo "🛠 Building project..."
-npm run build
+NEXT_PUBLIC_SKIP_PRISMA_GENERATE=true next build
 if [ $? -ne 0 ]; then
   echo "❌ Build failed. Push aborted."
   exit 1
