@@ -18,6 +18,14 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+# Prisma generate
+echo "🔄 Generating Prisma client..."
+npx prisma generate
+if [ $? -ne 0 ]; then
+  echo "❌ Prisma generate failed. Push aborted."
+  exit 1
+fi
+
 # Build
 echo "🛠 Building project..."
 npm run build
