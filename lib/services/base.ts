@@ -1,59 +1,36 @@
-import { prisma } from "@/lib/prisma";
-import { Prisma, PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 
-type PrismaModels = {
-  [K in Prisma.ModelName]: PrismaClient[Lowercase<K>];
-};
+const prisma = new PrismaClient();
 
-export class BaseService {
-  protected prisma = prisma;
+export class BaseService<T extends keyof PrismaClient> {
+  protected model: PrismaClient[T];
 
-  protected async findUnique<T extends Prisma.ModelName>(
-    model: T,
-    where: Prisma.Args<PrismaModels[T]>["findUnique"]["where"]
-  ) {
-    return (this.prisma[model.toLowerCase()] as PrismaModels[T]).findUnique({ where });
+  constructor(modelName: T) {
+    this.model = prisma[modelName];
   }
 
-  protected async findMany<T extends Prisma.ModelName>(
-    model: T,
-    args?: Prisma.Args<PrismaModels[T]>["findMany"]
-  ) {
-    return (this.prisma[model.toLowerCase()] as PrismaModels[T]).findMany(args);
+  async findUnique(args: any) {
+    return (this.model as any).findUnique(args);
   }
 
-  protected async create<T extends Prisma.ModelName>(
-    model: T,
-    data: Prisma.Args<PrismaModels[T]>["create"]["data"]
-  ) {
-    return (this.prisma[model.toLowerCase()] as PrismaModels[T]).create({ data });
+  async findMany(args?: any) {
+    return (this.model as any).findMany(args);
   }
 
-  protected async update<T extends Prisma.ModelName>(
-    model: T,
-    where: Prisma.Args<PrismaModels[T]>["update"]["where"],
-    data: Prisma.Args<PrismaModels[T]>["update"]["data"]
-  ) {
-    return (this.prisma[model.toLowerCase()] as PrismaModels[T]).update({ where, data });
+  async create(args: any) {
+    return (this.model as any).create(args);
   }
 
-  protected async delete<T extends Prisma.ModelName>(
-    model: T,
-    where: Prisma.Args<PrismaModels[T]>["delete"]["where"]
-  ) {
-    return (this.prisma[model.toLowerCase()] as PrismaModels[T]).delete({ where });
+  async update(args: any) {
+    return (this.model as any).update(args);
   }
 
-  protected async upsert<T extends Prisma.ModelName>(
-    model: T,
-    where: Prisma.Args<PrismaModels[T]>["upsert"]["where"],
-    create: Prisma.Args<PrismaModels[T]>["upsert"]["create"],
-    update: Prisma.Args<PrismaModels[T]>["upsert"]["update"]
-  ) {
-    return (this.prisma[model.toLowerCase()] as PrismaModels[T]).upsert({
-      where,
-      create,
-      update,
-    });
+  async delete(args: any) {
+    return (this.model as any).delete(args);
+  }
+
+  async upsert(args: any) {
+    return (this.model as any).upsert(args);
   }
 } 

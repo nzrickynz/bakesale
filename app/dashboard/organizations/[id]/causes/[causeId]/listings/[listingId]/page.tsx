@@ -246,7 +246,7 @@ export default async function ListingDetailsPage({ params }: PageProps) {
                                 try {
                                   await prisma.order.update({
                                     where: { id: order.id },
-                                    data: { paymentStatus: "COMPLETED" },
+                                    data: { fulfillmentStatus: "FULFILLED" },
                                   });
                                   toast.success("Order completed");
                                   window.location.reload();

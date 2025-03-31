@@ -106,7 +106,11 @@ export async function POST(request: Request) {
         status,
         startDate,
         endDate,
-        organizationId: userOrg.userOrganizations[0].organization.id,
+        organization: {
+          connect: {
+            id: userOrg.userOrganizations[0].organization.id,
+          },
+        },
       },
     });
 

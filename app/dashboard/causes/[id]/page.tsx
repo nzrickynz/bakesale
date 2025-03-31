@@ -66,11 +66,6 @@ export default async function CausePage({ params }: PageProps) {
           name: true,
         },
       },
-      donations: {
-        where: {
-          status: "COMPLETED",
-        },
-      },
       listings: {
         orderBy: {
           createdAt: "desc",

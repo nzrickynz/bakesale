@@ -106,11 +106,11 @@ export default async function EditListingPage({ params }: PageProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="stripePaymentLink">Payment Link</Label>
+              <Label htmlFor="paymentLink">Payment Link</Label>
               <Input
-                id="stripePaymentLink"
+                id="paymentLink"
                 type="url"
-                defaultValue={listing.stripePaymentLink || ""}
+                defaultValue={listing.paymentLink || ""}
                 placeholder="Enter payment link"
               />
             </div>

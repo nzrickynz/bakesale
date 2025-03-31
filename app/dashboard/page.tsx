@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Users, Heart, DollarSign, ArrowRight } from "lucide-react";
-import { UserRole, Cause as PrismaCause, UserOrganization as PrismaUserOrg, PaymentStatus } from "@prisma/client";
+import { UserRole, Cause as PrismaCause, UserOrganization as PrismaUserOrg } from "@prisma/client";
 
 type UserOrganization = PrismaUserOrg & {
   organization: {
