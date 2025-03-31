@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("SUPABASE_DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("SUPABASE_DATABASE_URL")
   directUrl = env("SUPABASE_DIRECT_URL")
 }
 
@@ -19,31 +19,31 @@ enum UserRole {
 }
 
 model User {
-  id             String       @id @default(cuid())
-  name           String?
-  email          String       @unique
-  emailVerified  DateTime?
-  image          String?
-  passwordHash   String
-  role           UserRole     @default(PUBLIC)
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String
+  role          UserRole  @default(PUBLIC)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   // Organization relationships
-  adminOf       Organization[] @relation("OrganizationAdmin")
+  adminOf           Organization[]     @relation("OrganizationAdmin")
   userOrganizations UserOrganization[]
 
   // Volunteer relationships
-  managedListings Listing[]   @relation("ListingVolunteer")
-  createdOrders   Order[]     @relation("OrderCreator")
+  managedListings Listing[] @relation("ListingVolunteer")
+  createdOrders   Order[]   @relation("OrderCreator")
 
   // Invitation relationships
   sentInvitations     VolunteerInvitation[] @relation("InvitedBy")
   receivedInvitations VolunteerInvitation[] @relation("InvitedUser")
 
   // Auth relationships
-  accounts       Account[]
-  sessions       Session[]
+  accounts Account[]
+  sessions Session[]
 
   passwordResets PasswordReset[]
 
@@ -51,22 +51,22 @@ model User {
 }
 
 model Organization {
-  id            String   @id @default(cuid())
-  name          String   @unique
-  logoUrl       String?
-  description   String
-  facebookUrl   String?
-  instagramUrl  String?
-  websiteUrl    String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id           String   @id @default(cuid())
+  name         String   @unique
+  logoUrl      String?
+  description  String
+  facebookUrl  String?
+  instagramUrl String?
+  websiteUrl   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   // Relationships
-  admin         User     @relation("OrganizationAdmin", fields: [adminId], references: [id])
-  adminId       String
-  causes        Cause[]
+  admin             User                  @relation("OrganizationAdmin", fields: [adminId], references: [id])
+  adminId           String
+  causes            Cause[]
   userOrganizations UserOrganization[]
-  invitations   VolunteerInvitation[]
+  invitations       VolunteerInvitation[]
 
   @@map("organizations")
 }
@@ -79,60 +79,60 @@ enum CauseCategory {
 }
 
 model Cause {
-  id            String   @id @default(cuid())
-  title         String   @unique
-  description   String
-  imageUrl      String?
-  targetGoal    Float?
-  startDate     DateTime
-  endDate       DateTime?
-  status        CauseStatus @default(ACTIVE)
-  category      CauseCategory @default(SERVICES)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id          String        @id @default(cuid())
+  title       String        @unique
+  description String
+  imageUrl    String?
+  targetGoal  Float?
+  startDate   DateTime
+  endDate     DateTime?
+  status      CauseStatus   @default(ACTIVE)
+  category    CauseCategory @default(SERVICES)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
   // Relationships
-  organization  Organization @relation(fields: [organizationId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id])
   organizationId String
-  listings      Listing[]
+  listings       Listing[]
 
-  @@map("causes")
   @@index([organizationId])
+  @@map("causes")
 }
 
 model Listing {
-  id            String   @id @default(cuid())
-  title         String   @unique
-  description   String
-  price         Float
-  imageUrl      String?
-  quantity      Int?
-  paymentLink   String?  // User-provided payment link
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id          String   @id @default(cuid())
+  title       String   @unique
+  description String
+  price       Float
+  imageUrl    String?
+  quantity    Int?
+  paymentLink String? // User-provided payment link
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Relationships
-  cause         Cause    @relation(fields: [causeId], references: [id])
-  causeId       String
-  volunteer     User     @relation("ListingVolunteer", fields: [volunteerId], references: [id])
-  volunteerId   String
-  orders        Order[]
+  cause       Cause   @relation(fields: [causeId], references: [id])
+  causeId     String
+  volunteer   User    @relation("ListingVolunteer", fields: [volunteerId], references: [id])
+  volunteerId String
+  orders      Order[]
 
   @@map("listings")
 }
 
 model Order {
-  id            String   @id @default(cuid())
-  buyerEmail    String
+  id                String      @id @default(cuid())
+  buyerEmail        String
   fulfillmentStatus OrderStatus @default(ORDERED)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
 
   // Relationships
-  listing       Listing  @relation(fields: [listingId], references: [id])
-  listingId     String
-  creator       User     @relation("OrderCreator", fields: [creatorId], references: [id])
-  creatorId     String
+  listing   Listing @relation(fields: [listingId], references: [id])
+  listingId String
+  creator   User    @relation("OrderCreator", fields: [creatorId], references: [id])
+  creatorId String
 
   @@map("orders")
 }
@@ -207,24 +207,24 @@ enum OrderStatus {
 }
 
 model VolunteerInvitation {
-  id            String           @id @default(cuid())
-  email         String
-  token         String           @unique
-  status        InvitationStatus @default(PENDING)
-  role          UserRole         @default(VOLUNTEER)
-  expiresAt     DateTime
-  acceptedAt    DateTime?
-  declinedAt    DateTime?
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
+  id         String           @id @default(cuid())
+  email      String
+  token      String           @unique
+  status     InvitationStatus @default(PENDING)
+  role       UserRole         @default(VOLUNTEER)
+  expiresAt  DateTime
+  acceptedAt DateTime?
+  declinedAt DateTime?
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
 
   // Relationships
-  organization  Organization     @relation(fields: [organizationId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id])
   organizationId String
-  invitedBy     User            @relation("InvitedBy", fields: [invitedById], references: [id])
-  invitedById   String
-  invitedUser   User?           @relation("InvitedUser", fields: [invitedUserId], references: [id])
-  invitedUserId String?
+  invitedBy      User         @relation("InvitedBy", fields: [invitedById], references: [id])
+  invitedById    String
+  invitedUser    User?        @relation("InvitedUser", fields: [invitedUserId], references: [id])
+  invitedUserId  String?
 
   @@unique([email, organizationId])
   @@map("volunteer_invitations")
@@ -239,4 +239,4 @@ model PasswordReset {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([token])
-} 
+}
