@@ -3,15 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { Cause, Donation } from "@prisma/client";
-
-type CauseWithDonations = Cause & {
-  donations: Donation[];
-};
-
-type CauseWithAmount = CauseWithDonations & {
-  currentAmount: number;
-};
+import { Cause } from "@prisma/client";
 
 // Validation schema for cause creation
 const causeSchema = z.object({
@@ -36,16 +28,11 @@ export async function GET(req: Request) {
           organizationId,
         },
         include: {
-          donations: true,
+          listings: true,
         },
       });
 
-      const causesWithAmounts = causes.map((cause: CauseWithDonations) => ({
-        ...cause,
-        currentAmount: cause.donations.reduce((sum, donation) => sum + donation.amount, 0),
-      }));
-
-      return NextResponse.json(causesWithAmounts);
+      return NextResponse.json(causes);
     }
 
     // Otherwise, fetch all causes (with proper authorization)
@@ -58,16 +45,11 @@ export async function GET(req: Request) {
 
     const causes = await prisma.cause.findMany({
       include: {
-        donations: true,
+        listings: true,
       },
     });
 
-    const causesWithAmounts = causes.map((cause: CauseWithDonations) => ({
-      ...cause,
-      currentAmount: cause.donations.reduce((sum, donation) => sum + donation.amount, 0),
-    }));
-
-    return NextResponse.json(causesWithAmounts);
+    return NextResponse.json(causes);
   } catch (error) {
     console.error("[CAUSES] Error fetching causes:", error);
     return NextResponse.json(

@@ -2,6 +2,17 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { z } from "zod";
+
+// Validation schema for listing creation
+const listingSchema = z.object({
+  title: z.string().min(1),
+  description: z.string().min(1),
+  price: z.number().positive(),
+  imageUrl: z.string().optional(),
+  paymentLink: z.string().url(),
+  causeId: z.string(),
+});
 
 export async function POST(request: Request) {
   try {
@@ -19,24 +30,17 @@ export async function POST(request: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const formData = await request.formData();
-    const title = formData.get("title") as string;
-    const description = formData.get("description") as string;
-    const price = parseFloat(formData.get("price") as string);
-    const imageUrl = formData.get("imageUrl") as string;
-    const stripePaymentLink = formData.get("stripePaymentLink") as string;
-    const causeId = formData.get("causeId") as string;
+    const body = await request.json();
+    const result = listingSchema.safeParse(body);
 
-    if (!title || !description || !price || !stripePaymentLink || !causeId) {
-      console.error("[LISTINGS_POST_MISSING_FIELDS]", {
-        title: !!title,
-        description: !!description,
-        price: !!price,
-        stripePaymentLink: !!stripePaymentLink,
-        causeId: !!causeId,
-      });
-      return new NextResponse("Missing required fields", { status: 400 });
+    if (!result.success) {
+      return NextResponse.json(
+        { error: "Invalid input", details: result.error.errors },
+        { status: 400 }
+      );
     }
+
+    const { title, description, price, imageUrl, paymentLink, causeId } = result.data;
 
     const listing = await prisma.listing.create({
       data: {
@@ -46,13 +50,42 @@ export async function POST(request: Request) {
         imageUrl: imageUrl || "/placeholder.svg?height=300&width=300",
         causeId,
         volunteerId: user.id,
-        stripePaymentLink: stripePaymentLink,
+        paymentLink,
       },
     });
 
     return NextResponse.json(listing);
   } catch (error) {
     console.error("[LISTINGS_POST_ERROR]", error);
+    return new NextResponse(
+      error instanceof Error ? error.message : "Internal error", 
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const causeId = searchParams.get("causeId");
+
+    const listings = await prisma.listing.findMany({
+      where: causeId ? { causeId } : undefined,
+      include: {
+        cause: true,
+        volunteer: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json(listings);
+  } catch (error) {
+    console.error("[LISTINGS_GET_ERROR]", error);
     return new NextResponse(
       error instanceof Error ? error.message : "Internal error", 
       { status: 500 }

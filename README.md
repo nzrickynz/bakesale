@@ -1,108 +1,88 @@
-# Bake Sale - Community Fundraising Platform
+# Bake Sale Platform
 
-Bake Sale is a modern web application that helps organizations raise funds for their causes through bake sales and other fundraising events. Built with Next.js, TypeScript, and Tailwind CSS, it provides a seamless experience for both organizations and donors.
+A platform for managing and organizing bake sales for charitable causes.
 
 ## Features
 
-- **Organization Management**
-  - Organization registration and profile management
-  - Cause creation and management
-  - Volunteer invitation system
-  - Stripe Connect integration for donations
-
-- **Authentication & Authorization**
-  - Email/password authentication
-  - Google OAuth integration
-  - Role-based access control
-  - Protected routes and API endpoints
-
-- **Cause Management**
-  - Create and manage fundraising causes
-  - Set fundraising goals and deadlines
-  - Track donation progress
-  - Accept donations through Stripe
-
-- **Volunteer System**
-  - Invite volunteers to your organization
-  - Manage volunteer roles and permissions
-  - Track volunteer activities
-  - Email notifications for invitations
+- Create and manage organizations
+- Create fundraising causes
+- List baked goods for sale
+- Track orders and fulfillment
+- Volunteer management system
+- Role-based access control
+- Email notifications
+- Image uploads
+- Responsive design
 
 ## Tech Stack
 
-- **Frontend**
-  - Next.js 14 with App Router
-  - TypeScript
-  - Tailwind CSS
-  - React Hook Form
-  - Zod for validation
+- Next.js 14 (App Router)
+- TypeScript
+- Tailwind CSS
+- Supabase
+- Vercel
+- Cloudinary for image hosting
+- NextAuth.js for authentication
+- Prisma ORM
 
-- **Backend**
-  - Next.js API Routes
-  - Prisma ORM
-  - PostgreSQL database
-  - NextAuth.js for authentication
-  - Stripe for payments
+## Database Models
 
-- **Email**
-  - Nodemailer for sending emails
-  - SMTP for email delivery
+- **User**: Stores user information and roles
+- **Organization**: Represents a charitable organization
+- **Cause**: Represents a fundraising cause
+- **Listing**: A baked good item for sale
+- **Order**: Tracks orders and fulfillment status
+- **UserOrganization**: Links users to organizations with roles
+- **VolunteerInvitation**: Manages volunteer invitations
 
 ## Getting Started
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/bakesale.git
-   cd bakesale
-   ```
-
+1. Clone the repository
 2. Install dependencies:
    ```bash
    npm install
    ```
-
 3. Set up environment variables:
    ```bash
-   cp .env.example .env.local
+   cp .env.example .env
    ```
-   Edit `.env.local` with your configuration values.
-
 4. Set up the database:
    ```bash
-   npx prisma generate
-   npx prisma db push
+   npx prisma migrate dev
    ```
-
-5. Start the development server:
+5. Run the development server:
    ```bash
    npm run dev
    ```
 
-6. Open [http://localhost:3000](http://localhost:3000) in your browser.
-
 ## Environment Variables
 
-See `.env.example` for a list of required environment variables.
+Required environment variables:
 
-## Database Schema
+```bash
+# Database
+SUPABASE_DATABASE_URL=
+SUPABASE_DIRECT_URL=
 
-The application uses the following main models:
+# Auth
+NEXTAUTH_URL=
+NEXTAUTH_SECRET=
 
-- **User**: Represents application users with roles (USER, VOLUNTEER, ADMIN)
-- **Organization**: Represents fundraising organizations
-- **UserOrganization**: Manages user-organization relationships and roles
-- **Cause**: Represents fundraising causes
-- **Donation**: Tracks donations to causes
-- **VolunteerInvitation**: Manages volunteer invitations
+# Cloudinary
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=
+NEXT_PUBLIC_CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=
+```
 
 ## Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch
+3. Make your changes
+4. Run tests
+5. Submit a pull request
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT

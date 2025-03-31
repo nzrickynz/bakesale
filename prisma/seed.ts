@@ -94,26 +94,34 @@ async function main() {
   // Create listings
   await prisma.listing.create({
     data: {
-      title: 'Homemade Chocolate Chip Cookies',
-      description: 'Freshly baked chocolate chip cookies, made with love',
-      price: 15,
+      title: "Chocolate Chip Cookies",
+      description: "Classic homemade chocolate chip cookies",
+      price: 5.00,
       quantity: 20,
-      imageUrl: '/placeholder.svg?height=300&width=300',
-      causeId: foodDrive.id,
-      volunteerId: orgAdmin.id,
-    },
+      paymentLink: "https://example.com/pay",
+      cause: {
+        connect: { id: foodDrive.id }
+      },
+      volunteer: {
+        connect: { id: orgAdmin.id }
+      }
+    }
   });
 
   await prisma.listing.create({
     data: {
-      title: 'Fudgy Brownies',
-      description: 'Rich, fudgy brownies with dark chocolate',
-      price: 20,
+      title: "Brownies",
+      description: "Fudgy chocolate brownies",
+      price: 8.00,
       quantity: 15,
-      imageUrl: '/placeholder.svg?height=300&width=300',
-      causeId: foodDrive.id,
-      volunteerId: orgAdmin.id,
-    },
+      paymentLink: "https://example.com/pay",
+      cause: {
+        connect: { id: foodDrive.id }
+      },
+      volunteer: {
+        connect: { id: orgAdmin.id }
+      }
+    }
   });
 
   await prisma.listing.create({

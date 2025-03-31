@@ -1,3 +1,5 @@
+import { CauseStatus, User } from "@prisma/client";
+
 export type Json =
   | string
   | number
@@ -260,4 +262,48 @@ export interface Database {
       order_status: 'ORDERED' | 'IN_PROGRESS' | 'READY' | 'FULFILLED'
     }
   }
-} 
+}
+
+export type Cause = {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string | null;
+  targetGoal: number | null;
+  startDate: Date;
+  endDate: Date | null;
+  status: CauseStatus;
+  createdAt: Date;
+  updatedAt: Date;
+  organizationId: string;
+  listings: Listing[];
+};
+
+export type Listing = {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  imageUrl: string | null;
+  quantity: number | null;
+  paymentLink: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  causeId: string;
+  volunteerId: string;
+  cause: Cause;
+  volunteer: User;
+  orders: Order[];
+};
+
+export type Order = {
+  id: string;
+  buyerEmail: string;
+  fulfillmentStatus: string;
+  createdAt: Date;
+  updatedAt: Date;
+  listingId: string;
+  creatorId: string;
+  listing: Listing;
+  creator: User;
+}; 

@@ -87,7 +87,6 @@ model Cause {
   organization  Organization @relation(fields: [organizationId], references: [id])
   organizationId String
   listings      Listing[]
-  donations     Donation[]
 
   @@map("causes")
 }
@@ -99,7 +98,7 @@ model Listing {
   price         Float
   imageUrl      String?
   quantity      Int?
-  stripePaymentLink String?
+  paymentLink   String?  // User-provided payment link
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -116,7 +115,6 @@ model Listing {
 model Order {
   id            String   @id @default(cuid())
   buyerEmail    String
-  paymentStatus String   // e.g., "Paid", "Refunded"
   fulfillmentStatus String // "Ordered", "In Progress", "Ready", "Fulfilled"
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -185,13 +183,6 @@ enum CauseStatus {
   CANCELLED
 }
 
-enum PaymentStatus {
-  PENDING
-  COMPLETED
-  FAILED
-  REFUNDED
-}
-
 enum InvitationStatus {
   PENDING
   ACCEPTED
@@ -204,20 +195,6 @@ enum OrderStatus {
   IN_PROGRESS
   READY
   FULFILLED
-}
-
-model Donation {
-  id            String   @id @default(cuid())
-  amount        Float
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  status        PaymentStatus @default(PENDING)
-
-  // Relationships
-  cause         Cause    @relation(fields: [causeId], references: [id])
-  causeId       String
-
-  @@map("donations")
 }
 
 model VolunteerInvitation {
