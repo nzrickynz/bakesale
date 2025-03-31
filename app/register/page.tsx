@@ -88,7 +88,7 @@ export default function RegisterPage() {
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Register Your Organization
           </h1>
-          <p className="text-xl text-gray-900">
+          <p className="text-xl text-gray-800">
             Join Bake Sale and start fundraising for your cause
           </p>
         </div>
@@ -107,57 +107,57 @@ export default function RegisterPage() {
 
               {/* Organization Name */}
               <div className="space-y-2">
-                <Label htmlFor="organizationName" className="text-gray-900">Organization Name</Label>
+                <Label htmlFor="organizationName" className="text-gray-800">Organization Name</Label>
                 <Input
                   id="organizationName"
                   name="organizationName"
                   placeholder="Your organization's name"
                   required
-                  className="text-gray-900"
+                  className="text-gray-800 placeholder-gray-400"
                 />
               </div>
 
               {/* Description */}
               <div className="space-y-2">
-                <Label htmlFor="organizationDescription" className="text-gray-900">Description</Label>
+                <Label htmlFor="organizationDescription" className="text-gray-800">Description</Label>
                 <Textarea
                   id="organizationDescription"
                   name="organizationDescription"
                   placeholder="Tell us about your organization..."
-                  className="min-h-[100px] text-gray-900"
+                  className="min-h-[100px] text-gray-800 placeholder-gray-400"
                   required
                 />
               </div>
 
               {/* Social Media Links */}
               <div className="space-y-4">
-                <Label className="text-gray-900">Social Media Links</Label>
+                <Label className="text-gray-800">Social Media Links</Label>
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
-                    <Link className="w-5 h-5 text-gray-400" />
+                    <Link className="w-5 h-5 text-gray-500" />
                     <Input
                       name="facebookUrl"
                       placeholder="Facebook URL"
                       type="url"
-                      className="text-gray-900"
+                      className="text-gray-800 placeholder-gray-400"
                     />
                   </div>
                   <div className="flex items-center gap-2">
-                    <Link className="w-5 h-5 text-gray-400" />
+                    <Link className="w-5 h-5 text-gray-500" />
                     <Input
                       name="instagramUrl"
                       placeholder="Instagram URL"
                       type="url"
-                      className="text-gray-900"
+                      className="text-gray-800 placeholder-gray-400"
                     />
                   </div>
                   <div className="flex items-center gap-2">
-                    <Link className="w-5 h-5 text-gray-400" />
+                    <Link className="w-5 h-5 text-gray-500" />
                     <Input
                       name="websiteUrl"
                       placeholder="Website URL"
                       type="url"
-                      className="text-gray-900"
+                      className="text-gray-800 placeholder-gray-400"
                     />
                   </div>
                 </div>
@@ -165,50 +165,50 @@ export default function RegisterPage() {
 
               {/* Admin Account */}
               <div className="space-y-4">
-                <Label className="text-gray-900">Admin Account</Label>
+                <Label className="text-gray-800">Admin Account</Label>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name" className="text-gray-900">Name</Label>
+                    <Label htmlFor="name" className="text-gray-800">Name</Label>
                     <Input
                       id="name"
                       name="name"
                       type="text"
                       placeholder="John Doe"
                       required
-                      className="text-gray-900"
+                      className="text-gray-800 placeholder-gray-400"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-gray-900">Email</Label>
+                    <Label htmlFor="email" className="text-gray-800">Email</Label>
                     <Input
                       id="email"
                       name="email"
                       type="email"
                       placeholder="name@example.com"
                       required
-                      className="text-gray-900"
+                      className="text-gray-800 placeholder-gray-400"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="password" className="text-gray-900">Password</Label>
+                    <Label htmlFor="password" className="text-gray-800">Password</Label>
                     <Input
                       id="password"
                       name="password"
                       type="password"
                       required
                       minLength={8}
-                      className="text-gray-900"
+                      className="text-gray-800 placeholder-gray-400"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword" className="text-gray-900">Confirm Password</Label>
+                    <Label htmlFor="confirmPassword" className="text-gray-800">Confirm Password</Label>
                     <Input
                       id="confirmPassword"
                       name="confirmPassword"
                       type="password"
                       required
                       minLength={8}
-                      className="text-gray-900"
+                      className="text-gray-800 placeholder-gray-400"
                     />
                   </div>
                 </div>
@@ -223,13 +223,13 @@ export default function RegisterPage() {
                     className="mt-1"
                     required
                   />
-                  <Label htmlFor="terms" className="text-sm text-gray-900">
+                  <Label htmlFor="terms" className="text-sm text-gray-800">
                     I agree to the{' '}
-                    <a href="/terms" className="text-[#E55937] hover:underline">
+                    <a href="/terms" className="text-orange-500 hover:text-orange-600 hover:underline">
                       Terms of Service
                     </a>
                     {' '}and{' '}
-                    <a href="/privacy" className="text-[#E55937] hover:underline">
+                    <a href="/privacy" className="text-orange-500 hover:text-orange-600 hover:underline">
                       Privacy Policy
                     </a>
                   </Label>

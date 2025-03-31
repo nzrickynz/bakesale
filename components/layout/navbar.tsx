@@ -20,18 +20,18 @@ export function Navbar() {
         <div className="flex justify-between h-16">
           <div className="flex">
             <Link href="/" className="flex items-center">
-              <span className="text-xl font-bold text-primary">Bake Sale</span>
+              <span className="text-xl font-bold text-gray-900 hover:text-orange-500">Bake Sale</span>
             </Link>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               <Link
                 href="/causes"
-                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 hover:text-primary"
+                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-800 hover:text-orange-500"
               >
                 Causes
               </Link>
               <Link
                 href="/organizations"
-                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 hover:text-primary"
+                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-800 hover:text-orange-500"
               >
                 Organizations
               </Link>
@@ -62,20 +62,21 @@ export function Navbar() {
                 <DropdownMenuContent align="end">
                   {session.user?.role === "VOLUNTEER" ? (
                     <DropdownMenuItem asChild>
-                      <Link href="/volunteer-dashboard">Volunteer Dashboard</Link>
+                      <Link href="/volunteer-dashboard" className="text-gray-800 hover:text-orange-500">Volunteer Dashboard</Link>
                     </DropdownMenuItem>
                   ) : (
                     <>
                       <DropdownMenuItem asChild>
-                        <Link href="/dashboard">Dashboard</Link>
+                        <Link href="/dashboard" className="text-gray-800 hover:text-orange-500">Dashboard</Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href="/org/dashboard">Organization Dashboard</Link>
+                        <Link href="/org/dashboard" className="text-gray-800 hover:text-orange-500">Organization Dashboard</Link>
                       </DropdownMenuItem>
                     </>
                   )}
                   <DropdownMenuItem
                     onClick={() => signOut({ callbackUrl: "/" })}
+                    className="text-gray-800 hover:text-orange-500"
                   >
                     Sign out
                   </DropdownMenuItem>
@@ -83,10 +84,10 @@ export function Navbar() {
               </DropdownMenu>
             ) : (
               <div className="flex space-x-4">
-                <Link href="/login">
+                <Link href="/login" className="text-gray-800 hover:text-orange-500">
                   <Button variant="ghost">Sign in</Button>
                 </Link>
-                <Link href="/register">
+                <Link href="/register" className="text-gray-800 hover:text-orange-500">
                   <Button>Get Started</Button>
                 </Link>
               </div>
@@ -102,29 +103,30 @@ export function Navbar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem asChild>
-                  <Link href="/causes">Causes</Link>
+                  <Link href="/causes" className="text-gray-800 hover:text-orange-500">Causes</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/organizations">Organizations</Link>
+                  <Link href="/organizations" className="text-gray-800 hover:text-orange-500">Organizations</Link>
                 </DropdownMenuItem>
                 {session ? (
                   <>
                     {session.user?.role === "VOLUNTEER" ? (
                       <DropdownMenuItem asChild>
-                        <Link href="/volunteer-dashboard">Volunteer Dashboard</Link>
+                        <Link href="/volunteer-dashboard" className="text-gray-800 hover:text-orange-500">Volunteer Dashboard</Link>
                       </DropdownMenuItem>
                     ) : (
                       <>
                         <DropdownMenuItem asChild>
-                          <Link href="/dashboard">Dashboard</Link>
+                          <Link href="/dashboard" className="text-gray-800 hover:text-orange-500">Dashboard</Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                          <Link href="/org/dashboard">Organization Dashboard</Link>
+                          <Link href="/org/dashboard" className="text-gray-800 hover:text-orange-500">Organization Dashboard</Link>
                         </DropdownMenuItem>
                       </>
                     )}
                     <DropdownMenuItem
                       onClick={() => signOut({ callbackUrl: "/" })}
+                      className="text-gray-800 hover:text-orange-500"
                     >
                       Sign out
                     </DropdownMenuItem>
@@ -132,10 +134,10 @@ export function Navbar() {
                 ) : (
                   <>
                     <DropdownMenuItem asChild>
-                      <Link href="/login">Sign in</Link>
+                      <Link href="/login" className="text-gray-800 hover:text-orange-500">Sign in</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/register">Get Started</Link>
+                      <Link href="/register" className="text-gray-800 hover:text-orange-500">Get Started</Link>
                     </DropdownMenuItem>
                   </>
                 )}

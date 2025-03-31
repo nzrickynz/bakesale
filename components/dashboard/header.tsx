@@ -21,7 +21,7 @@ export function DashboardHeader() {
       <div className="container flex h-14 items-center">
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <span className="hidden font-bold text-gray-900 sm:inline-block">
+            <span className="hidden font-bold text-gray-900 hover:text-orange-500 sm:inline-block">
               Bake Sale
             </span>
           </Link>
@@ -33,7 +33,7 @@ export function DashboardHeader() {
           <nav className="flex items-center space-x-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-gray-600 hover:text-gray-900">
+                <Button variant="ghost" size="icon" className="text-gray-800 hover:text-orange-500">
                   <User className="h-5 w-5" />
                   <span className="sr-only">User menu</span>
                 </Button>
@@ -42,13 +42,13 @@ export function DashboardHeader() {
                 <DropdownMenuLabel className="text-gray-900">My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/dashboard/settings" className="text-gray-600 hover:text-gray-900">
+                  <Link href="/dashboard/settings" className="text-gray-800 hover:text-orange-500">
                     Settings
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => signOut({ callbackUrl: "/" })}
-                  className="text-gray-600 hover:text-gray-900"
+                  className="text-gray-800 hover:text-orange-500"
                 >
                   Log out
                 </DropdownMenuItem>

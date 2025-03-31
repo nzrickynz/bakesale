@@ -45,13 +45,13 @@ export default function CreateListingPage() {
         <div className="mb-8">
           <Link
             href="/org/[orgId]/dashboard"
-            className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-4"
+            className="inline-flex items-center text-gray-800 hover:text-orange-500 mb-4"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
           </Link>
           <h1 className="text-3xl font-bold text-gray-900">Create New Listing</h1>
-          <p className="text-gray-600">Add a new item to your cause</p>
+          <p className="text-gray-800">Add a new item to your cause</p>
         </div>
 
         <Card>
@@ -62,12 +62,12 @@ export default function CreateListingPage() {
             <form className="space-y-8">
               {/* Cause Selection */}
               <div className="space-y-2">
-                <Label htmlFor="cause">Select Cause</Label>
+                <Label htmlFor="cause" className="text-gray-800">Select Cause</Label>
                 <select
                   id="cause"
                   value={selectedCause}
                   onChange={(e) => setSelectedCause(e.target.value)}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-800"
                   required
                 >
                   <option value="">Choose a cause</option>
@@ -81,7 +81,7 @@ export default function CreateListingPage() {
 
               {/* Listing Image */}
               <div className="space-y-4">
-                <Label htmlFor="image">Listing Image</Label>
+                <Label htmlFor="image" className="text-gray-800">Listing Image</Label>
                 <div className="flex items-center gap-4">
                   <div className="relative w-48 h-48 border-2 border-dashed border-gray-300 rounded-lg overflow-hidden">
                     {imagePreview ? (
@@ -93,7 +93,7 @@ export default function CreateListingPage() {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <Upload className="w-8 h-8 text-gray-400" />
+                        <Upload className="w-8 h-8 text-gray-500" />
                       </div>
                     )}
                   </div>
@@ -109,11 +109,11 @@ export default function CreateListingPage() {
                       type="button"
                       variant="outline"
                       onClick={() => document.getElementById("image")?.click()}
-                      className="w-full"
+                      className="w-full text-gray-800 hover:text-orange-500"
                     >
                       Upload Image
                     </Button>
-                    <p className="mt-2 text-sm text-gray-500">
+                    <p className="mt-2 text-sm text-gray-600">
                       Recommended size: 800x800 pixels
                     </p>
                   </div>
@@ -122,35 +122,36 @@ export default function CreateListingPage() {
 
               {/* Listing Title */}
               <div className="space-y-2">
-                <Label htmlFor="title">Listing Title</Label>
+                <Label htmlFor="title" className="text-gray-800">Listing Title</Label>
                 <Input
                   id="title"
                   placeholder="Enter a clear, descriptive title for your item"
                   required
+                  className="text-gray-800 placeholder-gray-400"
                 />
               </div>
 
               {/* Description */}
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description" className="text-gray-800">Description</Label>
                 <Textarea
                   id="description"
                   placeholder="Describe your item, including any special details or customization options..."
-                  className="min-h-[150px]"
+                  className="min-h-[150px] text-gray-800 placeholder-gray-400"
                   required
                 />
               </div>
 
               {/* Price */}
               <div className="space-y-2">
-                <Label htmlFor="price">Price</Label>
+                <Label htmlFor="price" className="text-gray-800">Price</Label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600">$</span>
                   <Input
                     id="price"
                     type="number"
                     placeholder="0.00"
-                    className="pl-8"
+                    className="pl-8 text-gray-800 placeholder-gray-400"
                     required
                     min="0"
                     step="0.01"
@@ -160,27 +161,28 @@ export default function CreateListingPage() {
 
               {/* Quantity (Optional) */}
               <div className="space-y-2">
-                <Label htmlFor="quantity">Quantity Available (Optional)</Label>
+                <Label htmlFor="quantity" className="text-gray-800">Quantity Available (Optional)</Label>
                 <Input
                   id="quantity"
                   type="number"
                   placeholder="Leave empty for unlimited"
                   min="0"
+                  className="text-gray-800 placeholder-gray-400"
                 />
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-600">
                   Specify the number of items available, or leave empty for unlimited
                 </p>
               </div>
 
               {/* Volunteer Assignment */}
               <div className="space-y-4">
-                <Label>Volunteer Assignment</Label>
+                <Label className="text-gray-800">Volunteer Assignment</Label>
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
                     <select
                       value={selectedVolunteer}
                       onChange={(e) => setSelectedVolunteer(e.target.value)}
-                      className="flex-1 rounded-md border border-gray-300 px-3 py-2"
+                      className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-gray-800"
                     >
                       <option value="">Select existing volunteer</option>
                       {mockVolunteers.map((volunteer) => (
@@ -189,18 +191,19 @@ export default function CreateListingPage() {
                         </option>
                       ))}
                     </select>
-                    <span className="text-gray-500">or</span>
+                    <span className="text-gray-600">or</span>
                     <div className="flex-1 flex gap-2">
                       <Input
                         type="email"
                         placeholder="Invite new volunteer by email"
                         value={newVolunteerEmail}
                         onChange={(e) => setNewVolunteerEmail(e.target.value)}
+                        className="text-gray-800 placeholder-gray-400"
                       />
                       <Button
                         type="button"
                         variant="outline"
-                        className="whitespace-nowrap"
+                        className="whitespace-nowrap text-gray-800 hover:text-orange-500"
                       >
                         <UserPlus className="w-4 h-4 mr-2" />
                         Invite
@@ -215,13 +218,13 @@ export default function CreateListingPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  className="flex-1"
+                  className="flex-1 text-gray-800 hover:text-orange-500"
                 >
                   Save as Draft
                 </Button>
                 <Button
                   type="submit"
-                  className="flex-1 bg-[#E55937] hover:bg-[#E55937]/90"
+                  className="flex-1 bg-orange-500 hover:bg-orange-600 text-white"
                 >
                   Create Listing
                 </Button>

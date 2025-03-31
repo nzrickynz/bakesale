@@ -76,7 +76,7 @@ export default async function HomePage() {
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
                 1. Create Your Listing
               </h3>
-              <p className="text-gray-700">
+              <p className="text-gray-800">
                 Share your delicious treats and set your price. Each listing supports a specific cause.
               </p>
             </div>
@@ -87,7 +87,7 @@ export default async function HomePage() {
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
                 2. Support Causes
               </h3>
-              <p className="text-gray-700">
+              <p className="text-gray-800">
                 Buyers purchase your treats, and proceeds go directly to the cause you're supporting.
               </p>
             </div>
@@ -98,7 +98,7 @@ export default async function HomePage() {
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
                 3. Make an Impact
               </h3>
-              <p className="text-gray-700">
+              <p className="text-gray-800">
                 Join our community of bakers and buyers making a real difference in their communities.
               </p>
             </div>
@@ -122,7 +122,7 @@ export default async function HomePage() {
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">
                     {cause.title}
                   </h3>
-                  <p className="text-gray-700 mb-4 line-clamp-2">
+                  <p className="text-gray-800 mb-4 line-clamp-2">
                     {cause.description}
                   </p>
                   <div className="flex justify-between items-center">
@@ -130,7 +130,7 @@ export default async function HomePage() {
                       by {cause.organization.name}
                     </span>
                     <Link href={`/causes/${cause.id}`}>
-                      <Button variant="outline" size="sm" className="group">
+                      <Button variant="outline" size="sm" className="group text-gray-800 hover:text-orange-500">
                         Learn More
                         <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                       </Button>
@@ -164,7 +164,7 @@ export default async function HomePage() {
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
                 Delicious Impact
               </h3>
-              <p className="text-gray-700">
+              <p className="text-gray-800">
                 Every treat you bake or buy helps support meaningful causes in your community.
               </p>
             </div>
@@ -175,7 +175,7 @@ export default async function HomePage() {
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
                 Secure & Transparent
               </h3>
-              <p className="text-gray-700">
+              <p className="text-gray-800">
                 All transactions are secure, and you can track exactly where your support goes.
               </p>
             </div>
@@ -186,7 +186,7 @@ export default async function HomePage() {
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
                 Community Driven
               </h3>
-              <p className="text-gray-700">
+              <p className="text-gray-800">
                 Join a vibrant community of bakers and supporters making real change happen.
               </p>
             </div>
@@ -197,10 +197,10 @@ export default async function HomePage() {
       {/* Join Community Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-[#E55937] text-white">
         <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-6">
+          <h2 className="text-3xl font-bold text-white mb-6">
             Ready to Bake a Difference?
           </h2>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
             Join our community of bakers and changemakers. Start creating delicious treats for a cause today.
           </p>
           <Link href="/register">
