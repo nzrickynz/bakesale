@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { UserService } from "@/lib/services/user";
 import { CauseService } from "@/lib/services/cause";
+import prisma from "@/lib/prisma";
 
 const userService = new UserService();
 const causeService = new CauseService();

@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole, CauseCategory, OrderStatus, CauseStatus } from '@prisma/client';
+import { PrismaClient, UserRole, OrderStatus, CauseStatus } from '@prisma/client';
 import { hash } from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -68,7 +68,6 @@ async function main() {
       startDate: new Date(),
       endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
       targetGoal: 5000,
-      category: CauseCategory.FOOD,
       status: CauseStatus.ACTIVE,
     },
     {
@@ -79,7 +78,6 @@ async function main() {
       startDate: new Date(),
       endDate: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000), // 45 days from now
       targetGoal: 7500,
-      category: CauseCategory.SERVICES,
       status: CauseStatus.ACTIVE,
     },
     {
@@ -90,7 +88,6 @@ async function main() {
       startDate: new Date(),
       endDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000), // 60 days from now
       targetGoal: 10000,
-      category: CauseCategory.SERVICES,
       status: CauseStatus.ACTIVE,
     },
   ];
@@ -114,8 +111,7 @@ async function main() {
         imageUrl: 'https://placehold.co/300x300',
         price: 25,
         quantity: 10,
-        stripeProductId: `prod_${cause.id.slice(0, 8)}_001`,
-        stripePriceId: `price_${cause.id.slice(0, 8)}_001`,
+        paymentLink: 'https://example.com/payment/brownies',
         causeId: cause.id,
         volunteerId: volunteers[0].id,
       },
@@ -125,8 +121,7 @@ async function main() {
         imageUrl: 'https://placehold.co/300x300',
         price: 50,
         quantity: 5,
-        stripeProductId: `prod_${cause.id.slice(0, 8)}_002`,
-        stripePriceId: `price_${cause.id.slice(0, 8)}_002`,
+        paymentLink: 'https://example.com/payment/cake',
         causeId: cause.id,
         volunteerId: volunteers[1].id,
       },
@@ -136,8 +131,7 @@ async function main() {
         imageUrl: 'https://placehold.co/300x300',
         price: 35,
         quantity: 15,
-        stripeProductId: `prod_${cause.id.slice(0, 8)}_003`,
-        stripePriceId: `price_${cause.id.slice(0, 8)}_003`,
+        paymentLink: 'https://example.com/payment/cookies',
         causeId: cause.id,
         volunteerId: volunteers[0].id,
       },

@@ -1,19 +1,11 @@
-// lib/prisma.ts
-import { PrismaClient } from '@prisma/client';
-import { withAccelerate } from '@prisma/extension-accelerate';
+import { PrismaClient } from "@prisma/client";
 
-declare global {
-  // Prevent redeclaration during hot reloads in dev
-  // This is the Accelerate-extended PrismaClient
-  var prisma: ReturnType<typeof withAccelerate<PrismaClient>> | undefined;
-}
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
+};
 
-// Extend the Prisma client with Accelerate
-const prisma =
-  globalThis.prisma ?? withAccelerate(new PrismaClient());
+const prisma = globalForPrisma.prisma ?? new PrismaClient();
 
-if (process.env.NODE_ENV !== 'production') {
-  globalThis.prisma = prisma;
-}
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
 export default prisma;

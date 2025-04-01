@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -42,6 +42,10 @@ interface Cause {
     id: string;
     name: string;
   };
+  listings?: {
+    price: number;
+    orders: any[];
+  }[];
 }
 
 interface CauseWithAmount extends Cause {
@@ -88,9 +92,9 @@ export default async function OrganizationPage({ params }: PageProps) {
     }) as Cause[];
 
     // Calculate current amount for each cause
-    const causesWithAmounts = causes?.map(cause => ({
+    const causesWithAmounts = causes?.map((cause: Cause) => ({
       ...cause,
-      totalAmount: (cause as any).listings?.reduce((acc: number, listing: any) => 
+      totalAmount: cause.listings?.reduce((acc: number, listing: { price: number; orders: any[] }) => 
         acc + (listing.price * (listing.orders?.length || 0)), 0) || 0
     })) ?? [];
 
@@ -158,7 +162,7 @@ export default async function OrganizationPage({ params }: PageProps) {
                 <EmptyState text="No causes found" />
               ) : (
                 <div className="space-y-4">
-                  {causes?.map((cause) => (
+                  {causes?.map((cause: Cause) => (
                     <div
                       key={cause.id}
                       className="flex items-center justify-between"

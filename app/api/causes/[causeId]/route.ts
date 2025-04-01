@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { CauseService } from "@/lib/services/cause";
+import prisma from "@/lib/prisma";
 
 const causeService = new CauseService();
 

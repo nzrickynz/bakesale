@@ -1,11 +1,9 @@
-const { PrismaClient } = require('@prisma/client');
-const { hash } = require('bcryptjs');
-
-const prisma = new PrismaClient();
+import prisma from '@/lib/prisma';
+import { hash } from 'bcryptjs';
 
 async function main() {
   const passwordHash = await hash('Thinkdifferent72', 12);
-  
+
   const user = await prisma.user.upsert({
     where: { email: 'nzricky@gmail.com' },
     update: {},
@@ -17,8 +15,12 @@ async function main() {
     },
   });
 
-  console.log('User created:', user);
+  console.log('✅ User created:', user);
   await prisma.$disconnect();
 }
 
-main().catch(console.error); 
+main().catch((err) => {
+  console.error('❌ Error creating user:', err);
+  prisma.$disconnect();
+  process.exit(1);
+});

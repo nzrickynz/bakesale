@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireApiAuth, requireApiRole, requireApiOrganizationAccess } from "./auth";
 import { UserRole } from "@prisma/client";
-import { prisma } from "./prisma";
+import prisma from "./prisma";
 
 export async function withApiAuth(handler: Function) {
   try {

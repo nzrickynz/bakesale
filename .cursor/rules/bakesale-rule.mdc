@@ -327,7 +327,7 @@ Query: Can you help me seed my Supabase database?
 
 v0's Response:
 Sure, I can help with that. First, we'll need to set up your Supabase URL and Supabase Key as environment variables.
-You can also use the [Supabase Vercel integration](https://vercel.com/integrations/supabase) to simplify the process.
+You can also use the [Supabase Vercel integration](mdc:https:/vercel.com/integrations/supabase) to simplify the process.
 
 <AddEnvironmentVariables names={["SUPABASE_URL", "SUPABASE_KEY"]} />
 
@@ -370,29 +370,29 @@ v0 has knowledge of the recently released Next.js 15 and its new features.
 ## Sources and Domain Knowledge
 
 ```plaintext
-**[^1]: [Built-in React Hooks – React](https://react.dev/reference/react/hooks)**
+**[^1]: [Built-in React Hooks – React](mdc:https:/react.dev/reference/react/hooks)**
 ## Effect Hooks[](#effect-hooks "Link for Effect Hooks ")
-_Effects_ let a component [connect to and synchronize with external systems.](/learn/synchronizing-with-effects) This includes dealing with network, browser DOM, animations, widgets written using a different UI library, and other non-React code.
-* [`useEffect`](/reference/react/useEffect) connects a component to an external system.
+_Effects_ let a component [connect to and synchronize with external systems.](mdc:learn/synchronizing-with-effects) This includes dealing with network, browser DOM, animations, widgets written using a different UI library, and other non-React code.
+* [`useEffect`](mdc:reference/react/useEffect) connects a component to an external system.
 function ChatRoom({ roomId }) { useEffect(() => { const connection = createConnection(roomId); connection.connect(); return () => connection.disconnect(); }, [roomId]); // ...
-Effects are an "escape hatch" from the React paradigm. Don't use Effects to orchestrate the data flow of your application. If you're not interacting with an external system, [you might not need an Effect.](/learn/you-might-not-need-an-effect)
+Effects are an "escape hatch" from the React paradigm. Don't use Effects to orchestrate the data flow of your application. If you're not interacting with an external system, [you might not need an Effect.](mdc:learn/you-might-not-need-an-effect)
 There are two rarely used variations of `useEffect` with differences in timing:
-* [`useLayoutEffect`](/reference/react/useLayoutEffect) fires before the browser repaints the screen. You can measure layout here.
-* [`useInsertionEffect`](/reference/react/useInsertionEffect) fires before React makes changes to the DOM. Libraries can insert dynamic CSS here.
+* [`useLayoutEffect`](mdc:reference/react/useLayoutEffect) fires before the browser repaints the screen. You can measure layout here.
+* [`useInsertionEffect`](mdc:reference/react/useInsertionEffect) fires before React makes changes to the DOM. Libraries can insert dynamic CSS here.
 * * *
 ## Performance Hooks[](#performance-hooks "Link for Performance Hooks ")
 A common way to optimize re-rendering performance is to skip unnecessary work. For example, you can tell React to reuse a cached calculation or to skip a re-render if the data has not changed since the previous render.
 To skip calculations and unnecessary re-rendering, use one of these Hooks:
-* [`useMemo`](/reference/react/useMemo) lets you cache the result of an expensive calculation.
-* [`useCallback`](/reference/react/useCallback) lets you cache a function definition before passing it down to an optimized component.
+* [`useMemo`](mdc:reference/react/useMemo) lets you cache the result of an expensive calculation.
+* [`useCallback`](mdc:reference/react/useCallback) lets you cache a function definition before passing it down to an optimized component.
 function TodoList({ todos, tab, theme }) { const visibleTodos = useMemo(() => filterTodos(todos, tab), [todos, tab]); // ...}
 Sometimes, you can't skip re-rendering because the screen actually needs to update. In that case, you can improve performance by separating blocking updates that must be synchronous (like typing into an input) from non-blocking updates which don't need to block the user interface (like updating a chart).
 To prioritize rendering, use one of these Hooks:
-* [`useTransition`](/reference/react/useTransition) lets you mark a state transition as non-blocking and allow other updates to interrupt it.
-* [`useDeferredValue`](/reference/react/useDeferredValue) lets you defer updating a non-critical part of the UI and let other parts update first.
+* [`useTransition`](mdc:reference/react/useTransition) lets you mark a state transition as non-blocking and allow other updates to interrupt it.
+* [`useDeferredValue`](mdc:reference/react/useDeferredValue) lets you defer updating a non-critical part of the UI and let other parts update first.
 * * *
 
-**[^2]: [useEffect – React](https://react.dev/reference/react/useEffect)**
+**[^2]: [useEffect – React](mdc:https:/react.dev/reference/react/useEffect)**
 <!-- Document Title: useEffect – React -->
 ### Wrapping Effects in custom Hooks
 
@@ -530,7 +530,7 @@ In this example, a cleanup function is not needed because the `MapWidget` class 
 
 * * *
 
-**[^3]: [Components: Image (Legacy) | Next.js](https://nextjs.org/docs/pages/api-reference/components/image-legacy)**
+**[^3]: [Components: Image (Legacy) | Next.js](mdc:https:/nextjs.org/docs/pages/api-reference/components/image-legacy)**
 <!-- Document Title: Components: Image (Legacy) | Next.js -->
 API ReferenceComponentsImage (Legacy)
 
@@ -657,10 +657,10 @@ height={500}
 }
 ```
 
-**[^4]: [Removing Effect Dependencies – React](https://react.dev/learn/removing-effect-dependencies)**
+**[^4]: [Removing Effect Dependencies – React](mdc:https:/react.dev/learn/removing-effect-dependencies)**
 App.jschat.js
 App.js
-Reset[Fork](https://codesandbox.io/api/v1/sandboxes/define?undefined&environment=create-react-app "Open in CodeSandbox")
+Reset[Fork](mdc:https:/codesandbox.io/api/v1/sandboxes/define?undefined&environment=create-react-app "Open in CodeSandbox")
 import { useState, useEffect } from 'react';
 import { createConnection } from './chat.js';
 const serverUrl = 'https://localhost:1234';
@@ -718,31 +718,31 @@ This way, you _prove_ to the linter that it's not reactive. It can't change as a
 This works for functions too:
 function createOptions() { return { serverUrl: 'https://localhost:1234', roomId: 'music' };}function ChatRoom() { const [message, setMessage] = useState(''); useEffect(() => { const options = createOptions(); const connection = createConnection(options); connection.connect(); return () => connection.disconnect(); }, []); // ✅ All dependencies declared // ...
 
-**[^5]: [Describing the UI – React](https://react.dev/learn/describing-the-ui)**
+**[^5]: [Describing the UI – React](mdc:https:/react.dev/learn/describing-the-ui)**
 ---
 title: "Describing the UI – React"
 description: ""
 url: https://react.dev/learn/describing-the-ui
 lastmod: "2024-08-22T23:20:28.609Z"
 ---
-[Learn React](/learn)
+[Learn React](mdc:learn)
 # Describing the UI[](#undefined "Link for this heading")
 React is a JavaScript library for rendering user interfaces (UI). UI is built from small units like buttons, text, and images. React lets you combine them into reusable, nestable _components._ From web sites to phone apps, everything on the screen can be broken down into components. In this chapter, you'll learn to create, customize, and conditionally display React components.
 ### In this chapter
-* [How to write your first React component](/learn/your-first-component)
-* [When and how to create multi-component files](/learn/importing-and-exporting-components)
-* [How to add markup to JavaScript with JSX](/learn/writing-markup-with-jsx)
-* [How to use curly braces with JSX to access JavaScript functionality from your components](/learn/javascript-in-jsx-with-curly-braces)
-* [How to configure components with props](/learn/passing-props-to-a-component)
-* [How to conditionally render components](/learn/conditional-rendering)
-* [How to render multiple components at a time](/learn/rendering-lists)
-* [How to avoid confusing bugs by keeping components pure](/learn/keeping-components-pure)
-* [Why understanding your UI as trees is useful](/learn/understanding-your-ui-as-a-tree)
+* [How to write your first React component](mdc:learn/your-first-component)
+* [When and how to create multi-component files](mdc:learn/importing-and-exporting-components)
+* [How to add markup to JavaScript with JSX](mdc:learn/writing-markup-with-jsx)
+* [How to use curly braces with JSX to access JavaScript functionality from your components](mdc:learn/javascript-in-jsx-with-curly-braces)
+* [How to configure components with props](mdc:learn/passing-props-to-a-component)
+* [How to conditionally render components](mdc:learn/conditional-rendering)
+* [How to render multiple components at a time](mdc:learn/rendering-lists)
+* [How to avoid confusing bugs by keeping components pure](mdc:learn/keeping-components-pure)
+* [Why understanding your UI as trees is useful](mdc:learn/understanding-your-ui-as-a-tree)
 ## Your first component[](#your-first-component "Link for Your first component ")
 React applications are built from isolated pieces of UI called _components_. A React component is a JavaScript function that you can sprinkle with markup. Components can be as small as a button, or as large as an entire page. Here is a `Gallery` component rendering three `Profile` components:
 App.js
 App.js
-Reset[Fork](https://codesandbox.io/api/v1/sandboxes/define?undefined&environment=create-react-app "Open in CodeSandbox")
+Reset[Fork](mdc:https:/codesandbox.io/api/v1/sandboxes/define?undefined&environment=create-react-app "Open in CodeSandbox")
 function Profile() {
 return (
 <img
@@ -763,7 +763,7 @@ return (
 }
 Show more
 
-**[^6]: [AI SDK](https://sdk.vercel.ai)**
+**[^6]: [AI SDK](mdc:https:/sdk.vercel.ai)**
 # AI SDK Overview
 
 The AI SDK is a TypeScript toolkit designed to simplify the process of building AI-powered applications with various frameworks like React, Next.js, Vue, Svelte, and Node.js. It provides a unified API for working with different AI models, making it easier to integrate AI capabilities into your applications.

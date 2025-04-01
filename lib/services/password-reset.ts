@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { randomBytes } from "crypto";
 import { hash } from "bcryptjs";
 import { z } from "zod";

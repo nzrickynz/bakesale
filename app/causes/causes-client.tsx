@@ -73,7 +73,7 @@ export function CausesClient({ causes }: CausesClientProps) {
             />
           </div>
           <div className="flex gap-2 overflow-x-auto pb-2">
-            {categories.map((category) => (
+            {categories.map((category: { id: string; name: string }) => (
               <Button
                 key={category.id}
                 variant="outline"
@@ -88,7 +88,7 @@ export function CausesClient({ causes }: CausesClientProps) {
 
         {/* Causes Grid */}
         <div className="grid grid-cols-1 gap-8">
-          {causes.map((cause) => (
+          {causes.map((cause: Cause) => (
             <Card key={cause.id} className="overflow-hidden">
               <CardHeader>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

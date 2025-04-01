@@ -7,8 +7,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 enum UserRole {
@@ -71,25 +72,17 @@ model Organization {
   @@map("organizations")
 }
 
-enum CauseCategory {
-  FOOD
-  CLOTHING
-  ACCESSORIES
-  SERVICES
-}
-
 model Cause {
-  id          String        @id @default(cuid())
-  title       String        @unique
+  id          String      @id @default(cuid())
+  title       String      @unique
   description String
   imageUrl    String?
   targetGoal  Float?
   startDate   DateTime
   endDate     DateTime?
-  status      CauseStatus   @default(ACTIVE)
-  category    CauseCategory @default(SERVICES)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  status      CauseStatus @default(ACTIVE)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
   // Relationships
   organization   Organization @relation(fields: [organizationId], references: [id])
@@ -101,17 +94,15 @@ model Cause {
 }
 
 model Listing {
-  id              String   @id @default(cuid())
-  title           String   @unique
-  description     String
-  price           Float
-  imageUrl        String?
-  quantity        Int?
-  paymentLink     String? // User-provided payment link
-  stripeProductId String?
-  stripePriceId   String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id          String   @id @default(cuid())
+  title       String   @unique
+  description String
+  price       Float
+  imageUrl    String?
+  quantity    Int?
+  paymentLink String? // User-provided payment link
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Relationships
   cause       Cause   @relation(fields: [causeId], references: [id])

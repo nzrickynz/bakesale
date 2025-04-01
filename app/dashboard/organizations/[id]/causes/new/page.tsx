@@ -1,7 +1,7 @@
 // Server Component (NO "use client")
 import { notFound } from "next/navigation";
 import { requireOrganizationAccess } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import { UserRole } from "@prisma/client";
 import NewCauseForm from "./NewCauseForm";
 

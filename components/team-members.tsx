@@ -180,7 +180,7 @@ export function TeamMembers({ organizationId, listings, organizations }: TeamMem
                   {assignments?.length === 0 ? (
                     <p className="text-sm text-gray-500">No {role === "ORG_ADMIN" ? "organizations" : "listings"} available</p>
                   ) : (
-                    assignments?.map((assignment) => (
+                    assignments?.map((assignment: Organization | Listing) => (
                       <div key={assignment.id} className="flex items-center space-x-2">
                         <Checkbox
                           id={assignment.id}
@@ -235,7 +235,7 @@ export function TeamMembers({ organizationId, listings, organizations }: TeamMem
                   </td>
                 </tr>
               ) : (
-                teamMembers?.map((member) => (
+                teamMembers?.map((member: TeamMember) => (
                   <tr key={member.id} className="border-b">
                     <td className="px-4 py-2 text-sm text-gray-900">{member.name}</td>
                     <td className="px-4 py-2 text-sm text-gray-900">{member.email}</td>
@@ -243,7 +243,7 @@ export function TeamMembers({ organizationId, listings, organizations }: TeamMem
                       {member.role.toLowerCase().replace("_", " ")}
                     </td>
                     <td className="px-4 py-2 text-sm text-gray-900">
-                      {member.assignments?.map((assignment) => assignment.name).join(", ")}
+                      {member.assignments?.map((assignment: { name: string }) => assignment.name).join(", ")}
                     </td>
                   </tr>
                 ))
