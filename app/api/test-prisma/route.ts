@@ -1,22 +1,12 @@
-import prisma from '@/lib/prisma';
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const users = await prisma.user.findMany({
-      where: {
-        email: {
-          contains: 'alice@prisma.io',
-        },
-      },
-      cacheStrategy: {
-        ttl: 60, // seconds
-      },
-    });
-
-    return NextResponse.json({ success: true, users });
-  } catch (err) {
-    console.error('Prisma test error:', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    const user = await prisma.user.findFirst();
+    return NextResponse.json({ user });
+  } catch (error: any) {
+    console.error("Prisma test failed:", error);
+    return NextResponse.json({ error: error?.message || "Unknown error" }, { status: 500 });
   }
 }

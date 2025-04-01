@@ -1,18 +1,15 @@
 import { PrismaClient } from '@prisma/client';
 import { withAccelerate } from '@prisma/extension-accelerate';
 
-const prisma = new PrismaClient().$extends(withAccelerate());
-
-export default prisma;
-
-
 declare global {
-  var globalPrisma: PrismaClient | undefined;
+  var globalPrisma: ReturnType<typeof prismaClientSingleton> | undefined;
 }
 
-const prisma = global.globalPrisma || new PrismaClient({
-  log: ["query"],
-});
+const prismaClientSingleton = () => {
+  return new PrismaClient().$extends(withAccelerate());
+};
+
+const prisma = global.globalPrisma || prismaClientSingleton();
 
 if (process.env.NODE_ENV !== "production") {
   global.globalPrisma = prisma;
