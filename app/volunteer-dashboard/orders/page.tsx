@@ -68,51 +68,53 @@ export default async function OrdersPage() {
                 </tr>
               </thead>
               <tbody>
-                {orders.map((order) => (
-                  <tr key={order.id} className="border-b last:border-0">
-                    <td className="py-3 px-4">
-                      <span className="text-sm text-gray-900">
-                        {order.listing.title}
-                      </span>
-                      <span className="text-sm text-gray-600 block">
-                        ${order.listing.price}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className="text-sm text-gray-900">
-                        {order.listing.cause.organization.name}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className="text-sm text-gray-900">
-                        {order.listing.cause.title}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className="text-sm text-gray-900">
-                        {order.buyerEmail}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <Badge
-                        variant={
-                          order.fulfillmentStatus === "ORDERED"
-                            ? "warning"
-                            : order.fulfillmentStatus === "FULFILLED"
-                            ? "success"
-                            : "default"
-                        }
-                      >
-                        {order.fulfillmentStatus}
-                      </Badge>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className="text-sm text-gray-900">
-                        {format(new Date(order.createdAt), "PPP")}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                <div className="space-y-4">
+                  {orders?.map((order) => (
+                    <tr key={order.id} className="border-b last:border-0">
+                      <td className="py-3 px-4">
+                        <span className="text-sm text-gray-900">
+                          {order.listing.title}
+                        </span>
+                        <span className="text-sm text-gray-600 block">
+                          ${order.listing.price}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="text-sm text-gray-900">
+                          {order.listing.cause.organization.name}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="text-sm text-gray-900">
+                          {order.listing.cause.title}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="text-sm text-gray-900">
+                          {order.buyerEmail}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <Badge
+                          variant={
+                            order.fulfillmentStatus === "ORDERED"
+                              ? "warning"
+                              : order.fulfillmentStatus === "FULFILLED"
+                              ? "success"
+                              : "default"
+                          }
+                        >
+                          {order.fulfillmentStatus}
+                        </Badge>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="text-sm text-gray-900">
+                          {format(new Date(order.createdAt), "PPP")}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </div>
               </tbody>
             </table>
           </div>

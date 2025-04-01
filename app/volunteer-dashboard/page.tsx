@@ -53,15 +53,15 @@ export default async function VolunteerDashboard() {
     notFound();
   }
 
-  const totalListings = user.managedListings.length;
-  const pendingOrders = user.managedListings.reduce(
-    (acc: number, listing: ListingWithOrders) => 
-      acc + listing.orders.filter(order => order.fulfillmentStatus !== "FULFILLED").length,
+  const totalListings = user?.managedListings?.length ?? 0;
+  const pendingOrders = user?.managedListings?.reduce(
+    (acc, listing) =>
+      acc + listing.orders?.filter(order => order.fulfillmentStatus !== "FULFILLED")?.length ?? 0,
     0
   );
-  const fulfilledOrders = user.managedListings.reduce(
-    (acc: number, listing: ListingWithOrders) => 
-      acc + listing.orders.filter(order => order.fulfillmentStatus === "FULFILLED").length,
+  const fulfilledOrders = user?.managedListings?.reduce(
+    (acc, listing) =>
+      acc + listing.orders?.filter(order => order.fulfillmentStatus === "FULFILLED")?.length ?? 0,
     0
   );
 
@@ -152,7 +152,7 @@ export default async function VolunteerDashboard() {
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="font-medium text-gray-900">Orders</h3>
                     <span className="px-2 py-1 text-sm rounded-full bg-[#FFE974] border border-[#FFE974] text-gray-900">
-                      {listing.orders.length} orders
+                      {listing.orders?.length ?? 0} orders
                     </span>
                   </div>
                 </div>

@@ -226,7 +226,7 @@ export default function VolunteersPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {volunteers.map((volunteer) => (
+                  {volunteers?.map((volunteer) => (
                     <tr key={volunteer.id}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {volunteer.name || "N/A"}
@@ -248,7 +248,7 @@ export default function VolunteersPage() {
           </div>
         </div>
 
-        {invitations.length > 0 && (
+        {invitations?.length > 0 && (
           <div className="mt-8 bg-white shadow rounded-lg">
             <div className="px-4 py-5 sm:p-6">
               <h2 className="text-lg font-medium text-gray-900 mb-4">
@@ -273,7 +273,7 @@ export default function VolunteersPage() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {invitations.map((invitation) => (
+                    {invitations?.map((invitation) => (
                       <tr key={invitation.id}>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                           {invitation.email}
