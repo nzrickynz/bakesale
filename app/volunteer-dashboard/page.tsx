@@ -56,12 +56,12 @@ export default async function VolunteerDashboard() {
   const totalListings = user?.managedListings?.length ?? 0;
   const pendingOrders = user?.managedListings?.reduce(
     (acc, listing) =>
-      acc + listing.orders?.filter(order => order.fulfillmentStatus !== "FULFILLED")?.length ?? 0,
+      acc + (listing.orders?.filter(order => order.fulfillmentStatus !== "FULFILLED")?.length || 0),
     0
   );
   const fulfilledOrders = user?.managedListings?.reduce(
     (acc, listing) =>
-      acc + listing.orders?.filter(order => order.fulfillmentStatus === "FULFILLED")?.length ?? 0,
+      acc + (listing.orders?.filter(order => order.fulfillmentStatus === "FULFILLED")?.length || 0),
     0
   );
 
