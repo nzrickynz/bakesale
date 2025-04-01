@@ -1,5 +1,6 @@
 import { OrderService } from '@/lib/services/order';
 import { OrderStatus } from '@prisma/client';
+import prisma from '@/lib/prisma';
 
 // Mock Prisma client
 jest.mock('@prisma/client', () => ({
@@ -19,9 +20,6 @@ jest.mock('@prisma/client', () => ({
     CANCELLED: 'CANCELLED',
   },
 }));
-
-// Import prisma after mocking
-import { prisma } from '@/lib/prisma';
 
 jest.mock('@/lib/prisma');
 

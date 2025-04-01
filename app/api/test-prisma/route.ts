@@ -9,9 +9,6 @@ export async function GET() {
           contains: 'alice@prisma.io',
         },
       },
-      cacheStrategy: {
-        ttl: 60,
-      },
     });
 
     return NextResponse.json({ success: true, users });

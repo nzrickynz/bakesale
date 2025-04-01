@@ -1,17 +1,16 @@
 import prisma from "@/lib/prisma";
 import { CauseCard } from "@/components/causes/cause-card";
 import { SearchFilter } from "@/components/causes/search-filter";
-import { Prisma, CauseCategory, Cause, Listing, User } from "@prisma/client";
+import { Prisma, Cause, Listing, User } from "@prisma/client";
 
 interface PageProps {
   searchParams: {
     search?: string;
-    category?: CauseCategory | "ALL";
   };
 }
 
 export default async function CausesPage({ searchParams }: PageProps) {
-  const { search = "", category = "ALL" } = searchParams;
+  const { search = "" } = searchParams;
 
   const where: Prisma.CauseWhereInput = {
     status: "ACTIVE",
@@ -22,10 +21,6 @@ export default async function CausesPage({ searchParams }: PageProps) {
       { title: { contains: search, mode: "insensitive" } },
       { description: { contains: search, mode: "insensitive" } },
     ];
-  }
-
-  if (category !== "ALL") {
-    where.category = category;
   }
 
   const causes = await prisma.cause.findMany({
@@ -55,8 +50,6 @@ export default async function CausesPage({ searchParams }: PageProps) {
         <SearchFilter
           search={search}
           onSearchChange={() => {}}
-          category={category}
-          onCategoryChange={() => {}}
         />
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

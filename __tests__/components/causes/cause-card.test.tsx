@@ -1,19 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import { CauseCard } from '@/components/causes/cause-card';
-import { CauseStatus, CauseCategory } from '@prisma/client';
+import { CauseStatus } from '@prisma/client';
 
 // Mock Prisma enums
 jest.mock('@prisma/client', () => ({
   CauseStatus: {
     ACTIVE: 'ACTIVE',
     COMPLETED: 'COMPLETED',
-  },
-  CauseCategory: {
-    SERVICES: 'SERVICES',
-    EDUCATION: 'EDUCATION',
-    HEALTHCARE: 'HEALTHCARE',
-    ENVIRONMENT: 'ENVIRONMENT',
-    OTHER: 'OTHER',
   },
 }));
 
@@ -27,7 +20,6 @@ describe('CauseCard', () => {
     startDate: new Date(),
     endDate: new Date(),
     status: CauseStatus.ACTIVE,
-    category: CauseCategory.SERVICES,
     createdAt: new Date(),
     updatedAt: new Date(),
     organizationId: 'org-1',

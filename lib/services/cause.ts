@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { Cause, CauseCategory, Prisma } from "@prisma/client";
+import { Cause, Prisma } from "@prisma/client";
 
 type CauseWithRelations = Cause & {
   listings?: any[];
@@ -36,19 +36,6 @@ export class CauseService {
 
   async delete(where: Prisma.CauseWhereUniqueInput) {
     return prisma.cause.delete({ where });
-  }
-
-  async findByCategory(category: CauseCategory) {
-    return prisma.cause.findMany({
-      where: { category },
-      include: {
-        listings: {
-          include: {
-            volunteer: true,
-          },
-        },
-      },
-    });
   }
 
   async findByOrganization(organizationId: string) {

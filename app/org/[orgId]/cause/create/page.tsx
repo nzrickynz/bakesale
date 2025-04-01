@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Upload, ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { CauseCategory } from "@prisma/client";
+import { CauseStatus } from "@prisma/client";
 
 export default function CreateCausePage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -124,22 +124,6 @@ export default function CreateCausePage() {
                 <p className="text-sm text-gray-500">
                   Set a fundraising goal to track progress
                 </p>
-              </div>
-
-              {/* Category */}
-              <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
-                <select
-                  id="category"
-                  className="w-full rounded-md border border-gray-300 px-3 py-2"
-                  required
-                >
-                  <option value="">Select a category</option>
-                  <option value={CauseCategory.FOOD}>Food</option>
-                  <option value={CauseCategory.CLOTHING}>Clothing</option>
-                  <option value={CauseCategory.ACCESSORIES}>Accessories</option>
-                  <option value={CauseCategory.SERVICES}>Services</option>
-                </select>
               </div>
 
               {/* Start Date */}
