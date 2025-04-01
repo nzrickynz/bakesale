@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import { Cake, Heart, Users, Shield, ArrowRight, Sparkles } from "lucide-react";
 
 interface Cause {

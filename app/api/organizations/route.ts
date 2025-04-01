@@ -5,7 +5,7 @@ import { OrganizationService } from "@/lib/services/organization";
 import { UserService } from "@/lib/services/user";
 import { UserRole } from "@prisma/client";
 import { z } from "zod";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 
 // Force deployment
 export const dynamic = 'force-dynamic'

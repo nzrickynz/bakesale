@@ -5,6 +5,7 @@ import { CauseService } from "@/lib/services/cause";
 import { OrganizationService } from "@/lib/services/organization";
 import { UserService } from "@/lib/services/user";
 import { CauseCategory, CauseStatus, UserRole } from "@prisma/client";
+import prisma from "@/lib/prisma";
 
 export async function POST(
   request: Request,

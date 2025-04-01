@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import { Prisma, OrderStatus } from "@prisma/client";
 
 type OrderWithRelations = Prisma.OrderGetPayload<{

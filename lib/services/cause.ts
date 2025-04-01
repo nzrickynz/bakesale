@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import { Cause, CauseCategory, Prisma } from "@prisma/client";
 
 type CauseWithRelations = Cause & {

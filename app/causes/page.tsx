@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import { CauseCard } from "@/components/causes/cause-card";
 import { SearchFilter } from "@/components/causes/search-filter";
 import { Prisma, CauseCategory } from "@prisma/client";
