@@ -125,7 +125,7 @@ export async function GET(request: Request) {
     const teamMembers = await userService.getTeamMembers(organizationId);
 
     return NextResponse.json({
-      teamMembers: teamMembers.map((member) => ({
+      teamMembers: teamMembers?.map((member) => ({
         id: member.user.id,
         name: member.user.name,
         email: member.user.email,

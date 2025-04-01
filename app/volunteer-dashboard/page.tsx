@@ -117,7 +117,7 @@ export default async function VolunteerDashboard() {
 
       {/* Listings Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {user.managedListings.map((listing) => (
+        {user?.managedListings?.map((listing) => (
           <Card key={listing.id} className="overflow-hidden bg-white">
             {listing.imageUrl && (
               <div className="relative h-48">

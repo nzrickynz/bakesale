@@ -42,7 +42,7 @@ export function CauseCard({ cause }: CauseCardProps) {
             {cause.description}
           </p>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>{activeListings.length} active listings</span>
+            <span>{activeListings?.length} active listings</span>
             <span>•</span>
             <span>
               Started {formatDistanceToNow(cause.startDate, { addSuffix: true })}
@@ -55,7 +55,7 @@ export function CauseCard({ cause }: CauseCardProps) {
           <div className="space-y-2">
             <h4 className="text-sm font-medium">Active Volunteers</h4>
             <div className="flex -space-x-2">
-              {activeListings.slice(0, 3).map((listing) => (
+              {activeListings?.slice(0, 3).map((listing) => (
                 <Avatar key={listing.id} className="h-8 w-8 border-2 border-background">
                   <AvatarImage src={listing.volunteer.image || undefined} />
                   <AvatarFallback>
@@ -63,10 +63,10 @@ export function CauseCard({ cause }: CauseCardProps) {
                   </AvatarFallback>
                 </Avatar>
               ))}
-              {activeListings.length > 3 && (
-                <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs border-2 border-background">
-                  +{activeListings.length - 3}
-                </div>
+              {activeListings?.length > 3 && (
+                <p className="text-sm text-muted-foreground">
+                  +{activeListings.length - 3} more
+                </p>
               )}
             </div>
           </div>

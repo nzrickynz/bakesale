@@ -54,7 +54,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json({
       success: true,
-      data: volunteers.map((v: VolunteerWithUser) => ({
+      data: volunteers?.map((v: VolunteerWithUser) => ({
         id: v.user.id,
         name: v.user.name,
         email: v.user.email,

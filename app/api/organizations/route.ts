@@ -131,7 +131,7 @@ export async function GET(request: Request) {
     });
 
     // Then get the user roles for these organizations
-    const orgIds = organizations.map(org => org.id);
+    const orgIds = organizations?.map(org => org.id) ?? [];
     const userOrgs = await prisma.userOrganization.findMany({
       where: {
         userId: user.id,
@@ -146,10 +146,10 @@ export async function GET(request: Request) {
     });
 
     // Create a map of organization ID to role
-    const orgRoleMap = new Map(userOrgs.map(uo => [uo.organizationId, uo.role]));
+    const orgRoleMap = new Map(userOrgs?.map(uo => [uo.organizationId, uo.role]) ?? []);
 
     // Transform the response to match the expected format
-    const transformedOrganizations = organizations.map(org => ({
+    const transformedOrganizations = organizations?.map(org => ({
       id: org.id,
       name: org.name,
       description: org.description,
@@ -160,7 +160,7 @@ export async function GET(request: Request) {
       role: org.adminId === user.id ? UserRole.ORG_ADMIN : orgRoleMap.get(org.id),
       createdAt: org.createdAt,
       updatedAt: org.updatedAt,
-    }));
+    })) ?? [];
 
     const response = NextResponse.json({
       success: true,

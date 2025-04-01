@@ -70,7 +70,7 @@ export async function POST(request: Request) {
         { 
           success: false,
           error: 'Validation failed',
-          details: validationResult.error.errors.map(e => ({
+          details: validationResult.error.errors?.map(e => ({
             field: e.path.join('.'),
             message: e.message
           }))

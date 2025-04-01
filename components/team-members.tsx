@@ -177,10 +177,10 @@ export function TeamMembers({ organizationId, listings, organizations }: TeamMem
                   Assignments
                 </Label>
                 <div className="max-h-[200px] overflow-y-auto space-y-2 border rounded-md p-2 bg-white">
-                  {assignments.length === 0 ? (
+                  {assignments?.length === 0 ? (
                     <p className="text-sm text-gray-500">No {role === "ORG_ADMIN" ? "organizations" : "listings"} available</p>
                   ) : (
-                    assignments.map((assignment) => (
+                    assignments?.map((assignment) => (
                       <div key={assignment.id} className="flex items-center space-x-2">
                         <Checkbox
                           id={assignment.id}
@@ -228,14 +228,14 @@ export function TeamMembers({ organizationId, listings, organizations }: TeamMem
                     Loading...
                   </td>
                 </tr>
-              ) : teamMembers.length === 0 ? (
+              ) : teamMembers?.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-4 py-2 text-center text-sm text-gray-500">
                     No team members found
                   </td>
                 </tr>
               ) : (
-                teamMembers.map((member) => (
+                teamMembers?.map((member) => (
                   <tr key={member.id} className="border-b">
                     <td className="px-4 py-2 text-sm text-gray-900">{member.name}</td>
                     <td className="px-4 py-2 text-sm text-gray-900">{member.email}</td>
@@ -243,7 +243,7 @@ export function TeamMembers({ organizationId, listings, organizations }: TeamMem
                       {member.role.toLowerCase().replace("_", " ")}
                     </td>
                     <td className="px-4 py-2 text-sm text-gray-900">
-                      {member.assignments.map((assignment) => assignment.name).join(", ")}
+                      {member.assignments?.map((assignment) => assignment.name).join(", ")}
                     </td>
                   </tr>
                 ))

@@ -60,7 +60,7 @@ export default async function CausesPage({ searchParams }: PageProps) {
         />
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {causes.map((cause) => (
+          {causes?.map((cause) => (
             <CauseCard key={cause.id} cause={cause} />
           ))}
         </div>
