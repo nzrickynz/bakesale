@@ -98,11 +98,11 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-gray-900">
-              {userOrganizations.length}
+              {userOrganizations?.length ?? 0}
             </div>
             <p className="text-xs text-gray-700">
-              You are a member of {userOrganizations.length} organization
-              {userOrganizations.length !== 1 ? "s" : ""}
+              You are a member of {userOrganizations?.length ?? 0} organization
+              {(userOrganizations?.length ?? 0) !== 1 ? "s" : ""}
             </p>
           </CardContent>
         </Card>
@@ -114,16 +114,21 @@ export default function DashboardPage() {
             <Heart className="h-4 w-4 text-gray-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900">
-              {causes.filter((cause) => cause.status === "ACTIVE").length}
-            </div>
-            <p className="text-xs text-gray-600">
-              {causes.filter((cause) => cause.status === "ACTIVE").length} active
-              cause
-              {causes.filter((cause) => cause.status === "ACTIVE").length !== 1
-                ? "s"
-                : ""}
-            </p>
+            {(() => {
+              const activeCauses = causes?.filter((cause) => cause.status === "ACTIVE") ?? [];
+              return (
+                <>
+                  <div className="text-2xl font-bold text-gray-900">
+                    {activeCauses.length}
+                  </div>
+                  <p className="text-xs text-gray-600">
+                    {activeCauses.length} active
+                    cause
+                    {activeCauses.length !== 1 ? "s" : ""}
+                  </p>
+                </>
+              );
+            })()}
           </CardContent>
         </Card>
       </div>
@@ -134,7 +139,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {causes.slice(0, 5).map((cause) => (
+              {causes?.slice(0, 5).map((cause) => (
                 <div
                   key={cause.id}
                   className="flex items-center justify-between"
@@ -163,7 +168,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {userOrganizations.slice(0, 5).map((uo) => (
+              {userOrganizations?.slice(0, 5).map((uo) => (
                 <div
                   key={uo.organization.id}
                   className="flex items-center justify-between"
