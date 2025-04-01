@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Heart, Settings, ArrowRight } from "lucide-react";
+import { ErrorMessage } from "@/components/ui/error-message";
+import { EmptyState } from "@/components/ui/empty-state";
 
 interface PageProps {
   params: {
@@ -47,165 +49,174 @@ interface CauseWithAmount extends Cause {
 }
 
 export default async function OrganizationPage({ params }: PageProps) {
-  const session = await getServerSession(authOptions);
+  try {
+    const session = await getServerSession(authOptions);
 
-  if (!session?.user?.email) {
-    notFound();
-  }
+    if (!session?.user?.email) {
+      notFound();
+    }
 
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-  });
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+    });
 
-  if (!user) {
-    notFound();
-  }
+    if (!user) {
+      notFound();
+    }
 
-  const userOrganization = await prisma.userOrganization.findFirst({
-    where: {
-      userId: user.id,
-      organizationId: params.id,
-    },
-    include: {
-      organization: true,
-    },
-  }) as UserOrganization | null;
+    const userOrganization = await prisma.userOrganization.findFirst({
+      where: {
+        userId: user.id,
+        organizationId: params.id,
+      },
+      include: {
+        organization: true,
+      },
+    }) as UserOrganization | null;
 
-  if (!userOrganization) {
-    notFound();
-  }
+    if (!userOrganization) {
+      notFound();
+    }
 
-  const causes = await prisma.cause.findMany({
-    where: {
-      organizationId: params.id,
-    },
-    include: {
-      organization: true,
-    },
-  }) as Cause[];
+    const causes = await prisma.cause.findMany({
+      where: {
+        organizationId: params.id,
+      },
+      include: {
+        organization: true,
+      },
+    }) as Cause[];
 
-  // Calculate current amount for each cause
-  const causesWithAmounts = causes?.map(cause => ({
-    ...cause,
-    totalAmount: (cause as any).listings?.reduce((acc: number, listing: any) => 
-      acc + (listing.price * (listing.orders?.length || 0)), 0) || 0
-  })) ?? [];
+    // Calculate current amount for each cause
+    const causesWithAmounts = causes?.map(cause => ({
+      ...cause,
+      totalAmount: (cause as any).listings?.reduce((acc: number, listing: any) => 
+        acc + (listing.price * (listing.orders?.length || 0)), 0) || 0
+    })) ?? [];
 
-  // Calculate total amount raised
-  const totalAmount = causesWithAmounts.reduce((acc, cause) => acc + cause.totalAmount, 0);
+    // Calculate total amount raised
+    const totalAmount = causesWithAmounts.reduce((acc, cause) => acc + cause.totalAmount, 0);
 
-  return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight text-gray-900">
-          {userOrganization.organization.name}
-        </h2>
-        <div className="flex items-center space-x-4">
-          {userOrganization.role === "ADMIN" && (
+    return (
+      <div className="flex-1 space-y-4 p-8 pt-6">
+        <div className="flex items-center justify-between space-y-2">
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900">
+            {userOrganization.organization.name}
+          </h2>
+          <div className="flex items-center space-x-4">
+            {userOrganization.role === "ADMIN" && (
+              <Button asChild>
+                <Link href={`/dashboard/organizations/${params.id}/settings`}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Settings
+                </Link>
+              </Button>
+            )}
             <Button asChild>
-              <Link href={`/dashboard/organizations/${params.id}/settings`}>
-                <Settings className="mr-2 h-4 w-4" />
-                Settings
+              <Link href={`/dashboard/organizations/${params.id}/causes/new`}>
+                New Cause
               </Link>
             </Button>
-          )}
-          <Button asChild>
-            <Link href={`/dashboard/organizations/${params.id}/causes/new`}>
-              New Cause
-            </Link>
-          </Button>
+          </div>
         </div>
-      </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="bg-white shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-900">
-              Active Causes
-            </CardTitle>
-            <Heart className="h-4 w-4 text-gray-600" />
-          </CardHeader>
-          <CardContent>
-            {(() => {
-              const activeCauses = causes?.filter((cause) => cause.status === "ACTIVE") ?? [];
-              return (
-                <>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {activeCauses.length}
-                  </div>
-                  <p className="text-xs text-gray-600">
-                    {activeCauses.length} active
-                    cause
-                    {activeCauses.length !== 1 ? "s" : ""}
-                  </p>
-                </>
-              );
-            })()}
-          </CardContent>
-        </Card>
-      </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card className="bg-white shadow-md">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-900">
+                Active Causes
+              </CardTitle>
+              <Heart className="h-4 w-4 text-gray-600" />
+            </CardHeader>
+            <CardContent>
+              {(() => {
+                const activeCauses = causes?.filter((cause) => cause.status === "ACTIVE") ?? [];
+                return (
+                  <>
+                    <div className="text-2xl font-bold text-gray-900">
+                      {activeCauses.length}
+                    </div>
+                    <p className="text-xs text-gray-600">
+                      {activeCauses.length} active
+                      cause
+                      {activeCauses.length !== 1 ? "s" : ""}
+                    </p>
+                  </>
+                );
+              })()}
+            </CardContent>
+          </Card>
+        </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle>Active Causes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {causes?.map((cause) => (
-                <div
-                  key={cause.id}
-                  className="flex items-center justify-between"
-                >
-                  <div>
-                    <p className="text-sm font-medium leading-none text-gray-900">
-                      {cause.title}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      ${(cause as any).totalAmount.toFixed(2)} raised of $
-                      {cause.targetGoal?.toFixed(2) || "0.00"}
-                    </p>
-                  </div>
-                  <Button variant="ghost" size="icon" asChild>
-                    <Link href={`/dashboard/causes/${cause.id}`}>
-                      <ArrowRight className="h-4 w-4 text-gray-600" />
-                    </Link>
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="col-span-3">
-          <CardHeader>
-            <CardTitle>Organization Info</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div>
-                <h4 className="text-sm font-medium">Description</h4>
-                <p className="text-sm text-muted-foreground">
-                  {userOrganization.organization.description ||
-                    "No description provided"}
-                </p>
-              </div>
-              {userOrganization.organization.website && (
-                <div>
-                  <h4 className="text-sm font-medium">Website</h4>
-                  <a
-                    href={userOrganization.organization.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-primary hover:underline"
-                  >
-                    {userOrganization.organization.website}
-                  </a>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+          <Card className="col-span-4">
+            <CardHeader>
+              <CardTitle>Active Causes</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {causes?.length === 0 ? (
+                <EmptyState text="No causes found" />
+              ) : (
+                <div className="space-y-4">
+                  {causes?.map((cause) => (
+                    <div
+                      key={cause.id}
+                      className="flex items-center justify-between"
+                    >
+                      <div>
+                        <p className="text-sm font-medium leading-none text-gray-900">
+                          {cause.title}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          ${(cause as any).totalAmount.toFixed(2)} raised of $
+                          {cause.targetGoal?.toFixed(2) || "0.00"}
+                        </p>
+                      </div>
+                      <Button variant="ghost" size="icon" asChild>
+                        <Link href={`/dashboard/causes/${cause.id}`}>
+                          <ArrowRight className="h-4 w-4 text-gray-600" />
+                        </Link>
+                      </Button>
+                    </div>
+                  ))}
                 </div>
               )}
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+          <Card className="col-span-3">
+            <CardHeader>
+              <CardTitle>Organization Info</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-sm font-medium">Description</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {userOrganization.organization.description ||
+                      "No description provided"}
+                  </p>
+                </div>
+                {userOrganization.organization.website && (
+                  <div>
+                    <h4 className="text-sm font-medium">Website</h4>
+                    <a
+                      href={userOrganization.organization.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-primary hover:underline"
+                    >
+                      {userOrganization.organization.website}
+                    </a>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </div>
-  );
+    );
+  } catch (error) {
+    console.error("Error loading organization page:", error);
+    return <ErrorMessage />;
+  }
 }
