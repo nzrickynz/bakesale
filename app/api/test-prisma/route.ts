@@ -1,22 +1,15 @@
-import prisma from '@/lib/prisma';
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const users = await prisma.user.findMany({
-      where: {
-        email: {
-          contains: 'alice@prisma.io',
-        },
-      },
-      cacheStrategy: {
-        ttl: 60, // seconds
-      },
-    });
-
-    return NextResponse.json({ success: true, users });
-  } catch (err) {
-    console.error('Prisma test error:', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    // Test the database connection
+    await prisma.$queryRaw`SELECT 1`;
+    
+    return NextResponse.json({ status: "ok", message: "Database connection successful" });
+  } catch (error) {
+    console.error("Database connection test failed:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
