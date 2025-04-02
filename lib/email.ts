@@ -4,7 +4,7 @@ if (!process.env.RESEND_API_KEY) {
   console.error("RESEND_API_KEY environment variable is required");
 }
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || '');
 
 interface InvitationEmailParams {
   to: string;
