@@ -35,15 +35,15 @@ const items = [
     roles: ["ORG_ADMIN"],
   },
   {
-    title: "Orders",
-    href: "/dashboard/orders",
-    icon: ShoppingCart,
+    title: "Listings",
+    href: "/dashboard/listings",
+    icon: Package,
     roles: ["ORG_ADMIN"],
   },
   {
-    title: "Analytics",
-    href: "/dashboard/analytics",
-    icon: BarChart,
+    title: "Orders",
+    href: "/dashboard/orders",
+    icon: ShoppingCart,
     roles: ["ORG_ADMIN"],
   },
   {

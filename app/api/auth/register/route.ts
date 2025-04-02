@@ -28,6 +28,7 @@ const registerSchema = z.object({
   websiteUrl: z.string().url().optional().nullable(),
   facebookUrl: z.string().url().optional().nullable(),
   instagramUrl: z.string().url().optional().nullable(),
+  logoUrl: z.string().url().optional().nullable(),
 })
 
 const userService = new UserService()
@@ -88,7 +89,8 @@ export async function POST(request: Request) {
       organizationDescription,
       websiteUrl,
       facebookUrl,
-      instagramUrl
+      instagramUrl,
+      logoUrl
     } = validationResult.data
 
     try {
@@ -128,6 +130,7 @@ export async function POST(request: Request) {
           websiteUrl,
           facebookUrl,
           instagramUrl,
+          logoUrl,
         }
       })
 

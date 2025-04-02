@@ -6,14 +6,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Link } from "lucide-react";
+import { Link, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import Image from "next/image";
 
 export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const router = useRouter();
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -23,6 +36,7 @@ export default function RegisterPage() {
     const formData = new FormData(event.currentTarget);
     const password = formData.get("password") as string;
     const confirmPassword = formData.get("confirmPassword") as string;
+    const logoFile = formData.get("logo") as File;
 
     // Validate password match
     if (password !== confirmPassword) {
@@ -38,6 +52,31 @@ export default function RegisterPage() {
       return;
     }
 
+    let logoUrl = null;
+    if (logoFile) {
+      try {
+        const uploadFormData = new FormData();
+        uploadFormData.append("file", logoFile);
+        
+        const uploadResponse = await fetch("/api/upload", {
+          method: "POST",
+          body: uploadFormData,
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error("Failed to upload logo");
+        }
+
+        const { url } = await uploadResponse.json();
+        logoUrl = url;
+      } catch (error) {
+        console.error("Logo upload error:", error);
+        setError("Failed to upload logo. Please try again.");
+        setIsLoading(false);
+        return;
+      }
+    }
+
     const data = {
       // User account details
       name: formData.get("name") as string,
@@ -51,6 +90,7 @@ export default function RegisterPage() {
       websiteUrl: formData.get("websiteUrl") as string,
       facebookUrl: formData.get("facebookUrl") as string,
       instagramUrl: formData.get("instagramUrl") as string,
+      logoUrl,
     };
 
     try {
@@ -104,6 +144,48 @@ export default function RegisterPage() {
                   {error}
                 </div>
               )}
+
+              {/* Organization Logo */}
+              <div className="space-y-2">
+                <Label htmlFor="logo" className="text-gray-800">Organization Logo</Label>
+                <div className="flex items-center gap-4">
+                  <div className="relative w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg overflow-hidden">
+                    {logoPreview ? (
+                      <Image
+                        src={logoPreview}
+                        alt="Organization logo preview"
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Upload className="w-8 h-8 text-gray-500" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <Input
+                      id="logo"
+                      name="logo"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoChange}
+                      className="hidden"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => document.getElementById("logo")?.click()}
+                      className="w-full text-gray-800 hover:text-orange-500"
+                    >
+                      Upload Logo
+                    </Button>
+                    <p className="mt-2 text-sm text-gray-600">
+                      Recommended size: 300x300 pixels
+                    </p>
+                  </div>
+                </div>
+              </div>
 
               {/* Organization Name */}
               <div className="space-y-2">

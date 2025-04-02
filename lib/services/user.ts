@@ -27,6 +27,7 @@ type CreateWithOrganizationInput = {
     websiteUrl?: string | null;
     facebookUrl?: string | null;
     instagramUrl?: string | null;
+    logoUrl?: string | null;
   };
 };
 
@@ -189,6 +190,7 @@ export class UserService {
           websiteUrl: organization.websiteUrl,
           facebookUrl: organization.facebookUrl,
           instagramUrl: organization.instagramUrl,
+          logoUrl: organization.logoUrl,
           adminId: user.id,
         },
       });

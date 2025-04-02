@@ -24,6 +24,12 @@ export default function NewOrganizationPage() {
       return;
     }
 
+    console.log("[NEW_ORG] Session user:", {
+      id: session.user.id,
+      email: session.user.email,
+      role: session.user.role
+    });
+
     setIsLoading(true);
     try {
       const result = await createOrganization(formData, session.user.id);
@@ -34,7 +40,7 @@ export default function NewOrganizationPage() {
         toast.error(result.error || "Failed to create organization");
       }
     } catch (error) {
-      console.error("Error creating organization:", error);
+      console.error("[NEW_ORG] Error creating organization:", error);
       toast.error("Failed to create organization");
     } finally {
       setIsLoading(false);
@@ -112,16 +118,6 @@ export default function NewOrganizationPage() {
               <Textarea
                 id="description"
                 name="description"
-                required
-                className="w-full text-gray-900"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="adminEmail" className="text-sm font-medium text-gray-900">Organization Admin Email</Label>
-              <Input
-                id="adminEmail"
-                name="adminEmail"
-                type="email"
                 required
                 className="w-full text-gray-900"
               />
