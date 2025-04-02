@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { PasswordResetService } from '@/lib/services/password-reset'
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY || '')
+const resend = new Resend(process.env.RESEND_API_KEY || 'ABC')
 const passwordResetService = new PasswordResetService()
 
 export async function POST(request: Request) {
