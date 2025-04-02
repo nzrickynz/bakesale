@@ -5,12 +5,12 @@ import prisma from "@/lib/prisma";
 import { Resend } from "resend";
 import { hash } from "bcryptjs";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || '');
 
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.email) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
       // Create a new user with a temporary password
       const tempPassword = Math.random().toString(36).slice(-8);
       const hashedPassword = await hash(tempPassword, 12);
-      
+
       user = await prisma.user.create({
         data: {
           email,
@@ -97,4 +97,4 @@ export async function POST(req: Request) {
     console.error("Failed to add volunteer:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
-} 
+}

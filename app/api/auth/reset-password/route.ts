@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { PasswordResetService } from '@/lib/services/password-reset'
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const resend = new Resend(process.env.RESEND_API_KEY || '')
 const passwordResetService = new PasswordResetService()
 
 export async function POST(request: Request) {
@@ -12,9 +12,9 @@ export async function POST(request: Request) {
 
     if (!email) {
       return NextResponse.json(
-        { 
+        {
           success: false,
-          error: 'Email is required' 
+          error: 'Email is required'
         },
         { status: 400 }
       )
@@ -55,9 +55,9 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('[RESET_PASSWORD]', error)
     return NextResponse.json(
-      { 
+      {
         success: false,
-        error: 'Failed to process password reset request' 
+        error: 'Failed to process password reset request'
       },
       { status: 500 }
     )
@@ -71,9 +71,9 @@ export async function PUT(request: Request) {
 
     if (!token || !newPassword) {
       return NextResponse.json(
-        { 
+        {
           success: false,
-          error: 'Token and new password are required' 
+          error: 'Token and new password are required'
         },
         { status: 400 }
       )
@@ -91,9 +91,9 @@ export async function PUT(request: Request) {
       if (error instanceof Error) {
         if (error.message === 'Invalid or expired reset token') {
           return NextResponse.json(
-            { 
+            {
               success: false,
-              error: error.message 
+              error: error.message
             },
             { status: 400 }
           )
@@ -104,11 +104,11 @@ export async function PUT(request: Request) {
   } catch (error) {
     console.error('[RESET_PASSWORD]', error)
     return NextResponse.json(
-      { 
+      {
         success: false,
-        error: 'Failed to reset password' 
+        error: 'Failed to reset password'
       },
       { status: 500 }
     )
   }
-} 
+}
