@@ -11,6 +11,7 @@ interface EditListingFormProps {
     description: string;
     price: number;
     paymentLink: string | null;
+    imageUrl: string | null;
   };
 }
 

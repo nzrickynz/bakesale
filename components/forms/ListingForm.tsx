@@ -8,6 +8,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 interface ListingFormProps {
   causeId: string;
@@ -18,6 +24,7 @@ interface ListingFormProps {
     description: string;
     price: number;
     paymentLink: string | null;
+    imageUrl: string | null;
   };
   mode: "create" | "edit";
 }
@@ -26,6 +33,25 @@ export function ListingForm({ causeId, listingId, listing, mode }: ListingFormPr
   const router = useRouter();
   const [description, setDescription] = useState(listing?.description || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(listing?.imageUrl || null);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Check file size (500KB = 500 * 1024 bytes)
+      if (file.size > 500 * 1024) {
+        toast.error("Image size must be less than 500KB");
+        return;
+      }
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSubmit = async (formData: FormData) => {
     setIsSubmitting(true);
@@ -42,20 +68,41 @@ export function ListingForm({ causeId, listingId, listing, mode }: ListingFormPr
     }
 
     try {
-      formData.append("causeId", causeId);
-      formData.append("imageUrl", "/placeholder.svg?height=300&width=300");
-
-      const url = mode === "create" 
-        ? "/api/listings"
-        : `/api/listings/${listingId}`;
+      let imageUrl = listing?.imageUrl || null;
       
-      const method = mode === "create" ? "POST" : "PATCH";
+      // Upload new image if provided
+      if (imageFile) {
+        const fileExt = imageFile.name.split('.').pop();
+        const fileName = `${Date.now()}.${fileExt}`;
+        const { data, error } = await supabase.storage
+          .from('publicimages')
+          .upload(fileName, imageFile, {
+            cacheControl: '3600',
+            upsert: false
+          });
 
-      const response = await fetch(url, {
-        method,
-        body: formData,
-        credentials: "include",
-        headers: {},
+        if (error) throw error;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('publicimages')
+          .getPublicUrl(fileName);
+        
+        imageUrl = publicUrl;
+      }
+
+      const response = await fetch(mode === "create" ? "/api/listings" : `/api/listings/${listingId}`, {
+        method: mode === "create" ? "POST" : "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title,
+          description,
+          price,
+          paymentLink,
+          imageUrl,
+          causeId,
+        }),
       });
 
       if (!response.ok) {
@@ -64,7 +111,7 @@ export function ListingForm({ causeId, listingId, listing, mode }: ListingFormPr
       }
 
       toast.success(`Listing ${mode === "create" ? "created" : "updated"} successfully`);
-      router.push(`/dashboard/causes/${causeId}`);
+      router.push("/dashboard/causes");
     } catch (err) {
       console.error(`Failed to ${mode} listing:`, err);
       toast.error(err instanceof Error ? err.message : `Failed to ${mode} listing`);
@@ -128,6 +175,26 @@ export function ListingForm({ causeId, listingId, listing, mode }: ListingFormPr
           placeholder="Enter payment link"
           defaultValue={listing?.paymentLink || ""}
         />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="image">Image</Label>
+        <Input
+          id="image"
+          name="image"
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          required={mode === "create"}
+        />
+        {imagePreview && (
+          <div className="mt-2">
+            <img 
+              src={imagePreview} 
+              alt="Preview" 
+              className="w-32 h-32 object-cover rounded-md"
+            />
+          </div>
+        )}
       </div>
       <Button 
         type="submit" 

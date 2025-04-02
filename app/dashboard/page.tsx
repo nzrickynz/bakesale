@@ -149,7 +149,7 @@ export default function DashboardPage() {
                       {cause.title}
                     </p>
                     <p className="text-sm text-gray-700">
-                      {cause.organization.name}
+                      {cause.organization?.name || "Unknown Organization"}
                     </p>
                   </div>
                   <Button variant="ghost" size="icon" asChild>
@@ -159,6 +159,9 @@ export default function DashboardPage() {
                   </Button>
                 </div>
               ))}
+              {!causes?.length && (
+                <p className="text-sm text-gray-500">No causes found</p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -175,10 +178,10 @@ export default function DashboardPage() {
                 >
                   <div>
                     <p className="text-sm font-medium leading-none text-gray-900">
-                      {uo.organization.name}
+                      {uo.organization?.name || "Unknown Organization"}
                     </p>
                     <p className="text-sm text-gray-700">
-                      {uo.role.toLowerCase()}
+                      {uo.role?.toLowerCase() || "Unknown Role"}
                     </p>
                   </div>
                   <Button variant="ghost" size="icon" asChild>
@@ -188,6 +191,9 @@ export default function DashboardPage() {
                   </Button>
                 </div>
               ))}
+              {!userOrganizations?.length && (
+                <p className="text-sm text-gray-500">No organizations found</p>
+              )}
             </div>
           </CardContent>
         </Card>

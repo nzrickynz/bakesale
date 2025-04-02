@@ -59,20 +59,15 @@ export function Navbar() {
                     )}
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="bg-white">
                   {session.user?.role === "VOLUNTEER" ? (
                     <DropdownMenuItem asChild>
                       <Link href="/volunteer-dashboard" className="text-gray-800 hover:text-orange-500">Volunteer Dashboard</Link>
                     </DropdownMenuItem>
                   ) : (
-                    <>
-                      <DropdownMenuItem asChild>
-                        <Link href="/dashboard" className="text-gray-800 hover:text-orange-500">Dashboard</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/org/dashboard" className="text-gray-800 hover:text-orange-500">Organization Dashboard</Link>
-                      </DropdownMenuItem>
-                    </>
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard" className="text-gray-800 hover:text-orange-500">Dashboard</Link>
+                    </DropdownMenuItem>
                   )}
                   <DropdownMenuItem
                     onClick={() => signOut({ callbackUrl: "/" })}
@@ -101,7 +96,7 @@ export function Navbar() {
                   <Menu className="h-6 w-6" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="bg-white">
                 <DropdownMenuItem asChild>
                   <Link href="/causes" className="text-gray-800 hover:text-orange-500">Causes</Link>
                 </DropdownMenuItem>
@@ -115,14 +110,9 @@ export function Navbar() {
                         <Link href="/volunteer-dashboard" className="text-gray-800 hover:text-orange-500">Volunteer Dashboard</Link>
                       </DropdownMenuItem>
                     ) : (
-                      <>
-                        <DropdownMenuItem asChild>
-                          <Link href="/dashboard" className="text-gray-800 hover:text-orange-500">Dashboard</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href="/org/dashboard" className="text-gray-800 hover:text-orange-500">Organization Dashboard</Link>
-                        </DropdownMenuItem>
-                      </>
+                      <DropdownMenuItem asChild>
+                        <Link href="/dashboard" className="text-gray-800 hover:text-orange-500">Dashboard</Link>
+                      </DropdownMenuItem>
                     )}
                     <DropdownMenuItem
                       onClick={() => signOut({ callbackUrl: "/" })}
