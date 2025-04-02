@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { z } from "zod";
-import { Cause } from "@prisma/client";
+import { Cause, Order } from "@prisma/client";
 import { CauseService } from "@/lib/services/cause";
 import { UserService } from "@/lib/services/user";
 
@@ -20,46 +20,76 @@ const causeSchema = z.object({
   organizationId: z.string(),
 });
 
-export async function GET(request: Request) {
+interface CauseWithAmount extends Cause {
+  currentAmount: number;
+  organization: {
+    id: string;
+    name: string;
+  };
+  listings: {
+    price: number;
+    orders: {
+      id: string;
+      buyerEmail: string;
+      fulfillmentStatus: string;
+    }[];
+  }[];
+}
+
+export async function GET() {
   try {
-    const { searchParams } = new URL(request.url);
-    const category = searchParams.get("category");
-    const search = searchParams.get("search");
+    const session = await getServerSession(authOptions);
 
-    const where: any = {
-      status: "ACTIVE",
-    };
-
-    if (search) {
-      where.OR = [
-        { title: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
-      ];
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { message: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
-    if (category && category !== "ALL") {
-      where.category = category;
-    }
-
-    const causes = await causeService.findMany({
-      where,
+    const causes = await prisma.cause.findMany({
+      where: {
+        status: "ACTIVE",
+      },
       include: {
+        organization: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
         listings: {
-          include: {
-            volunteer: true,
+          select: {
+            price: true,
+            orders: {
+              select: {
+                id: true,
+                buyerEmail: true,
+                fulfillmentStatus: true,
+              },
+            },
           },
         },
       },
       orderBy: {
         createdAt: "desc",
       },
-    });
+    }) as CauseWithAmount[];
 
-    return NextResponse.json(causes);
+    const causesWithAmounts = causes.map(cause => ({
+      ...cause,
+      currentAmount: cause.listings.reduce((total: number, listing) => {
+        return total + (listing.price * listing.orders.length);
+      }, 0),
+    }));
+
+    return NextResponse.json({
+      causes: causesWithAmounts,
+    });
   } catch (error) {
     console.error("Error fetching causes:", error);
     return NextResponse.json(
-      { error: "Failed to fetch causes" },
+      { message: "Error fetching causes" },
       { status: 500 }
     );
   }

@@ -50,7 +50,14 @@ export default async function ListingsPage() {
             {userOrg.organization.causes.map((cause) => (
               <Card key={cause.id} className="bg-white shadow-md">
                 <CardHeader>
-                  <CardTitle className="text-gray-900">{cause.title}</CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-gray-900">{cause.title}</CardTitle>
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/dashboard/listings/new?causeId=${cause.id}`}>
+                        Add Listing
+                      </Link>
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">

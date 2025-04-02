@@ -41,7 +41,7 @@ export default async function OrganizationsPage() {
             key={organization.id}
             href={`/dashboard/organizations/${organization.id}`}
           >
-            <Card className="p-6 hover:shadow-lg transition-shadow">
+            <Card className="p-6 hover:shadow-lg transition-shadow bg-white">
               <div className="flex items-center gap-4">
                 {organization.logoUrl && (
                   <img
@@ -51,8 +51,8 @@ export default async function OrganizationsPage() {
                   />
                 )}
                 <div>
-                  <h2 className="text-lg font-semibold">{organization.name}</h2>
-                  <p className="text-sm text-gray-500">
+                  <h2 className="text-lg font-semibold text-gray-900">{organization.name}</h2>
+                  <p className="text-sm text-gray-700">
                     {organization.description}
                   </p>
                 </div>

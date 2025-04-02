@@ -88,18 +88,30 @@ export default async function OrganizationPage({ params }: PageProps) {
       },
       include: {
         organization: true,
+        listings: {
+          select: {
+            price: true,
+            orders: {
+              select: {
+                id: true,
+                buyerEmail: true,
+                fulfillmentStatus: true,
+              },
+            },
+          },
+        },
       },
     }) as Cause[];
 
     // Calculate current amount for each cause
     const causesWithAmounts = causes?.map((cause: Cause) => ({
       ...cause,
-      totalAmount: cause.listings?.reduce((acc: number, listing: { price: number; orders: any[] }) => 
+      currentAmount: cause.listings?.reduce((acc: number, listing) => 
         acc + (listing.price * (listing.orders?.length || 0)), 0) || 0
     })) ?? [];
 
     // Calculate total amount raised
-    const totalAmount = causesWithAmounts.reduce((acc, cause) => acc + cause.totalAmount, 0);
+    const totalAmount = causesWithAmounts.reduce((acc, cause) => acc + cause.currentAmount, 0);
 
     return (
       <div className="flex-1 space-y-4 p-8 pt-6">
@@ -172,7 +184,7 @@ export default async function OrganizationPage({ params }: PageProps) {
                           {cause.title}
                         </p>
                         <p className="text-sm text-gray-600">
-                          ${(cause as any).totalAmount.toFixed(2)} raised of $
+                          ${(cause as any).currentAmount.toFixed(2)} raised of $
                           {cause.targetGoal?.toFixed(2) || "0.00"}
                         </p>
                       </div>

@@ -92,102 +92,46 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
+
     if (!session?.user?.email) {
       return NextResponse.json(
-        { error: "You must be logged in" },
+        { message: "Unauthorized" },
         { status: 401 }
       );
     }
 
-    const userService = new UserService();
-    const user = await userService.findByEmail(session.user.email);
-    
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      include: {
+        userOrganizations: {
+          include: {
+            organization: true,
+          },
+        },
+      },
+    });
+
     if (!user) {
       return NextResponse.json(
-        { error: "User not found" },
+        { message: "User not found" },
         { status: 404 }
       );
     }
 
-    const organizationService = new OrganizationService();
-    
-    // First get the organizations
-    const organizations = await organizationService.findMany({
-      where: {
-        OR: [
-          { adminId: user.id },
-          {
-            userOrganizations: {
-              some: {
-                userId: user.id,
-              },
-            },
-          },
-        ],
-      },
+    return NextResponse.json({
+      organizations: user.userOrganizations.map(org => ({
+        id: org.organization.id,
+        name: org.organization.name,
+        role: org.role,
+      })),
     });
-
-    // Then get the user roles for these organizations
-    const orgIds = organizations?.map((org: { id: string }) => org.id) ?? [];
-    const userOrgs = await prisma.userOrganization.findMany({
-      where: {
-        userId: user.id,
-        organizationId: {
-          in: orgIds,
-        },
-      },
-      select: {
-        organizationId: true,
-        role: true,
-      },
-    });
-
-    // Create a map of organization ID to role
-    const orgRoleMap = new Map(userOrgs?.map((uo: { organizationId: string; role: string }) => [uo.organizationId, uo.role]) ?? []);
-
-    // Transform the response to match the expected format
-    const transformedOrganizations = organizations?.map((org: { 
-      id: string; 
-      name: string; 
-      description: string | null;
-      logoUrl: string | null;
-      facebookUrl: string | null;
-      instagramUrl: string | null;
-      websiteUrl: string | null;
-      adminId: string;
-      createdAt: Date;
-      updatedAt: Date;
-    }) => ({
-      id: org.id,
-      name: org.name,
-      description: org.description,
-      logoUrl: org.logoUrl,
-      facebookUrl: org.facebookUrl,
-      instagramUrl: org.instagramUrl,
-      websiteUrl: org.websiteUrl,
-      role: org.adminId === user.id ? UserRole.ORG_ADMIN : orgRoleMap.get(org.id),
-      createdAt: org.createdAt,
-      updatedAt: org.updatedAt,
-    })) ?? [];
-
-    const response = NextResponse.json({
-      success: true,
-      data: transformedOrganizations,
-    });
-
-    // Set cache control headers
-    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-    response.headers.set('Pragma', 'no-cache');
-    response.headers.set('Expires', '0');
-
-    return response;
   } catch (error) {
-    console.error("[ORGANIZATIONS] Error fetching organizations:", error);
+    console.error("Error fetching organizations:", error);
     return NextResponse.json(
-      { error: "Failed to fetch organizations" },
+      { message: "Error fetching organizations" },
       { status: 500 }
     );
   }

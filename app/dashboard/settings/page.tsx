@@ -67,18 +67,23 @@ export default async function SettingsPage() {
   // Transform the user data to match the expected type
   const transformedUser: UserWithOrgs = {
     id: user.id,
-    name: user.name,
+    name: user.name || "",
     email: user.email,
     role: user.role,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
-    adminOf: user.userOrganizations,
-    managedListings: user.managedListings,
+    adminOf: user.userOrganizations || [],
+    managedListings: user.managedListings || [],
   };
 
   const organization = transformedUser.adminOf[0]?.organization;
   if (!organization) {
-    return null;
+    return (
+      <div className="flex-1 space-y-4 p-8 pt-6">
+        <h2 className="text-3xl font-bold tracking-tight text-gray-900">Settings</h2>
+        <p className="text-gray-600">You don't have access to any organizations yet.</p>
+      </div>
+    );
   }
 
   // Get all listings for the organization
@@ -105,19 +110,17 @@ export default async function SettingsPage() {
   });
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Settings</h1>
-
-      <div className="grid grid-cols-1 gap-6">
+    <div className="flex-1 space-y-4 p-8 pt-6">
+      <h2 className="text-3xl font-bold tracking-tight text-gray-900">Settings</h2>
+      <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Profile Settings</CardTitle>
+            <CardTitle>Organization Settings</CardTitle>
           </CardHeader>
           <CardContent>
             <SettingsForm user={transformedUser} causes={causes} />
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader>
             <CardTitle>Team Members</CardTitle>

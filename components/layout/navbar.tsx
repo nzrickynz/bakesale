@@ -52,7 +52,7 @@ export function Navbar() {
                       />
                     ) : (
                       <div className="h-8 w-8 rounded-full bg-[#E55937] flex items-center justify-center">
-                        <span className="text-sm font-medium text-white">
+                        <span className="text-sm font-medium text-white uppercase">
                           {session.user?.name?.[0] || session.user?.email?.[0]}
                         </span>
                       </div>
