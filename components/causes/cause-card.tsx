@@ -14,9 +14,7 @@ interface CauseCardProps {
 }
 
 export function CauseCard({ cause }: CauseCardProps) {
-  const activeListings = cause.listings.filter(
-    (listing) => listing.quantity && listing.quantity > 0
-  );
+  const activeListings = cause.listings;
 
   return (
     <Card className="overflow-hidden">

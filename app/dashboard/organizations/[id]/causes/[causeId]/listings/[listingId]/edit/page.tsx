@@ -91,18 +91,8 @@ export default async function EditListingPage({ params }: PageProps) {
               <Input
                 id="price"
                 type="number"
-                step="0.01"
-                defaultValue={listing.price}
+                defaultValue={listing.price || ""}
                 placeholder="Enter price"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="quantity">Quantity</Label>
-              <Input
-                id="quantity"
-                type="number"
-                defaultValue={listing.quantity || ""}
-                placeholder="Enter quantity"
               />
             </div>
             <div className="space-y-2">
