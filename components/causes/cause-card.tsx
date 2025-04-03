@@ -28,18 +28,18 @@ export function CauseCard({ cause }: CauseCardProps) {
             />
           ) : (
             <div className="w-full h-full bg-muted flex items-center justify-center">
-              <span className="text-muted-foreground">No image</span>
+              <span className="text-gray-600">No image</span>
             </div>
           )}
         </div>
       </CardHeader>
       <CardContent className="p-4">
         <div className="space-y-2">
-          <h3 className="font-semibold text-lg">{cause.title}</h3>
-          <p className="text-sm text-muted-foreground line-clamp-2">
+          <h3 className="font-semibold text-lg text-gray-900">{cause.title}</h3>
+          <p className="text-sm text-gray-700 line-clamp-2">
             {cause.description}
           </p>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 text-sm text-gray-600">
             <span>{activeListings?.length} active listings</span>
             <span>•</span>
             <span>
@@ -51,7 +51,7 @@ export function CauseCard({ cause }: CauseCardProps) {
       <CardFooter className="p-4 pt-0">
         <div className="w-full space-y-4">
           <div className="space-y-2">
-            <h4 className="text-sm font-medium">Active Volunteers</h4>
+            <h4 className="text-sm font-medium text-gray-900">Active Volunteers</h4>
             <div className="flex -space-x-2">
               {activeListings?.slice(0, 3).map((listing) => (
                 <Avatar key={listing.id} className="h-8 w-8 border-2 border-background">
@@ -62,7 +62,7 @@ export function CauseCard({ cause }: CauseCardProps) {
                 </Avatar>
               ))}
               {activeListings?.length > 3 && (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-gray-600">
                   +{activeListings.length - 3} more
                 </p>
               )}

@@ -41,8 +41,8 @@ export default async function CausesPage({ searchParams }: PageProps) {
     <div className="container py-8">
       <div className="space-y-8">
         <div>
-          <h1 className="text-3xl font-bold">Causes</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold text-gray-900">Causes</h1>
+          <p className="text-gray-700">
             Browse and support causes from various organizations
           </p>
         </div>
