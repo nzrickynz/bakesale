@@ -51,8 +51,8 @@ export function Navbar() {
                         alt={session.user.name || ""}
                       />
                     ) : (
-                      <div className="h-8 w-8 rounded-full bg-[#E55937] flex items-center justify-center">
-                        <span className="text-sm font-medium text-white uppercase">
+                      <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
+                        <span className="text-sm font-medium text-white">
                           {session.user?.name?.[0] || session.user?.email?.[0]}
                         </span>
                       </div>
