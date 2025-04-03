@@ -15,22 +15,23 @@ import {
 import { useEffect, useState } from "react";
 
 interface UserOrganization {
-  organization: {
+  id: string;
+  name: string;
+  role: string;
+  causes: Array<{
     id: string;
-    name: string;
-    causes: Array<{
+    title: string;
+    listings: Array<{
       id: string;
       title: string;
-      listings: Array<{
+      price: number;
+      volunteer: {
         id: string;
-        title: string;
-        price: number;
-        volunteer: {
-          name: string;
-        };
-      }>;
+        name: string;
+        email: string;
+      } | null;
     }>;
-  };
+  }>;
 }
 
 export default function ListingsPage() {
@@ -73,12 +74,12 @@ export default function ListingsPage() {
       </div>
 
       <div className="space-y-8">
-        {userOrganizations.map((userOrg) => (
-          <div key={userOrg.organization.id} className="space-y-4">
+        {userOrganizations.map((org) => (
+          <div key={org.id} className="space-y-4">
             <h3 className="text-2xl font-semibold text-gray-900">
-              {userOrg.organization.name}
+              {org.name}
             </h3>
-            {userOrg.organization.causes.map((cause) => (
+            {org.causes.map((cause) => (
               <Card key={cause.id} className="bg-white shadow-md">
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -101,14 +102,14 @@ export default function ListingsPage() {
                           </DialogDescription>
                         </DialogHeader>
                         <div className="space-y-4">
-                          {userOrg.organization.causes.map((cause) => (
+                          {org.causes.map((cause) => (
                             <Button
                               key={cause.id}
                               variant="outline"
                               className="w-full justify-start"
                               asChild
                             >
-                              <Link href={`/dashboard/organizations/${userOrg.organization.id}/causes/${cause.id}/listings/new`}>
+                              <Link href={`/dashboard/organizations/${org.id}/causes/${cause.id}/listings/new`}>
                                 {cause.title}
                               </Link>
                             </Button>
@@ -130,7 +131,7 @@ export default function ListingsPage() {
                             {listing.title}
                           </p>
                           <p className="text-sm text-gray-600">
-                            Volunteer: {listing.volunteer.name}
+                            Volunteer: {listing.volunteer?.name || 'Anonymous'}
                           </p>
                           <p className="text-sm text-gray-600">
                             Price: ${listing.price}

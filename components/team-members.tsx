@@ -177,10 +177,10 @@ export function TeamMembers({ organizationId, listings, organizations }: TeamMem
                   Assignments
                 </Label>
                 <div className="max-h-[200px] overflow-y-auto space-y-2 border rounded-md p-2 bg-white">
-                  {assignments?.length === 0 ? (
-                    <p className="text-sm text-gray-500">No {role === "ORG_ADMIN" ? "organizations" : "listings"} available</p>
+                  {!assignments || assignments.length === 0 ? (
+                    <p className="text-sm text-gray-900">No {role === "ORG_ADMIN" ? "organizations" : "listings"} available</p>
                   ) : (
-                    assignments?.map((assignment: Organization | Listing) => (
+                    assignments.map((assignment: Organization | Listing) => (
                       <div key={assignment.id} className="flex items-center space-x-2">
                         <Checkbox
                           id={assignment.id}

@@ -49,7 +49,7 @@ function LoginForm() {
     <Card className="w-full max-w-md">
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-center text-[#E55937]">Welcome Back</CardTitle>
-        <CardDescription className="text-center">
+        <CardDescription className="text-center text-gray-800">
           Sign in to your account to continue
         </CardDescription>
       </CardHeader>
@@ -61,23 +61,25 @@ function LoginForm() {
             </Alert>
           )}
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email" className="text-gray-800">Email</Label>
             <Input
               id="email"
               name="email"
               type="email"
               placeholder="Enter your email"
               required
+              className="text-gray-800 placeholder-gray-400"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password" className="text-gray-800">Password</Label>
             <Input
               id="password"
               name="password"
               type="password"
               placeholder="Enter your password"
               required
+              className="text-gray-800 placeholder-gray-400"
             />
           </div>
         </CardContent>
@@ -89,7 +91,7 @@ function LoginForm() {
           >
             {isLoading ? 'Signing in...' : 'Sign in'}
           </Button>
-          <div className="text-center text-sm text-gray-600">
+          <div className="text-center text-sm text-gray-800">
             Don't have an account?{' '}
             <a href="/register" className="text-[#E55937] hover:underline">
               Register

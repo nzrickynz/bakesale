@@ -74,7 +74,7 @@ export function SettingsForm({ user, causes }: SettingsFormProps) {
                 name="email"
                 type="email"
                 defaultValue={user.email}
-                className="w-full text-gray-900"
+                className="w-full text-gray-900 placeholder-gray-500"
                 disabled={isLoading}
               />
             </div>
@@ -96,19 +96,19 @@ export function SettingsForm({ user, causes }: SettingsFormProps) {
           <div className="space-y-4">
             <div>
               <h4 className="text-sm font-medium text-gray-900">Role</h4>
-              <p className="text-sm text-gray-600 capitalize">
+              <p className="text-sm text-gray-900 capitalize">
                 {user.role.toLowerCase()}
               </p>
             </div>
             <div>
               <h4 className="text-sm font-medium text-gray-900">Member Since</h4>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-900">
                 {new Date(user.createdAt).toLocaleDateString()}
               </p>
             </div>
             <div>
               <h4 className="text-sm font-medium text-gray-900">Last Updated</h4>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-900">
                 {new Date(user.updatedAt).toLocaleDateString()}
               </p>
             </div>

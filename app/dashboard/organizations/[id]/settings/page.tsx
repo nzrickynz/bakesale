@@ -35,39 +35,42 @@ export default async function OrganizationSettingsPage({ params }: PageProps) {
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Organization Settings</h2>
+        <h2 className="text-3xl font-bold tracking-tight text-gray-900">Organization Settings</h2>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
+            <CardTitle className="text-gray-900">Basic Information</CardTitle>
           </CardHeader>
           <CardContent>
             <form className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Organization Name</Label>
+                <Label htmlFor="name" className="text-gray-900">Organization Name</Label>
                 <Input
                   id="name"
                   defaultValue={organization.name}
                   placeholder="Enter organization name"
+                  className="text-gray-900 placeholder-gray-500"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description" className="text-gray-900">Description</Label>
                 <Textarea
                   id="description"
                   defaultValue={organization.description || ""}
                   placeholder="Enter organization description"
+                  className="text-gray-900 placeholder-gray-500"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="website">Website</Label>
+                <Label htmlFor="website" className="text-gray-900">Website</Label>
                 <Input
                   id="website"
                   type="url"
                   defaultValue={organization.websiteUrl || ""}
                   placeholder="https://example.com"
+                  className="text-gray-900 placeholder-gray-500"
                 />
               </div>
               <Button type="submit">Save Changes</Button>
@@ -77,26 +80,28 @@ export default async function OrganizationSettingsPage({ params }: PageProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Social Media</CardTitle>
+            <CardTitle className="text-gray-900">Social Media</CardTitle>
           </CardHeader>
           <CardContent>
             <form className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="facebook">Facebook URL</Label>
+                <Label htmlFor="facebook" className="text-gray-900">Facebook URL</Label>
                 <Input
                   id="facebook"
                   type="url"
                   defaultValue={organization.facebookUrl || ""}
                   placeholder="https://facebook.com/your-org"
+                  className="text-gray-900 placeholder-gray-500"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="instagram">Instagram URL</Label>
+                <Label htmlFor="instagram" className="text-gray-900">Instagram URL</Label>
                 <Input
                   id="instagram"
                   type="url"
                   defaultValue={organization.instagramUrl || ""}
                   placeholder="https://instagram.com/your-org"
+                  className="text-gray-900 placeholder-gray-500"
                 />
               </div>
               <Button type="submit">Save Changes</Button>

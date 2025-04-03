@@ -122,6 +122,17 @@ export default function NewOrganizationPage() {
                 className="w-full text-gray-900"
               />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="image" className="text-sm font-medium text-gray-900">Organization Image</Label>
+              <Input
+                id="image"
+                name="image"
+                type="file"
+                accept="image/*"
+                className="w-full text-gray-900"
+              />
+              <p className="text-sm text-gray-600">Upload an image for your organization (recommended size: 1200x630 pixels)</p>
+            </div>
             <div className="flex gap-4">
               <Button 
                 type="submit" 

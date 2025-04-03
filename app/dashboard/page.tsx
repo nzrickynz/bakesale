@@ -149,7 +149,7 @@ export default function DashboardPage() {
                       {cause?.title}
                     </p>
                     <p className="text-sm text-gray-700">
-                      {cause?.organization?.name || "Unknown Organization"}
+                      {cause?.organization?.name || "No Organization"}
                     </p>
                   </div>
                   <Button variant="ghost" size="icon" asChild>
@@ -178,10 +178,10 @@ export default function DashboardPage() {
                 >
                   <div>
                     <p className="text-sm font-medium leading-none text-gray-900">
-                      {uo?.organization?.name || "Unknown Organization"}
+                      {uo?.organization?.name || "No Organization"}
                     </p>
                     <p className="text-sm text-gray-700">
-                      {uo?.role?.toLowerCase() || "Unknown Role"}
+                      {uo?.role?.toLowerCase() || "No Role"}
                     </p>
                   </div>
                   <Button variant="ghost" size="icon" asChild>

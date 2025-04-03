@@ -72,11 +72,12 @@ export default async function NewListingPage({ params }: PageProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="quantity">Quantity</Label>
+              <Label htmlFor="image">Image</Label>
               <Input
-                id="quantity"
-                type="number"
-                placeholder="Enter quantity"
+                id="image"
+                type="file"
+                accept="image/*"
+                placeholder="Upload an image"
               />
             </div>
             <div className="space-y-2">

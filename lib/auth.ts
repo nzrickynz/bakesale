@@ -103,27 +103,23 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
         token.role = user.role;
-        token.name = user.name;
+        token.id = user.id;
         token.supabaseAccessToken = user.supabaseAccessToken;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
+        session.user.role = token.role as UserRole;
         session.user.id = token.id as string;
-        session.user.role = token.role as "SUPER_ADMIN" | "ORG_ADMIN" | "VOLUNTEER";
-        session.user.name = token.name as string;
         session.supabaseAccessToken = token.supabaseAccessToken as string;
       }
       return session;
     },
     async redirect({ url, baseUrl }) {
-      // Allows relative URLs
-      if (url.startsWith("/")) return `${baseUrl}${url}`;
-      // Allows callback URLs on the same origin
-      else if (new URL(url).origin === baseUrl) return url;
+      // Always redirect to /dashboard after login
+      if (url.startsWith(baseUrl)) return `${baseUrl}/dashboard`;
       return baseUrl;
     },
   },

@@ -115,20 +115,20 @@ export default async function SettingsPage() {
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Organization Settings</CardTitle>
+            <CardTitle className="text-gray-900">Organization Settings</CardTitle>
           </CardHeader>
           <CardContent>
-            <SettingsForm user={transformedUser} causes={causes} />
+            <SettingsForm user={transformedUser} causes={causes || []} />
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Team Members</CardTitle>
+            <CardTitle className="text-gray-900">Team Members</CardTitle>
           </CardHeader>
           <CardContent>
             <TeamMembers 
               organizationId={organization.id}
-              listings={listings}
+              listings={listings || []}
               organizations={[organization]}
             />
           </CardContent>

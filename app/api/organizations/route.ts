@@ -108,7 +108,25 @@ export async function GET() {
       include: {
         userOrganizations: {
           include: {
-            organization: true,
+            organization: {
+              include: {
+                causes: {
+                  include: {
+                    listings: {
+                      include: {
+                        volunteer: {
+                          select: {
+                            id: true,
+                            name: true,
+                            email: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -126,6 +144,7 @@ export async function GET() {
         id: org.organization.id,
         name: org.organization.name,
         role: org.role,
+        causes: org.organization.causes,
       })),
     });
   } catch (error) {

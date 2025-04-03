@@ -13,6 +13,7 @@ export async function createOrganization(formData: FormData, userId: string) {
   const websiteUrl = formData.get("websiteUrl") as string;
   const facebookUrl = formData.get("facebookUrl") as string;
   const instagramUrl = formData.get("instagramUrl") as string;
+  const imageFile = formData.get("image") as File;
 
   try {
     // First verify that the user exists
@@ -38,6 +39,32 @@ export async function createOrganization(formData: FormData, userId: string) {
       };
     }
 
+    let imageUrl = null;
+    if (imageFile) {
+      try {
+        const uploadFormData = new FormData();
+        uploadFormData.append("file", imageFile);
+        
+        const uploadResponse = await fetch("/api/upload", {
+          method: "POST",
+          body: uploadFormData,
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error("Failed to upload image");
+        }
+
+        const { url } = await uploadResponse.json();
+        imageUrl = url;
+      } catch (error) {
+        console.error("[CREATE_ORG] Image upload error:", error);
+        return { 
+          success: false, 
+          error: "Failed to upload image. Please try again." 
+        };
+      }
+    }
+
     // Create the organization
     console.log("[CREATE_ORG] Creating organization with name:", name);
     const organization = await prisma.organization.create({
@@ -47,6 +74,7 @@ export async function createOrganization(formData: FormData, userId: string) {
         websiteUrl,
         facebookUrl,
         instagramUrl,
+        logoUrl: imageUrl,
         admin: {
           connect: { id: userId }
         }
