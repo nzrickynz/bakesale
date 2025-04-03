@@ -53,7 +53,7 @@ export function Navbar() {
                     ) : (
                       <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
                         <span className="text-sm font-medium text-white">
-                          {session.user?.name?.[0] || session.user?.email?.[0]}
+                          {session.user.name?.charAt(0) || session.user.email?.charAt(0) || "U"}
                         </span>
                       </div>
                     )}

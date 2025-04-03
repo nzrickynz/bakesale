@@ -1,39 +1,70 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import prisma from "@/lib/prisma";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+"use client";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { Edit, ArrowRight } from "lucide-react";
-import { notFound } from "next/navigation";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useEffect, useState } from "react";
 
-export default async function ListingsPage() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
-    notFound();
+interface UserOrganization {
+  organization: {
+    id: string;
+    name: string;
+    causes: Array<{
+      id: string;
+      title: string;
+      listings: Array<{
+        id: string;
+        title: string;
+        price: number;
+        volunteer: {
+          name: string;
+        };
+      }>;
+    }>;
+  };
+}
+
+export default function ListingsPage() {
+  const [userOrganizations, setUserOrganizations] = useState<UserOrganization[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await fetch("/api/organizations");
+        if (!response.ok) {
+          throw new Error("Failed to fetch organizations");
+        }
+        const data = await response.json();
+        setUserOrganizations(data.organizations);
+      } catch (error) {
+        console.error("Error fetching organizations:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchData();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 space-y-4 p-8 pt-6">
+        <div className="flex items-center justify-center">
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
   }
-
-  // Get all organizations the user has access to
-  const userOrganizations = await prisma.userOrganization.findMany({
-    where: {
-      userId: session.user.id,
-    },
-    include: {
-      organization: {
-        include: {
-          causes: {
-            include: {
-              listings: {
-                include: {
-                  volunteer: true,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  });
 
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
@@ -52,11 +83,39 @@ export default async function ListingsPage() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-gray-900">{cause.title}</CardTitle>
-                    <Button variant="outline" size="sm" asChild>
-                      <Link href={`/dashboard/listings/new?causeId=${cause.id}`}>
-                        Add Listing
-                      </Link>
-                    </Button>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="bg-orange-500 hover:bg-orange-600 text-white border-none"
+                        >
+                          Add Listing
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Select Cause</DialogTitle>
+                          <DialogDescription>
+                            Choose which cause you want to create a listing for
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          {userOrg.organization.causes.map((cause) => (
+                            <Button
+                              key={cause.id}
+                              variant="outline"
+                              className="w-full justify-start"
+                              asChild
+                            >
+                              <Link href={`/dashboard/organizations/${userOrg.organization.id}/causes/${cause.id}/listings/new`}>
+                                {cause.title}
+                              </Link>
+                            </Button>
+                          ))}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -100,18 +159,8 @@ export default async function ListingsPage() {
                 </CardContent>
               </Card>
             ))}
-            {userOrg.organization.causes.length === 0 && (
-              <p className="text-sm text-gray-600">
-                No causes for this organization yet.
-              </p>
-            )}
           </div>
         ))}
-        {userOrganizations.length === 0 && (
-          <p className="text-sm text-gray-600">
-            You don't have access to any organizations yet.
-          </p>
-        )}
       </div>
     </div>
   );

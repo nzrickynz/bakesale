@@ -141,19 +141,19 @@ export default function DashboardPage() {
             <div className="space-y-4">
               {causes?.slice(0, 5).map((cause) => (
                 <div
-                  key={cause.id}
+                  key={cause?.id}
                   className="flex items-center justify-between"
                 >
                   <div>
                     <p className="text-sm font-medium leading-none text-gray-900">
-                      {cause.title}
+                      {cause?.title}
                     </p>
                     <p className="text-sm text-gray-700">
-                      {cause.organization?.name || "Unknown Organization"}
+                      {cause?.organization?.name || "Unknown Organization"}
                     </p>
                   </div>
                   <Button variant="ghost" size="icon" asChild>
-                    <Link href={`/dashboard/causes/${cause.id}`}>
+                    <Link href={`/dashboard/causes/${cause?.id}`}>
                       <ArrowRight className="h-4 w-4 text-gray-700" />
                     </Link>
                   </Button>
@@ -173,19 +173,19 @@ export default function DashboardPage() {
             <div className="space-y-4">
               {userOrganizations?.slice(0, 5).map((uo) => (
                 <div
-                  key={uo.organization.id}
+                  key={uo?.organization?.id}
                   className="flex items-center justify-between"
                 >
                   <div>
                     <p className="text-sm font-medium leading-none text-gray-900">
-                      {uo.organization?.name || "Unknown Organization"}
+                      {uo?.organization?.name || "Unknown Organization"}
                     </p>
                     <p className="text-sm text-gray-700">
-                      {uo.role?.toLowerCase() || "Unknown Role"}
+                      {uo?.role?.toLowerCase() || "Unknown Role"}
                     </p>
                   </div>
                   <Button variant="ghost" size="icon" asChild>
-                    <Link href={`/dashboard/organizations/${uo.organization.id}`}>
+                    <Link href={`/dashboard/organizations/${uo?.organization?.id}`}>
                       <ArrowRight className="h-4 w-4 text-gray-700" />
                     </Link>
                   </Button>

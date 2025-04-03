@@ -47,7 +47,10 @@ export default async function CausesPage({ searchParams }: PageProps) {
           </p>
         </div>
 
-        <SearchFilter search={search} />
+        <SearchFilter
+          search={search}
+          onSearchChange={() => {}}
+        />
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {causes?.map((cause: Cause & { listings: (Listing & { volunteer: User })[] }) => (

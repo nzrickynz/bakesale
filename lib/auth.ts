@@ -4,6 +4,7 @@ import { compare } from "bcryptjs";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { UserRole } from "@prisma/client";
+import { createClient } from "@supabase/supabase-js";
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -72,12 +73,29 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid user role");
         }
 
+        // Get Supabase access token
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        );
+
+        const { data: { session }, error } = await supabase.auth.signInWithPassword({
+          email: credentials.email,
+          password: credentials.password,
+        });
+
+        if (error || !session) {
+          console.error("[AUTH] Supabase auth error:", error);
+          throw new Error("Error authenticating with Supabase");
+        }
+
         console.log("[AUTH] Login successful for user:", user.email);
         return {
           id: user.id,
           email: user.email,
           name: user.name,
           role: user.role,
+          supabaseAccessToken: session.access_token,
         };
       },
     }),
@@ -88,6 +106,7 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.role = user.role;
         token.name = user.name;
+        token.supabaseAccessToken = user.supabaseAccessToken;
       }
       return token;
     },
@@ -96,6 +115,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string;
         session.user.role = token.role as "SUPER_ADMIN" | "ORG_ADMIN" | "VOLUNTEER";
         session.user.name = token.name as string;
+        session.supabaseAccessToken = token.supabaseAccessToken as string;
       }
       return session;
     },
