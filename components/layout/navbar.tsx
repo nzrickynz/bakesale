@@ -22,7 +22,10 @@ export function Navbar() {
             <Link href="/" className="flex items-center">
               <span className="text-xl font-bold text-gray-900 hover:text-orange-500">Bake Sale</span>
             </Link>
-            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+          </div>
+
+          <div className="hidden sm:ml-6 sm:flex sm:items-center">
+            <div className="flex space-x-8 mr-6">
               <Link
                 href="/causes"
                 className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-800 hover:text-orange-500"
@@ -30,15 +33,19 @@ export function Navbar() {
                 Causes
               </Link>
               <Link
-                href="/organizations"
+                href="/about"
                 className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-800 hover:text-orange-500"
               >
-                Organizations
+                About
+              </Link>
+              <Link
+                href="/contact"
+                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-800 hover:text-orange-500"
+              >
+                Contact
               </Link>
             </div>
-          </div>
-
-          <div className="hidden sm:ml-6 sm:flex sm:items-center">
+            
             {session ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -101,7 +108,10 @@ export function Navbar() {
                   <Link href="/causes" className="text-gray-800 hover:text-orange-500">Causes</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/organizations" className="text-gray-800 hover:text-orange-500">Organizations</Link>
+                  <Link href="/about" className="text-gray-800 hover:text-orange-500">About</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/contact" className="text-gray-800 hover:text-orange-500">Contact</Link>
                 </DropdownMenuItem>
                 {session ? (
                   <>

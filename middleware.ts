@@ -11,6 +11,9 @@ const publicRoutes = [
   "/terms",
   "/register",
   "/_not-found",
+  "/causes",
+  "/causes/[causeId]",
+  "/causes/[causeId]/listings/[listingId]",
 ];
 
 export async function middleware(request: NextRequest) {
