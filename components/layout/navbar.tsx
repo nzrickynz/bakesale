@@ -20,7 +20,11 @@ export function Navbar() {
         <div className="flex justify-between h-16">
           <div className="flex">
             <Link href="/" className="flex items-center">
-              <span className="text-xl font-bold text-gray-900 hover:text-orange-500">Bake Sale</span>
+              <img
+                src="https://ypogpkbzhgvdenmxnamt.supabase.co/storage/v1/object/public/publicimages//orange.png"
+                alt="Bake Sale"
+                className="h-8 w-auto"
+              />
             </Link>
           </div>
 
