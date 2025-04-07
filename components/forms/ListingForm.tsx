@@ -89,10 +89,14 @@ export function ListingForm({ causeId, listingId, listing, mode }: ListingFormPr
         });
 
         if (!uploadResponse.ok) {
-          throw new Error('Failed to upload image');
+          const errorData = await uploadResponse.json();
+          throw new Error(errorData.error || 'Failed to upload image');
         }
 
         const { url } = await uploadResponse.json();
+        if (!url) {
+          throw new Error('No image URL returned from upload');
+        }
         imageUrl = url;
       }
 
