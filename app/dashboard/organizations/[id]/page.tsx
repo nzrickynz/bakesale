@@ -184,8 +184,8 @@ export default async function OrganizationPage({ params }: PageProps) {
                           {cause.title}
                         </p>
                         <p className="text-sm text-gray-600">
-                          ${(cause as any).currentAmount.toFixed(2)} raised of $
-                          {cause.targetGoal?.toFixed(2) || "0.00"}
+                          ${((cause as any).currentAmount || 0).toFixed(2)} raised of $
+                          {(cause.targetGoal || 0).toFixed(2)}
                         </p>
                       </div>
                       <Button variant="ghost" size="icon" asChild>
