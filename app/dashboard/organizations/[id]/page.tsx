@@ -142,7 +142,7 @@ export default async function OrganizationPage({ params }: PageProps) {
               <CardTitle className="text-sm font-medium text-gray-900">
                 Active Causes
               </CardTitle>
-              <Heart className="h-4 w-4 text-gray-600" />
+              <Heart className="h-4 w-4 text-gray-900" />
             </CardHeader>
             <CardContent>
               {(() => {
@@ -167,7 +167,7 @@ export default async function OrganizationPage({ params }: PageProps) {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
           <Card className="col-span-4">
             <CardHeader>
-              <CardTitle>Active Causes</CardTitle>
+              <CardTitle className="text-gray-900">Active Causes</CardTitle>
             </CardHeader>
             <CardContent>
               {causes?.length === 0 ? (
@@ -183,14 +183,14 @@ export default async function OrganizationPage({ params }: PageProps) {
                         <p className="text-sm font-medium leading-none text-gray-900">
                           {cause.title}
                         </p>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-gray-900">
                           ${((cause as any).currentAmount || 0).toFixed(2)} raised of $
                           {(cause.targetGoal || 0).toFixed(2)}
                         </p>
                       </div>
                       <Button variant="ghost" size="icon" asChild>
                         <Link href={`/dashboard/causes/${cause.id}`}>
-                          <ArrowRight className="h-4 w-4 text-gray-600" />
+                          <ArrowRight className="h-4 w-4 text-gray-900" />
                         </Link>
                       </Button>
                     </div>

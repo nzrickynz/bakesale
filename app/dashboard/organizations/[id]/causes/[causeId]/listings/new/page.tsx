@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { requireOrganizationAccess } from "@/lib/auth";
 import { UserRole } from "@prisma/client";
+import { ListingForm } from '@/components/forms/ListingForm';
 
 interface PageProps {
   params: {
@@ -47,49 +48,7 @@ export default async function NewListingPage({ params }: PageProps) {
           <CardTitle>Listing Details</CardTitle>
         </CardHeader>
         <CardContent>
-          <form className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
-              <Input
-                id="title"
-                placeholder="Enter listing title"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                placeholder="Enter listing description"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="price">Price</Label>
-              <Input
-                id="price"
-                type="number"
-                step="0.01"
-                placeholder="Enter price"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="image">Image</Label>
-              <Input
-                id="image"
-                type="file"
-                accept="image/*"
-                placeholder="Upload an image"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="paymentLink">Payment Link</Label>
-              <Input
-                id="paymentLink"
-                type="url"
-                placeholder="Enter payment link"
-              />
-            </div>
-            <Button type="submit">Create Listing</Button>
-          </form>
+          <ListingForm causeId={params.causeId} mode="create" />
         </CardContent>
       </Card>
     </div>

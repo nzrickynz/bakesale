@@ -98,6 +98,12 @@ export function ListingForm({ causeId, listingId, listing, mode }: ListingFormPr
         imageUrl = publicUrl;
       }
 
+      // Convert price to number
+      const priceNumber = parseFloat(price);
+      if (isNaN(priceNumber)) {
+        throw new Error("Price must be a valid number");
+      }
+
       const response = await fetch(mode === "create" ? "/api/listings" : `/api/listings/${listingId}`, {
         method: mode === "create" ? "POST" : "PATCH",
         headers: {
@@ -106,16 +112,16 @@ export function ListingForm({ causeId, listingId, listing, mode }: ListingFormPr
         body: JSON.stringify({
           title,
           description,
-          price,
-          paymentLink,
+          price: priceNumber,
+          paymentLink: paymentLink || null,
           imageUrl,
           causeId,
         }),
       });
 
       if (!response.ok) {
-        const error = await response.text();
-        throw new Error(error || `Failed to ${mode} listing`);
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Failed to ${mode} listing`);
       }
 
       toast.success(`Listing ${mode === "create" ? "created" : "updated"} successfully`);
@@ -131,55 +137,55 @@ export function ListingForm({ causeId, listingId, listing, mode }: ListingFormPr
 
   return (
     <form onSubmit={handleSubmit(handleSubmitForm)} className="space-y-4">
-      <div className="text-gray-800">
-        <label className="block text-gray-800 font-bold mb-2" htmlFor="title">
+      <div className="text-gray-900">
+        <label className="block text-gray-900 font-bold mb-2" htmlFor="title">
           Title
         </label>
         <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:shadow-outline"
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-900 leading-tight focus:outline-none focus:shadow-outline"
           id="title"
           type="text"
           placeholder="Enter listing title"
           {...register('title', { required: true })}
         />
       </div>
-      <div className="text-gray-800">
-        <label className="block text-gray-800 font-bold mb-2" htmlFor="description">
+      <div className="text-gray-900">
+        <label className="block text-gray-900 font-bold mb-2" htmlFor="description">
           Description
         </label>
         <textarea
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:shadow-outline"
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-900 leading-tight focus:outline-none focus:shadow-outline"
           id="description"
           placeholder="Enter listing description"
           {...register('description', { required: true })}
         />
       </div>
-      <div className="text-gray-800">
-        <label className="block text-gray-800 font-bold mb-2" htmlFor="price">
+      <div className="text-gray-900">
+        <label className="block text-gray-900 font-bold mb-2" htmlFor="price">
           Price
         </label>
         <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:shadow-outline"
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-900 leading-tight focus:outline-none focus:shadow-outline"
           id="price"
           type="text"
           placeholder="Enter price"
           {...register('price', { required: true })}
         />
       </div>
-      <div className="text-gray-800">
-        <label className="block text-gray-800 font-bold mb-2" htmlFor="paymentLink">
-          Payment Link
+      <div className="text-gray-900">
+        <label className="block text-gray-900 font-bold mb-2" htmlFor="paymentLink">
+          Payment Link (Optional)
         </label>
         <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:shadow-outline"
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-900 leading-tight focus:outline-none focus:shadow-outline"
           id="paymentLink"
           type="text"
-          placeholder="Enter payment link"
-          {...register('paymentLink', { required: true })}
+          placeholder="Enter payment link (optional)"
+          {...register('paymentLink')}
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="image" className="text-gray-800">Image</Label>
+        <Label htmlFor="image" className="text-gray-900">Image</Label>
         <Input
           id="image"
           name="image"
@@ -187,7 +193,7 @@ export function ListingForm({ causeId, listingId, listing, mode }: ListingFormPr
           accept="image/*"
           onChange={handleImageChange}
           required={mode === "create"}
-          className="text-gray-800"
+          className="text-gray-900"
         />
         {imagePreview && (
           <div className="mt-2">

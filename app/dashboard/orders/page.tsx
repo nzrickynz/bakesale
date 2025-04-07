@@ -115,7 +115,7 @@ export default async function OrdersPage() {
                       </div>
                     ))}
                     {cause.listings.length === 0 && (
-                      <p className="text-sm text-gray-600 text-center py-4">
+                      <p className="text-sm text-gray-900 text-center py-4">
                         No listings for this cause yet.
                       </p>
                     )}
@@ -124,14 +124,14 @@ export default async function OrdersPage() {
               </Card>
             ))}
             {userOrg.organization.causes.length === 0 && (
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-900">
                 No causes for this organization yet.
               </p>
             )}
           </div>
         ))}
         {userOrganizations.length === 0 && (
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-900">
             You don't have access to any organizations yet.
           </p>
         )}

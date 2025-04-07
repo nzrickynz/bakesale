@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { requireOrganizationAccess } from "@/lib/auth";
 import { UserRole } from "@prisma/client";
+import { ListingForm } from '@/components/forms/ListingForm';
 
 interface PageProps {
   params: {
@@ -69,43 +70,7 @@ export default async function EditListingPage({ params }: PageProps) {
           <CardTitle>Listing Details</CardTitle>
         </CardHeader>
         <CardContent>
-          <form className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
-              <Input
-                id="title"
-                defaultValue={listing.title}
-                placeholder="Enter listing title"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                defaultValue={listing.description}
-                placeholder="Enter listing description"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="price">Price</Label>
-              <Input
-                id="price"
-                type="number"
-                defaultValue={listing.price || ""}
-                placeholder="Enter price"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="paymentLink">Payment Link</Label>
-              <Input
-                id="paymentLink"
-                type="url"
-                defaultValue={listing.paymentLink || ""}
-                placeholder="Enter payment link"
-              />
-            </div>
-            <Button type="submit">Save Changes</Button>
-          </form>
+          <ListingForm causeId={params.causeId} listingId={params.listingId} mode="edit" />
         </CardContent>
       </Card>
     </div>

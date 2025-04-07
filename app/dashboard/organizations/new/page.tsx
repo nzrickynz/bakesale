@@ -3,15 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { createOrganization } from "./actions";
+import { OrganizationForm } from '@/components/forms/OrganizationForm';
 
 export default function NewOrganizationPage() {
   const router = useRouter();
@@ -66,88 +64,18 @@ export default function NewOrganizationPage() {
           <CardTitle className="text-gray-900">Organization Details</CardTitle>
         </CardHeader>
         <CardContent>
-          <form action={onSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-sm font-medium text-gray-900">Organization Name</Label>
-              <Input
-                id="name"
-                name="name"
-                required
-                className="w-full text-gray-900"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="contactEmail" className="text-sm font-medium text-gray-900">Organization Contact Email</Label>
-              <Input
-                id="contactEmail"
-                name="contactEmail"
-                type="email"
-                required
-                className="w-full text-gray-900"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="websiteUrl" className="text-sm font-medium text-gray-900">Website URL</Label>
-              <Input
-                id="websiteUrl"
-                name="websiteUrl"
-                type="url"
-                className="w-full text-gray-900"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="facebookUrl" className="text-sm font-medium text-gray-900">Facebook Link</Label>
-              <Input
-                id="facebookUrl"
-                name="facebookUrl"
-                type="url"
-                className="w-full text-gray-900"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="instagramUrl" className="text-sm font-medium text-gray-900">Instagram Link</Label>
-              <Input
-                id="instagramUrl"
-                name="instagramUrl"
-                type="url"
-                className="w-full text-gray-900"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="description" className="text-sm font-medium text-gray-900">Organization Description</Label>
-              <Textarea
-                id="description"
-                name="description"
-                required
-                className="w-full text-gray-900"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="image" className="text-sm font-medium text-gray-900">Organization Image</Label>
-              <Input
-                id="image"
-                name="image"
-                type="file"
-                accept="image/*"
-                className="w-full text-gray-900"
-              />
-              <p className="text-sm text-gray-600">Upload an image for your organization (recommended size: 1200x630 pixels)</p>
-            </div>
-            <div className="flex gap-4">
-              <Button 
-                type="submit" 
-                className="bg-[#F15A2B] text-white hover:bg-[#F15A2B]/90"
-                disabled={isLoading}
-              >
-                {isLoading ? "Creating..." : "Create Organization"}
-              </Button>
-              <Button type="button" variant="outline" asChild>
-                <Link href="/dashboard/organizations">Cancel</Link>
-              </Button>
-            </div>
-          </form>
+          <OrganizationForm
+            name=""
+            contactEmail=""
+            onSubmit={handleSubmit}
+            isSubmitting={isLoading}
+          />
         </CardContent>
       </Card>
     </div>
   );
-} 
+}
+
+function handleSubmit(data: any) {
+  // Handle form submission logic here
+}

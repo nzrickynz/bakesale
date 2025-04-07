@@ -94,7 +94,7 @@ export default function DashboardPage() {
             <CardTitle className="text-sm font-medium text-gray-900">
               Organizations
             </CardTitle>
-            <Users className="h-4 w-4 text-gray-700" />
+            <Users className="h-4 w-4 text-gray-900" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-gray-900">
@@ -111,7 +111,7 @@ export default function DashboardPage() {
             <CardTitle className="text-sm font-medium text-gray-900">
               Active Causes
             </CardTitle>
-            <Heart className="h-4 w-4 text-gray-600" />
+            <Heart className="h-4 w-4 text-gray-900" />
           </CardHeader>
           <CardContent>
             {(() => {

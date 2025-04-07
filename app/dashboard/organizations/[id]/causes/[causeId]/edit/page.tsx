@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { requireOrganizationAccess } from "@/lib/auth";
 import { UserRole } from "@prisma/client";
+import { CauseForm } from '@/components/forms/CauseForm';
 
 interface PageProps {
   params: {
@@ -36,6 +37,8 @@ export default async function EditCausePage({ params }: PageProps) {
     notFound();
   }
 
+  const isSubmitting = false; // Set this based on your form submission state
+
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
@@ -47,36 +50,19 @@ export default async function EditCausePage({ params }: PageProps) {
           <CardTitle>Cause Details</CardTitle>
         </CardHeader>
         <CardContent>
-          <form className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
-              <Input
-                id="title"
-                defaultValue={cause.title}
-                placeholder="Enter cause title"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                defaultValue={cause.description || ""}
-                placeholder="Enter cause description"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="goal">Fundraising Goal</Label>
-              <Input
-                id="goal"
-                type="number"
-                defaultValue={cause.targetGoal || ""}
-                placeholder="Enter fundraising goal"
-              />
-            </div>
-            <Button type="submit">Save Changes</Button>
-          </form>
+          <CauseForm
+            title={cause.title}
+            description={cause.description || ''}
+            goalAmount={cause.targetGoal || undefined}
+            onSubmit={handleSubmit}
+            isSubmitting={isSubmitting}
+          />
         </CardContent>
       </Card>
     </div>
   );
+}
+
+function handleSubmit(data: any) {
+  // Handle form submission logic here
 } 

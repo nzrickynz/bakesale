@@ -57,20 +57,20 @@ export default async function CausesPage() {
                     <CardTitle className="text-gray-900">{cause.title}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-gray-600 mb-4">{cause.description}</p>
+                    <p className="text-sm text-gray-900 mb-4">{cause.description}</p>
                     <div className="flex items-center justify-between">
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-gray-900">
                         {cause._count.listings} listings
                       </p>
                       <div className="flex items-center space-x-2">
                         <Button variant="ghost" size="icon" asChild>
                           <Link href={`/dashboard/causes/${cause.id}/edit`}>
-                            <Edit className="h-4 w-4 text-gray-700" />
+                            <Edit className="h-4 w-4 text-gray-900" />
                           </Link>
                         </Button>
                         <Button variant="ghost" size="icon" asChild>
                           <Link href={`/dashboard/causes/${cause.id}`}>
-                            <ArrowRight className="h-4 w-4 text-gray-700" />
+                            <ArrowRight className="h-4 w-4 text-gray-900" />
                           </Link>
                         </Button>
                       </div>

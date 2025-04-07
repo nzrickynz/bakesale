@@ -11,7 +11,7 @@ const listingSchema = z.object({
   description: z.string().min(1),
   price: z.number().positive(),
   imageUrl: z.string().optional(),
-  paymentLink: z.string().url(),
+  paymentLink: z.string().url().optional(),
   causeId: z.string(),
 });
 
