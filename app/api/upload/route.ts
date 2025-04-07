@@ -19,9 +19,10 @@ export async function POST(request: Request) {
     }
 
     // Validate file type
-    if (!file.type.startsWith('image/')) {
+    const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    if (!allowedMimeTypes.includes(file.type)) {
       return NextResponse.json(
-        { error: 'File must be an image' },
+        { error: `File type ${file.type} is not supported. Please upload a JPEG or PNG image.` },
         { status: 400 }
       );
     }
