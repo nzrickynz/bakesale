@@ -51,43 +51,20 @@ export function Navbar() {
             </div>
             
             {session ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <span className="sr-only">Open user menu</span>
-                    {session.user?.image ? (
-                      <img
-                        className="h-8 w-8 rounded-full"
-                        src={session.user.image}
-                        alt={session.user.name || ""}
-                      />
-                    ) : (
-                      <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
-                        <span className="text-sm font-medium text-white">
-                          {session.user.name?.charAt(0) || session.user.email?.charAt(0) || "U"}
-                        </span>
-                      </div>
-                    )}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-white">
-                  {session.user?.role === "VOLUNTEER" ? (
-                    <DropdownMenuItem asChild>
-                      <Link href="/volunteer-dashboard" className="text-gray-800 hover:text-orange-500">Volunteer Dashboard</Link>
-                    </DropdownMenuItem>
-                  ) : (
-                    <DropdownMenuItem asChild>
-                      <Link href="/dashboard" className="text-gray-800 hover:text-orange-500">Dashboard</Link>
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem
-                    onClick={() => signOut({ callbackUrl: "/" })}
-                    className="text-gray-800 hover:text-orange-500"
-                  >
-                    Sign out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <div className="flex items-center space-x-4">
+                <Link 
+                  href={session.user?.role === "VOLUNTEER" ? "/volunteer-dashboard" : "/dashboard"}
+                  className="text-gray-800 hover:text-orange-500"
+                >
+                  <Button>View Dashboard</Button>
+                </Link>
+                <Button 
+                  variant="ghost" 
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                >
+                  Sign out
+                </Button>
+              </div>
             ) : (
               <div className="flex space-x-4">
                 <Link href="/login" className="text-gray-800 hover:text-orange-500">

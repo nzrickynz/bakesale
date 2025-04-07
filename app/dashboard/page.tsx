@@ -9,11 +9,11 @@ import Link from "next/link";
 import { Users, Heart, DollarSign, ArrowRight } from "lucide-react";
 import { UserRole, Cause as PrismaCause, UserOrganization as PrismaUserOrg } from "@prisma/client";
 
-type UserOrganization = PrismaUserOrg & {
-  organization: {
-    id: string;
-    name: string;
-  };
+type UserOrganization = {
+  id: string;
+  name: string;
+  role: string;
+  causes: any[];
 };
 
 type Cause = PrismaCause & {
@@ -171,21 +171,21 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {userOrganizations?.slice(0, 5).map((uo) => (
+              {userOrganizations?.map((org) => (
                 <div
-                  key={uo?.organization?.id}
+                  key={org.id}
                   className="flex items-center justify-between"
                 >
                   <div>
                     <p className="text-sm font-medium leading-none text-gray-900">
-                      {uo?.organization?.name || "No Organization"}
+                      {org.name}
                     </p>
                     <p className="text-sm text-gray-700">
-                      {uo?.role?.toLowerCase() || "No Role"}
+                      {org.role.toLowerCase()}
                     </p>
                   </div>
                   <Button variant="ghost" size="icon" asChild>
-                    <Link href={`/dashboard/organizations/${uo?.organization?.id}`}>
+                    <Link href={`/dashboard/organizations/${org.id}`}>
                       <ArrowRight className="h-4 w-4 text-gray-700" />
                     </Link>
                   </Button>

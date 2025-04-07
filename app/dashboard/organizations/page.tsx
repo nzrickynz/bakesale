@@ -27,7 +27,7 @@ export default async function OrganizationsPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Organizations</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Organizations</h1>
         <Link
           href="/dashboard/organizations/new"
           className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md text-sm font-medium"

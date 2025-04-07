@@ -242,7 +242,7 @@ export function TeamMembers({ organizationId, listings = [], organizations = [] 
                       {member.role.toLowerCase().replace("_", " ")}
                     </td>
                     <td className="px-4 py-2 text-sm text-gray-900">
-                      {member.assignments?.map((assignment) => assignment.name).join(", ") || "None"}
+                      {(member.assignments || []).map((assignment) => assignment.name).join(", ") || "None"}
                     </td>
                   </tr>
                 ))
