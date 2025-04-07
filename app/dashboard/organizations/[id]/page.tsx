@@ -8,6 +8,8 @@ import Link from "next/link";
 import { Heart, Settings, ArrowRight } from "lucide-react";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { EmptyState } from "@/components/ui/empty-state";
+import { OrganizationEditForm } from '@/components/forms/OrganizationEditForm';
+import { toast } from "react-hot-toast";
 
 interface PageProps {
   params: {
@@ -17,14 +19,22 @@ interface PageProps {
 
 interface UserOrganization {
   id: string;
-  userId: string;
-  organizationId: string;
-  role: "ADMIN" | "VOLUNTEER";
+  role: string;
   organization: {
     id: string;
     name: string;
     description: string | null;
     website: string | null;
+    logoUrl: string | null;
+    websiteUrl: string | null;
+    facebookUrl: string | null;
+    instagramUrl: string | null;
+    causes: {
+      id: string;
+      title: string;
+      description: string;
+      currentAmount: number;
+    }[];
   };
 }
 
@@ -114,121 +124,86 @@ export default async function OrganizationPage({ params }: PageProps) {
     const totalAmount = causesWithAmounts.reduce((acc, cause) => acc + cause.currentAmount, 0);
 
     return (
-      <div className="flex-1 space-y-4 p-8 pt-6">
-        <div className="flex items-center justify-between space-y-2">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900">
-            {userOrganization.organization.name}
-          </h2>
-          <div className="flex items-center space-x-4">
-            {userOrganization.role === "ADMIN" && (
-              <Button asChild>
-                <Link href={`/dashboard/organizations/${params.id}/settings`}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  Settings
-                </Link>
-              </Button>
-            )}
-            <Button asChild>
-              <Link href={`/dashboard/organizations/${params.id}/causes/new`}>
-                New Cause
-              </Link>
-            </Button>
-          </div>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-gray-900">Organization Dashboard</h1>
+          <Button asChild>
+            <Link href={`/dashboard/organizations/${params.id}/causes/new`}>
+              Create New Cause
+            </Link>
+          </Button>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="bg-white shadow-md">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-900">
-                Active Causes
-              </CardTitle>
-              <Heart className="h-4 w-4 text-gray-900" />
-            </CardHeader>
-            <CardContent>
-              {(() => {
-                const activeCauses = causes?.filter((cause) => cause.status === "ACTIVE") ?? [];
-                return (
-                  <>
-                    <div className="text-2xl font-bold text-gray-900">
-                      {activeCauses.length}
-                    </div>
-                    <p className="text-xs text-gray-600">
-                      {activeCauses.length} active
-                      cause
-                      {activeCauses.length !== 1 ? "s" : ""}
-                    </p>
-                  </>
-                );
-              })()}
-            </CardContent>
-          </Card>
-        </div>
+        <Card className="bg-white">
+          <CardHeader>
+            <CardTitle className="text-gray-900">Organization Information</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <OrganizationEditForm 
+              organization={{
+                id: userOrganization.organization.id,
+                name: userOrganization.organization.name,
+                description: userOrganization.organization.description || '',
+                logoUrl: userOrganization.organization.logoUrl,
+                websiteUrl: userOrganization.organization.websiteUrl,
+                facebookUrl: userOrganization.organization.facebookUrl,
+                instagramUrl: userOrganization.organization.instagramUrl,
+              }}
+              onSubmit={async (data) => {
+                'use server';
+                try {
+                  await prisma.organization.update({
+                    where: { id: params.id },
+                    data: {
+                      name: data.name,
+                      description: data.description,
+                      logoUrl: data.logoUrl,
+                      websiteUrl: data.websiteUrl || null,
+                      facebookUrl: data.facebookUrl || null,
+                      instagramUrl: data.instagramUrl || null,
+                    },
+                  });
+                  toast.success('Organization updated successfully');
+                } catch (error) {
+                  console.error('Error updating organization:', error);
+                  toast.error('Failed to update organization');
+                }
+              }}
+            />
+          </CardContent>
+        </Card>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          <Card className="col-span-4">
-            <CardHeader>
-              <CardTitle className="text-gray-900">Active Causes</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {causes?.length === 0 ? (
-                <EmptyState text="No causes found" />
-              ) : (
-                <div className="space-y-4">
-                  {causes?.map((cause: Cause) => (
-                    <div
-                      key={cause.id}
-                      className="flex items-center justify-between"
-                    >
-                      <div>
-                        <p className="text-sm font-medium leading-none text-gray-900">
-                          {cause.title}
-                        </p>
-                        <p className="text-sm text-gray-900">
-                          ${((cause as any).currentAmount || 0).toFixed(2)} raised of $
-                          {(cause.targetGoal || 0).toFixed(2)}
-                        </p>
+        <Card className="bg-white">
+          <CardHeader>
+            <CardTitle className="text-gray-900">Active Causes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {userOrganization.organization.causes.length > 0 ? (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {userOrganization.organization.causes.map((cause) => (
+                  <Card key={cause.id} className="bg-white">
+                    <CardHeader>
+                      <CardTitle className="text-gray-900">{cause.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-900">{cause.description}</p>
+                      <div className="mt-4 flex items-center justify-between">
+                        <span className="text-gray-900">${cause.currentAmount} raised</span>
+                        <Button asChild>
+                          <Link href={`/dashboard/organizations/${params.id}/causes/${cause.id}`}>
+                            View Details
+                          </Link>
+                        </Button>
                       </div>
-                      <Button variant="ghost" size="icon" asChild>
-                        <Link href={`/dashboard/causes/${cause.id}`}>
-                          <ArrowRight className="h-4 w-4 text-gray-900" />
-                        </Link>
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-          <Card className="col-span-3">
-            <CardHeader>
-              <CardTitle>Organization Info</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <h4 className="text-sm font-medium">Description</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {userOrganization.organization.description ||
-                      "No description provided"}
-                  </p>
-                </div>
-                {userOrganization.organization.website && (
-                  <div>
-                    <h4 className="text-sm font-medium">Website</h4>
-                    <a
-                      href={userOrganization.organization.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-primary hover:underline"
-                    >
-                      {userOrganization.organization.website}
-                    </a>
-                  </div>
-                )}
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            ) : (
+              <p className="text-gray-900">No active causes yet.</p>
+            )}
+          </CardContent>
+        </Card>
       </div>
     );
   } catch (error) {

@@ -5,9 +5,7 @@ import prisma from "@/lib/prisma";
 import { UserRole } from "@prisma/client";
 import { CauseForm } from '@/components/forms/CauseForm';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { createClient } from '@supabase/supabase-js';
 import { redirect } from 'next/navigation';
-import { toast } from 'sonner';
 
 interface PageProps {
   params: { id: string };
@@ -28,39 +26,27 @@ export default async function NewCausePage({ params }: PageProps) {
     notFound();
   }
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-
   const handleSubmit = async (formData: any) => {
     'use server';
     
     try {
-      const { data: cause, error } = await supabase
-        .from('causes')
-        .insert([
-          {
-            organization_id: params.id,
-            title: formData.title,
-            description: formData.description,
-            goal_amount: formData.goalAmount ? parseFloat(formData.goalAmount) : null,
-            start_date: formData.startDate || null,
-            end_date: formData.endDate || null,
-            status: formData.status || 'DRAFT',
-            image_url: formData.imageUrl || null,
-          },
-        ])
-        .select()
-        .single();
+      const cause = await prisma.cause.create({
+        data: {
+          organizationId: params.id,
+          title: formData.title,
+          description: formData.description,
+          targetGoal: formData.goalAmount ? parseFloat(formData.goalAmount) : 0,
+          startDate: formData.startDate ? new Date(formData.startDate) : new Date(),
+          endDate: formData.endDate ? new Date(formData.endDate) : null,
+          status: formData.status || 'DRAFT',
+          imageUrl: formData.imageUrl || null,
+        },
+      });
 
-      if (error) throw error;
-
-      toast.success('Cause created successfully');
       redirect(`/dashboard/organizations/${params.id}/causes/${cause.id}`);
     } catch (error) {
       console.error('Error creating cause:', error);
-      toast.error('Failed to create cause');
+      throw new Error('Failed to create cause');
     }
   };
 

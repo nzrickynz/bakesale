@@ -5,8 +5,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
-import { Image } from '@/components/ui/image';
 import { toast } from 'sonner';
+import { useForm } from 'react-hook-form';
 
 interface CauseFormProps {
   title: string;
@@ -34,6 +34,17 @@ export function CauseForm({
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(imageUrl || null);
 
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    defaultValues: {
+      title,
+      description,
+      goalAmount,
+      startDate,
+      endDate,
+      status: status || 'DRAFT',
+    }
+  });
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -51,11 +62,7 @@ export function CauseForm({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const formData = new FormData(e.target as HTMLFormElement);
-    const data = Object.fromEntries(formData.entries());
-
+  const onFormSubmit = async (data: any) => {
     // Upload image if provided
     if (imageFile) {
       const imageFormData = new FormData();
@@ -85,30 +92,62 @@ export function CauseForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="title">Title</Label>
-        <Input id="title" name="title" defaultValue={title} required />
+        <Input 
+          id="title" 
+          {...register('title', { required: true })} 
+          className="text-gray-900"
+        />
+        {errors.title && <p className="text-red-500 text-xs mt-1">Title is required</p>}
       </div>
       <div className="space-y-2">
         <Label htmlFor="description">Description</Label>
-        <Textarea id="description" name="description" defaultValue={description} required />
+        <Textarea 
+          id="description" 
+          {...register('description', { required: true })} 
+          className="text-gray-900"
+        />
+        {errors.description && <p className="text-red-500 text-xs mt-1">Description is required</p>}
       </div>
       <div className="space-y-2">
         <Label htmlFor="goalAmount">Goal Amount</Label>
-        <Input id="goalAmount" name="goalAmount" type="number" defaultValue={goalAmount} />
+        <Input 
+          id="goalAmount" 
+          type="number" 
+          step="0.01"
+          min="0"
+          {...register('goalAmount', { min: 0 })} 
+          className="text-gray-900"
+        />
+        {errors.goalAmount && <p className="text-red-500 text-xs mt-1">Goal amount must be a positive number</p>}
       </div>
       <div className="space-y-2">
         <Label htmlFor="startDate">Start Date</Label>
-        <Input id="startDate" name="startDate" type="date" defaultValue={startDate} />
+        <Input 
+          id="startDate" 
+          type="date" 
+          {...register('startDate')} 
+          className="text-gray-900"
+        />
       </div>
       <div className="space-y-2">
         <Label htmlFor="endDate">End Date</Label>
-        <Input id="endDate" name="endDate" type="date" defaultValue={endDate} />
+        <Input 
+          id="endDate" 
+          type="date" 
+          {...register('endDate')} 
+          className="text-gray-900"
+        />
       </div>
       <div className="space-y-2">
         <Label htmlFor="status">Status</Label>
-        <select id="status" name="status" defaultValue={status} className="w-full">
+        <select 
+          id="status" 
+          {...register('status')} 
+          className="w-full text-gray-900"
+        >
           <option value="DRAFT">Draft</option>
           <option value="ACTIVE">Active</option>
           <option value="COMPLETED">Completed</option>

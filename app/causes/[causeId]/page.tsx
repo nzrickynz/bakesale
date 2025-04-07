@@ -119,21 +119,6 @@ export default async function CausePage({ params }: PageProps) {
                     <p className="text-2xl font-bold text-gray-900 mb-4">
                       ${listing.price.toFixed(2)}
                     </p>
-                    {listing.volunteer && (
-                      <div className="flex items-center mb-4">
-                        <div className="relative w-8 h-8 rounded-full overflow-hidden mr-2">
-                          <Image
-                            src={listing.volunteer.image || "/placeholder.svg"}
-                            alt={listing.volunteer.name || "Volunteer"}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                        <span className="text-gray-600">
-                          By {listing.volunteer.name}
-                        </span>
-                      </div>
-                    )}
                     <Button
                       asChild
                       className="w-full bg-orange-500 hover:bg-orange-600 text-white"
@@ -150,10 +135,10 @@ export default async function CausePage({ params }: PageProps) {
 
           {/* Sidebar - Organization Info */}
           <div className="lg:col-span-1">
-            <Card>
+            <Card className="bg-white">
               <CardHeader>
                 <div className="flex items-center gap-3 mb-2">
-                  {cause.organization.logoUrl && (
+                  {cause.organization.logoUrl ? (
                     <div className="relative w-12 h-12 rounded-full overflow-hidden">
                       <Image
                         src={cause.organization.logoUrl}
@@ -162,9 +147,13 @@ export default async function CausePage({ params }: PageProps) {
                         className="object-cover"
                       />
                     </div>
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
+                      <span className="text-gray-400 text-sm">No logo</span>
+                    </div>
                   )}
                   <div>
-                    <CardTitle>{cause.organization.name}</CardTitle>
+                    <CardTitle className="text-gray-900">{cause.organization.name}</CardTitle>
                     <p className="text-sm text-gray-500">
                       Organization
                     </p>
@@ -172,7 +161,7 @@ export default async function CausePage({ params }: PageProps) {
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 mb-6">
+                <p className="text-gray-900 mb-6">
                   {cause.organization.description}
                 </p>
                 <div className="space-y-4">

@@ -1,45 +1,52 @@
 'use client';
 
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { useForm } from 'react-hook-form';
-import Image from 'next/image';
+import { Textarea } from '@/components/ui/textarea';
+import { Image } from '@/components/ui/image';
 import { Upload } from 'lucide-react';
+import { toast } from 'sonner';
 
-interface OrganizationFormProps {
-  name: string;
-  contactEmail: string;
-  websiteUrl?: string;
-  facebookUrl?: string;
-  instagramUrl?: string;
-  logoUrl?: string | null;
-  onSubmit: (data: any) => void;
-  isSubmitting: boolean;
+const organizationSchema = z.object({
+  name: z.string().min(1, 'Organization name is required'),
+  description: z.string().min(1, 'Description is required'),
+  websiteUrl: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+  facebookUrl: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+  instagramUrl: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+});
+
+type OrganizationFormData = z.infer<typeof organizationSchema>;
+
+interface OrganizationEditFormProps {
+  organization: {
+    id: string;
+    name: string;
+    description: string;
+    logoUrl: string | null;
+    websiteUrl: string | null;
+    facebookUrl: string | null;
+    instagramUrl: string | null;
+  };
+  onSubmit: (data: OrganizationFormData & { logoUrl?: string }) => Promise<void>;
 }
 
-export function OrganizationForm({
-  name,
-  contactEmail,
-  websiteUrl,
-  facebookUrl,
-  instagramUrl,
-  logoUrl,
-  onSubmit,
-  isSubmitting,
-}: OrganizationFormProps) {
+export function OrganizationEditForm({ organization, onSubmit }: OrganizationEditFormProps) {
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(logoUrl || null);
+  const [imagePreview, setImagePreview] = useState<string | null>(organization.logoUrl);
 
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<OrganizationFormData>({
+    resolver: zodResolver(organizationSchema),
     defaultValues: {
-      name,
-      contactEmail,
-      websiteUrl,
-      facebookUrl,
-      instagramUrl,
+      name: organization.name,
+      description: organization.description,
+      websiteUrl: organization.websiteUrl || '',
+      facebookUrl: organization.facebookUrl || '',
+      instagramUrl: organization.instagramUrl || '',
     }
   });
 
@@ -60,13 +67,13 @@ export function OrganizationForm({
     }
   };
 
-  const onFormSubmit = async (data: any) => {
-    // Upload image if provided
-    if (imageFile) {
-      const imageFormData = new FormData();
-      imageFormData.append('file', imageFile);
+  const onFormSubmit = async (data: OrganizationFormData) => {
+    try {
+      // Upload image if provided
+      if (imageFile) {
+        const imageFormData = new FormData();
+        imageFormData.append('file', imageFile);
 
-      try {
         const uploadResponse = await fetch('/api/upload', {
           method: 'POST',
           body: imageFormData,
@@ -78,19 +85,18 @@ export function OrganizationForm({
         }
 
         const { url } = await uploadResponse.json();
-        data.logoUrl = url;
-      } catch (error) {
-        console.error('Upload error:', error);
-        toast.error('Failed to upload image');
-        return;
+        await onSubmit({ ...data, logoUrl: url });
+      } else {
+        await onSubmit(data);
       }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error('Failed to update organization');
     }
-
-    onSubmit(data);
   };
 
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
       {/* Logo Upload */}
       <div className="space-y-2">
         <Label htmlFor="logo" className="text-gray-900">Organization Logo</Label>
@@ -137,21 +143,20 @@ export function OrganizationForm({
         <Label htmlFor="name" className="text-gray-900">Organization Name</Label>
         <Input 
           id="name" 
-          {...register('name', { required: true })} 
+          {...register('name')} 
           className="text-gray-900"
         />
-        {errors.name && <p className="text-red-500 text-xs mt-1">Organization name is required</p>}
+        {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="contactEmail" className="text-gray-900">Contact Email</Label>
-        <Input 
-          id="contactEmail" 
-          type="email" 
-          {...register('contactEmail', { required: true })} 
+        <Label htmlFor="description" className="text-gray-900">Description</Label>
+        <Textarea 
+          id="description" 
+          {...register('description')} 
           className="text-gray-900"
         />
-        {errors.contactEmail && <p className="text-red-500 text-xs mt-1">Contact email is required</p>}
+        {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>}
       </div>
 
       <div className="space-y-2">
@@ -162,6 +167,7 @@ export function OrganizationForm({
           {...register('websiteUrl')} 
           className="text-gray-900"
         />
+        {errors.websiteUrl && <p className="text-red-500 text-xs mt-1">{errors.websiteUrl.message}</p>}
       </div>
 
       <div className="space-y-2">
@@ -173,6 +179,7 @@ export function OrganizationForm({
           placeholder="https://facebook.com/your-org"
           className="text-gray-900"
         />
+        {errors.facebookUrl && <p className="text-red-500 text-xs mt-1">{errors.facebookUrl.message}</p>}
       </div>
 
       <div className="space-y-2">
@@ -184,6 +191,7 @@ export function OrganizationForm({
           placeholder="https://instagram.com/your-org"
           className="text-gray-900"
         />
+        {errors.instagramUrl && <p className="text-red-500 text-xs mt-1">{errors.instagramUrl.message}</p>}
       </div>
 
       <Button type="submit" disabled={isSubmitting} className="w-full">

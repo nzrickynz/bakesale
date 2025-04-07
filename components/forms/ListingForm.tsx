@@ -46,7 +46,14 @@ export function ListingForm({ causeId, listingId, listing, mode }: ListingFormPr
     }
   );
 
-  const { register, handleSubmit } = useForm();
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    defaultValues: {
+      title: listing?.title || "",
+      description: listing?.description || "",
+      price: listing?.price?.toString() || "",
+      paymentLink: listing?.paymentLink || "",
+    }
+  });
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -100,10 +107,10 @@ export function ListingForm({ causeId, listingId, listing, mode }: ListingFormPr
         imageUrl = url;
       }
 
-      // Convert price to number
+      // Convert price to number and validate
       const priceNumber = parseFloat(price);
-      if (isNaN(priceNumber)) {
-        throw new Error("Price must be a valid number");
+      if (isNaN(priceNumber) || priceNumber <= 0) {
+        throw new Error("Price must be a valid positive number");
       }
 
       const response = await fetch(mode === "create" ? "/api/listings" : `/api/listings/${listingId}`, {
@@ -150,6 +157,7 @@ export function ListingForm({ causeId, listingId, listing, mode }: ListingFormPr
           placeholder="Enter listing title"
           {...register('title', { required: true })}
         />
+        {errors.title && <p className="text-red-500 text-xs mt-1">Title is required</p>}
       </div>
       <div className="text-gray-900">
         <label className="block text-gray-900 font-bold mb-2" htmlFor="description">
@@ -161,6 +169,7 @@ export function ListingForm({ causeId, listingId, listing, mode }: ListingFormPr
           placeholder="Enter listing description"
           {...register('description', { required: true })}
         />
+        {errors.description && <p className="text-red-500 text-xs mt-1">Description is required</p>}
       </div>
       <div className="text-gray-900">
         <label className="block text-gray-900 font-bold mb-2" htmlFor="price">
@@ -169,10 +178,13 @@ export function ListingForm({ causeId, listingId, listing, mode }: ListingFormPr
         <input
           className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-900 leading-tight focus:outline-none focus:shadow-outline"
           id="price"
-          type="text"
+          type="number"
+          step="0.01"
+          min="0"
           placeholder="Enter price"
-          {...register('price', { required: true })}
+          {...register('price', { required: true, min: 0 })}
         />
+        {errors.price && <p className="text-red-500 text-xs mt-1">Price must be a valid positive number</p>}
       </div>
       <div className="text-gray-900">
         <label className="block text-gray-900 font-bold mb-2" htmlFor="paymentLink">
@@ -181,7 +193,7 @@ export function ListingForm({ causeId, listingId, listing, mode }: ListingFormPr
         <input
           className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-900 leading-tight focus:outline-none focus:shadow-outline"
           id="paymentLink"
-          type="text"
+          type="url"
           placeholder="Enter payment link (optional)"
           {...register('paymentLink')}
         />
