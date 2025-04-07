@@ -49,13 +49,13 @@ export default async function EditCausePage({ params }: PageProps) {
         </CardHeader>
         <CardContent>
           <CauseForm
-            title={cause.title}
-            description={cause.description || ''}
-            goalAmount={cause.targetGoal || undefined}
-            startDate={cause.startDate.toISOString().split('T')[0]}
-            endDate={cause.endDate ? cause.endDate.toISOString().split('T')[0] : undefined}
-            status={cause.status}
-            imageUrl={cause.imageUrl}
+            cause={{
+              id: cause.id,
+              title: cause.title,
+              description: cause.description || '',
+              imageUrl: cause.imageUrl,
+            }}
+            mode="edit"
             onSubmit={async (data) => {
               'use server';
               try {
@@ -64,10 +64,6 @@ export default async function EditCausePage({ params }: PageProps) {
                   data: {
                     title: data.title,
                     description: data.description,
-                    targetGoal: data.goalAmount,
-                    startDate: new Date(data.startDate),
-                    endDate: data.endDate ? new Date(data.endDate) : null,
-                    status: data.status,
                     imageUrl: data.imageUrl,
                   },
                 });

@@ -35,11 +35,8 @@ export default async function NewCausePage({ params }: PageProps) {
           organizationId: params.id,
           title: formData.title,
           description: formData.description,
-          targetGoal: formData.goalAmount ? parseFloat(formData.goalAmount) : 0,
-          startDate: formData.startDate ? new Date(formData.startDate) : new Date(),
-          endDate: formData.endDate ? new Date(formData.endDate) : null,
-          status: formData.status || 'DRAFT',
           imageUrl: formData.imageUrl || null,
+          startDate: new Date(),
         },
       });
 
@@ -62,8 +59,7 @@ export default async function NewCausePage({ params }: PageProps) {
         </CardHeader>
         <CardContent>
           <CauseForm
-            title=""
-            description=""
+            mode="create"
             onSubmit={handleSubmit}
             isSubmitting={false}
           />

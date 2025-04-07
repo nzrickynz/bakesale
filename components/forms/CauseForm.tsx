@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ImageUpload } from "@/components/ImageUpload";
-import { ControllerRenderProps, FieldValues } from "react-hook-form";
+import { ControllerRenderProps } from "react-hook-form";
 
 const causeFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -66,7 +66,7 @@ export function CauseForm({ cause, mode, onSubmit, isSubmitting }: CauseFormProp
         <FormField
           control={form.control}
           name="title"
-          render={({ field }: { field: ControllerRenderProps<FieldValues, string> }) => (
+          render={({ field }) => (
             <FormItem>
               <FormLabel>Title</FormLabel>
               <FormControl>
@@ -80,7 +80,7 @@ export function CauseForm({ cause, mode, onSubmit, isSubmitting }: CauseFormProp
         <FormField
           control={form.control}
           name="description"
-          render={({ field }: { field: ControllerRenderProps<FieldValues, string> }) => (
+          render={({ field }) => (
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
@@ -94,7 +94,7 @@ export function CauseForm({ cause, mode, onSubmit, isSubmitting }: CauseFormProp
         <FormField
           control={form.control}
           name="imageUrl"
-          render={({ field }: { field: ControllerRenderProps<FieldValues, string> }) => (
+          render={({ field }) => (
             <FormItem>
               <FormLabel>Image</FormLabel>
               <FormControl>
