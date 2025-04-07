@@ -120,7 +120,8 @@ export function ListingForm({ causeId, listingId, listing, mode }: ListingFormPr
       }
 
       toast.success(`Listing ${mode === "create" ? "created" : "updated"} successfully`);
-      router.push("/dashboard/causes");
+      // Navigate back to the cause page after successful creation
+      router.push(`/dashboard/organizations/${causeId.split('/')[0]}/causes/${causeId.split('/')[1]}`);
     } catch (err) {
       console.error(`Failed to ${mode} listing:`, err);
       toast.error(err instanceof Error ? err.message : `Failed to ${mode} listing`);
@@ -132,17 +133,18 @@ export function ListingForm({ causeId, listingId, listing, mode }: ListingFormPr
   return (
     <form action={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="title">Title</Label>
+        <Label htmlFor="title" className="text-gray-800">Title</Label>
         <Input
           id="title"
           name="title"
           placeholder="Enter listing title"
           required
           defaultValue={listing?.title}
+          className="text-gray-800 placeholder-gray-500"
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description" className="text-gray-800">Description</Label>
         <div className="relative">
           <Textarea
             id="description"
@@ -152,18 +154,18 @@ export function ListingForm({ causeId, listingId, listing, mode }: ListingFormPr
             maxLength={100}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="min-h-[100px]"
+            className="min-h-[100px] text-gray-800 placeholder-gray-500"
           />
           <div className={cn(
             "absolute bottom-2 right-2 text-xs",
-            description.length > 100 ? "text-red-500" : "text-gray-500"
+            description.length > 100 ? "text-red-500" : "text-gray-600"
           )}>
             {description.length}/100
           </div>
         </div>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="price">Price</Label>
+        <Label htmlFor="price" className="text-gray-800">Price</Label>
         <Input
           id="price"
           name="price"
@@ -173,20 +175,22 @@ export function ListingForm({ causeId, listingId, listing, mode }: ListingFormPr
           placeholder="Enter price"
           required
           defaultValue={listing?.price}
+          className="text-gray-800 placeholder-gray-500"
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="paymentLink">Payment Link</Label>
+        <Label htmlFor="paymentLink" className="text-gray-800">Payment Link</Label>
         <Input
           id="paymentLink"
           name="paymentLink"
           type="url"
           placeholder="Enter payment link"
           defaultValue={listing?.paymentLink || ""}
+          className="text-gray-800 placeholder-gray-500"
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="image">Image</Label>
+        <Label htmlFor="image" className="text-gray-800">Image</Label>
         <Input
           id="image"
           name="image"
@@ -194,6 +198,7 @@ export function ListingForm({ causeId, listingId, listing, mode }: ListingFormPr
           accept="image/*"
           onChange={handleImageChange}
           required={mode === "create"}
+          className="text-gray-800"
         />
         {imagePreview && (
           <div className="mt-2">
@@ -208,6 +213,7 @@ export function ListingForm({ causeId, listingId, listing, mode }: ListingFormPr
       <Button 
         type="submit" 
         disabled={isSubmitting || description.length > 100}
+        className="w-full"
       >
         {isSubmitting 
           ? mode === "create" ? "Creating..." : "Saving..." 
