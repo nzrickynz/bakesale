@@ -40,12 +40,12 @@ export default async function NewListingPage({ params }: PageProps) {
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Create New Listing</h2>
+        <h2 className="text-3xl font-bold tracking-tight text-gray-900">Create New Listing</h2>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Listing Details</CardTitle>
+          <CardTitle className="text-gray-900">Listing Details</CardTitle>
         </CardHeader>
         <CardContent>
           <ListingForm causeId={params.causeId} mode="create" />
