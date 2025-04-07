@@ -26,6 +26,19 @@ export default async function NewListingPage({ params }: PageProps) {
     notFound();
   }
 
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email) {
+    notFound();
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+  });
+
+  if (!user) {
+    notFound();
+  }
+
   const cause = await prisma.cause.findUnique({
     where: {
       id: params.causeId,
@@ -48,7 +61,30 @@ export default async function NewListingPage({ params }: PageProps) {
           <CardTitle className="text-gray-900">Listing Details</CardTitle>
         </CardHeader>
         <CardContent>
-          <ListingForm causeId={params.causeId} mode="create" />
+          <ListingForm 
+            causeId={params.causeId} 
+            mode="create"
+            onSubmit={async (data) => {
+              'use server';
+              try {
+                await prisma.listing.create({
+                  data: {
+                    title: data.title,
+                    description: data.description,
+                    price: parseFloat(data.price),
+                    paymentLink: data.paymentLink || null,
+                    imageUrl: data.imageUrl,
+                    causeId: params.causeId,
+                    volunteerId: user.id,
+                  },
+                });
+              } catch (error) {
+                console.error('Error creating listing:', error);
+                throw new Error('Failed to create listing');
+              }
+            }}
+            isSubmitting={false}
+          />
         </CardContent>
       </Card>
     </div>

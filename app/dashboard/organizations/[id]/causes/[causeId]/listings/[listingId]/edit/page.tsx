@@ -62,8 +62,8 @@ export default async function EditListingPage({ params }: PageProps) {
                   data: {
                     title: data.title,
                     description: data.description,
-                    price: data.price,
-                    paymentLink: data.paymentLink,
+                    price: parseFloat(data.price),
+                    paymentLink: data.paymentLink || null,
                     imageUrl: data.imageUrl,
                   },
                 });
