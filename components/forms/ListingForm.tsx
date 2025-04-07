@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { createClient } from "@supabase/supabase-js";
 import { useSession } from "next-auth/react";
+import { useForm } from 'react-hook-form';
 
 interface ListingFormProps {
   causeId: string;
@@ -45,6 +46,8 @@ export function ListingForm({ causeId, listingId, listing, mode }: ListingFormPr
     }
   );
 
+  const { register, handleSubmit } = useForm();
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -62,13 +65,9 @@ export function ListingForm({ causeId, listingId, listing, mode }: ListingFormPr
     }
   };
 
-  const handleSubmit = async (formData: FormData) => {
+  const handleSubmitForm = async (data: any) => {
     setIsSubmitting(true);
-    
-    const title = formData.get("title") as string;
-    const description = formData.get("description") as string;
-    const price = parseFloat(formData.get("price") as string);
-    const paymentLink = formData.get("paymentLink") as string || null;
+    const { title, description, price, paymentLink } = data;
 
     if (description.length > 100) {
       setIsSubmitting(false);
@@ -131,62 +130,52 @@ export function ListingForm({ causeId, listingId, listing, mode }: ListingFormPr
   };
 
   return (
-    <form action={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="title" className="text-gray-800">Title</Label>
-        <Input
+    <form onSubmit={handleSubmit(handleSubmitForm)} className="space-y-4">
+      <div className="text-gray-800">
+        <label className="block text-gray-800 font-bold mb-2" htmlFor="title">
+          Title
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:shadow-outline"
           id="title"
-          name="title"
+          type="text"
           placeholder="Enter listing title"
-          required
-          defaultValue={listing?.title}
-          className="text-gray-800 placeholder-gray-500"
+          {...register('title', { required: true })}
         />
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="description" className="text-gray-800">Description</Label>
-        <div className="relative">
-          <Textarea
-            id="description"
-            name="description"
-            placeholder="Enter listing description"
-            required
-            maxLength={100}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="min-h-[100px] text-gray-800 placeholder-gray-500"
-          />
-          <div className={cn(
-            "absolute bottom-2 right-2 text-xs",
-            description.length > 100 ? "text-red-500" : "text-gray-600"
-          )}>
-            {description.length}/100
-          </div>
-        </div>
+      <div className="text-gray-800">
+        <label className="block text-gray-800 font-bold mb-2" htmlFor="description">
+          Description
+        </label>
+        <textarea
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:shadow-outline"
+          id="description"
+          placeholder="Enter listing description"
+          {...register('description', { required: true })}
+        />
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="price" className="text-gray-800">Price</Label>
-        <Input
+      <div className="text-gray-800">
+        <label className="block text-gray-800 font-bold mb-2" htmlFor="price">
+          Price
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:shadow-outline"
           id="price"
-          name="price"
-          type="number"
-          min="0"
-          step="0.01"
+          type="text"
           placeholder="Enter price"
-          required
-          defaultValue={listing?.price}
-          className="text-gray-800 placeholder-gray-500"
+          {...register('price', { required: true })}
         />
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="paymentLink" className="text-gray-800">Payment Link</Label>
-        <Input
+      <div className="text-gray-800">
+        <label className="block text-gray-800 font-bold mb-2" htmlFor="paymentLink">
+          Payment Link
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:shadow-outline"
           id="paymentLink"
-          name="paymentLink"
-          type="url"
+          type="text"
           placeholder="Enter payment link"
-          defaultValue={listing?.paymentLink || ""}
-          className="text-gray-800 placeholder-gray-500"
+          {...register('paymentLink', { required: true })}
         />
       </div>
       <div className="space-y-2">
