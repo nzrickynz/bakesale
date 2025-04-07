@@ -22,8 +22,8 @@ interface PageProps {
 export default async function EditListingPage({ params }: PageProps) {
   const userRole = await requireOrganizationAccess(params.id);
   
-  // Only allow VOLUNTEER and ORG_ADMIN to edit listings
-  if (userRole !== UserRole.VOLUNTEER && userRole !== UserRole.ORG_ADMIN) {
+  // Only allow ORG_ADMIN to edit listings
+  if (userRole !== UserRole.ORG_ADMIN) {
     notFound();
   }
 
@@ -31,9 +31,6 @@ export default async function EditListingPage({ params }: PageProps) {
     where: {
       id: params.listingId,
       causeId: params.causeId,
-      cause: {
-        organizationId: params.id,
-      },
     },
   });
 
@@ -41,36 +38,42 @@ export default async function EditListingPage({ params }: PageProps) {
     notFound();
   }
 
-  // Only allow the listing's volunteer or org admin to edit
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.email) {
-    notFound();
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-  });
-
-  if (!user) {
-    notFound();
-  }
-
-  if (userRole !== UserRole.ORG_ADMIN && listing.volunteerId !== user.id) {
-    notFound();
-  }
-
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Edit Listing</h2>
+        <h2 className="text-3xl font-bold tracking-tight text-gray-900">Edit Listing</h2>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Listing Details</CardTitle>
+          <CardTitle className="text-gray-900">Listing Details</CardTitle>
         </CardHeader>
         <CardContent>
-          <ListingForm causeId={params.causeId} listingId={params.listingId} mode="edit" />
+          <ListingForm
+            causeId={params.causeId}
+            listingId={params.listingId}
+            listing={listing}
+            mode="edit"
+            onSubmit={async (data) => {
+              'use server';
+              try {
+                await prisma.listing.update({
+                  where: { id: params.listingId },
+                  data: {
+                    title: data.title,
+                    description: data.description,
+                    price: data.price,
+                    paymentLink: data.paymentLink,
+                    imageUrl: data.imageUrl,
+                  },
+                });
+              } catch (error) {
+                console.error('Error updating listing:', error);
+                throw new Error('Failed to update listing');
+              }
+            }}
+            isSubmitting={false}
+          />
         </CardContent>
       </Card>
     </div>

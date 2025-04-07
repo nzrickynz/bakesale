@@ -37,32 +37,49 @@ export default async function EditCausePage({ params }: PageProps) {
     notFound();
   }
 
-  const isSubmitting = false; // Set this based on your form submission state
-
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Edit Cause</h2>
+        <h2 className="text-3xl font-bold tracking-tight text-gray-900">Edit Cause</h2>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Cause Details</CardTitle>
+          <CardTitle className="text-gray-900">Cause Details</CardTitle>
         </CardHeader>
         <CardContent>
           <CauseForm
             title={cause.title}
             description={cause.description || ''}
             goalAmount={cause.targetGoal || undefined}
-            onSubmit={handleSubmit}
-            isSubmitting={isSubmitting}
+            startDate={cause.startDate.toISOString().split('T')[0]}
+            endDate={cause.endDate ? cause.endDate.toISOString().split('T')[0] : undefined}
+            status={cause.status}
+            imageUrl={cause.imageUrl}
+            onSubmit={async (data) => {
+              'use server';
+              try {
+                await prisma.cause.update({
+                  where: { id: params.causeId },
+                  data: {
+                    title: data.title,
+                    description: data.description,
+                    targetGoal: data.goalAmount,
+                    startDate: new Date(data.startDate),
+                    endDate: data.endDate ? new Date(data.endDate) : null,
+                    status: data.status,
+                    imageUrl: data.imageUrl,
+                  },
+                });
+              } catch (error) {
+                console.error('Error updating cause:', error);
+                throw new Error('Failed to update cause');
+              }
+            }}
+            isSubmitting={false}
           />
         </CardContent>
       </Card>
     </div>
   );
-}
-
-function handleSubmit(data: any) {
-  // Handle form submission logic here
 } 

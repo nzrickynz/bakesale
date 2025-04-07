@@ -9,7 +9,6 @@ import { Heart, Settings, ArrowRight } from "lucide-react";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { EmptyState } from "@/components/ui/empty-state";
 import { OrganizationEditForm } from '@/components/forms/OrganizationEditForm';
-import { toast } from "react-hot-toast";
 
 interface PageProps {
   params: {
@@ -163,10 +162,9 @@ export default async function OrganizationPage({ params }: PageProps) {
                       instagramUrl: data.instagramUrl || null,
                     },
                   });
-                  toast.success('Organization updated successfully');
                 } catch (error) {
                   console.error('Error updating organization:', error);
-                  toast.error('Failed to update organization');
+                  throw new Error('Failed to update organization');
                 }
               }}
             />

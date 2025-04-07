@@ -42,7 +42,7 @@ interface TeamMembersProps {
   organizations: Organization[];
 }
 
-export function TeamMembers({ organizationId, listings, organizations }: TeamMembersProps) {
+export function TeamMembers({ organizationId, listings = [], organizations = [] }: TeamMembersProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -58,10 +58,11 @@ export function TeamMembers({ organizationId, listings, organizations }: TeamMem
         throw new Error("Failed to fetch team members");
       }
       const data = await response.json();
-      setTeamMembers(data);
+      setTeamMembers(data || []);
     } catch (error) {
       console.error("Failed to fetch team members:", error);
       toast.error("Failed to fetch team members");
+      setTeamMembers([]);
     } finally {
       setIsLoading(false);
     }
@@ -112,8 +113,6 @@ export function TeamMembers({ organizationId, listings, organizations }: TeamMem
   };
 
   const assignments = role === "ORG_ADMIN" ? organizations : listings;
-  console.log("Current role:", role);
-  console.log("Available assignments:", assignments);
 
   return (
     <Card className="col-span-4 bg-white shadow-sm">
@@ -177,7 +176,7 @@ export function TeamMembers({ organizationId, listings, organizations }: TeamMem
                   Assignments
                 </Label>
                 <div className="max-h-[200px] overflow-y-auto space-y-2 border rounded-md p-2 bg-white">
-                  {!assignments || assignments.length === 0 ? (
+                  {assignments.length === 0 ? (
                     <p className="text-sm text-gray-900">No {role === "ORG_ADMIN" ? "organizations" : "listings"} available</p>
                   ) : (
                     assignments.map((assignment: Organization | Listing) => (
@@ -228,14 +227,14 @@ export function TeamMembers({ organizationId, listings, organizations }: TeamMem
                     Loading...
                   </td>
                 </tr>
-              ) : teamMembers?.length === 0 ? (
+              ) : teamMembers.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-4 py-2 text-center text-sm text-gray-500">
                     No team members found
                   </td>
                 </tr>
               ) : (
-                teamMembers?.map((member: TeamMember) => (
+                teamMembers.map((member: TeamMember) => (
                   <tr key={member.id} className="border-b">
                     <td className="px-4 py-2 text-sm text-gray-900">{member.name}</td>
                     <td className="px-4 py-2 text-sm text-gray-900">{member.email}</td>
@@ -243,7 +242,7 @@ export function TeamMembers({ organizationId, listings, organizations }: TeamMem
                       {member.role.toLowerCase().replace("_", " ")}
                     </td>
                     <td className="px-4 py-2 text-sm text-gray-900">
-                      {member.assignments?.map((assignment: { name: string }) => assignment.name).join(", ")}
+                      {member.assignments?.map((assignment) => assignment.name).join(", ") || "None"}
                     </td>
                   </tr>
                 ))

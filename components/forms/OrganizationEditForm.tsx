@@ -86,8 +86,10 @@ export function OrganizationEditForm({ organization, onSubmit }: OrganizationEdi
 
         const { url } = await uploadResponse.json();
         await onSubmit({ ...data, logoUrl: url });
+        toast.success('Organization updated successfully');
       } else {
         await onSubmit(data);
+        toast.success('Organization updated successfully');
       }
     } catch (error) {
       console.error('Error submitting form:', error);
