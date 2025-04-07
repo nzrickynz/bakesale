@@ -38,11 +38,11 @@ export function ListingForm({ causeId, listingId, listing, mode }: ListingFormPr
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
-      global: {
-        headers: {
-          Authorization: `Bearer ${session?.supabaseAccessToken}`,
-        },
-      },
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false
+      }
     }
   );
 
@@ -80,22 +80,20 @@ export function ListingForm({ causeId, listingId, listing, mode }: ListingFormPr
       
       // Upload new image if provided
       if (imageFile) {
-        const fileExt = imageFile.name.split('.').pop();
-        const fileName = `${Date.now()}.${fileExt}`;
-        const { data, error } = await supabase.storage
-          .from('publicimages')
-          .upload(fileName, imageFile, {
-            cacheControl: '3600',
-            upsert: false
-          });
+        const formData = new FormData();
+        formData.append('file', imageFile);
 
-        if (error) throw error;
+        const uploadResponse = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('publicimages')
-          .getPublicUrl(fileName);
-        
-        imageUrl = publicUrl;
+        if (!uploadResponse.ok) {
+          throw new Error('Failed to upload image');
+        }
+
+        const { url } = await uploadResponse.json();
+        imageUrl = url;
       }
 
       // Convert price to number
