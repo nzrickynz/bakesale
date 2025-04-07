@@ -31,6 +31,7 @@ interface Cause {
       name: string | null;
       image: string | null;
     } | null;
+    paymentLink: string | null;
   }[];
 }
 
@@ -107,50 +108,39 @@ export default async function CausePage({ params }: PageProps) {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {cause.listings.map((listing) => (
-                <Card key={listing.id} className="overflow-hidden">
-                  {listing.imageUrl && (
-                    <div className="relative h-48">
-                      <Image
-                        src={listing.imageUrl}
-                        alt={listing.title}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  )}
+                <Card key={listing.id} className="bg-white">
                   <CardHeader>
-                    <CardTitle>{listing.title}</CardTitle>
+                    <CardTitle className="text-xl font-bold text-gray-900">
+                      {listing.title}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-600 mb-4 line-clamp-2">
-                      {listing.description}
+                    <p className="text-gray-600 mb-4">{listing.description}</p>
+                    <p className="text-2xl font-bold text-gray-900 mb-4">
+                      ${listing.price.toFixed(2)}
                     </p>
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-2xl font-bold text-[#E55937]">
-                        ${listing.price}
-                      </span>
-                      {listing.volunteer && (
-                        <div className="flex items-center gap-2">
-                          {listing.volunteer.image && (
-                            <div className="relative w-8 h-8 rounded-full overflow-hidden">
-                              <Image
-                                src={listing.volunteer.image}
-                                alt={listing.volunteer.name || "Volunteer"}
-                                fill
-                                className="object-cover"
-                              />
-                            </div>
-                          )}
-                          <span className="text-sm text-gray-500">
-                            by {listing.volunteer.name || "Anonymous"}
-                          </span>
+                    {listing.volunteer && (
+                      <div className="flex items-center mb-4">
+                        <div className="relative w-8 h-8 rounded-full overflow-hidden mr-2">
+                          <Image
+                            src={listing.volunteer.image || "/placeholder.svg"}
+                            alt={listing.volunteer.name || "Volunteer"}
+                            fill
+                            className="object-cover"
+                          />
                         </div>
-                      )}
-                    </div>
-                    <Button asChild className="w-full">
-                      <Link href={`/causes/${cause.id}/listings/${listing.id}`}>
-                        View Details
-                      </Link>
+                        <span className="text-gray-600">
+                          By {listing.volunteer.name}
+                        </span>
+                      </div>
+                    )}
+                    <Button
+                      asChild
+                      className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                    >
+                      <a href={listing.paymentLink || "#"} target="_blank" rel="noopener noreferrer">
+                        Buy Now
+                      </a>
                     </Button>
                   </CardContent>
                 </Card>
