@@ -7,7 +7,7 @@ import { Package, Clock, CheckCircle } from "lucide-react";
 import Image from "next/image";
 import { format } from "date-fns";
 import { notFound } from "next/navigation";
-import { Listing, Order, Cause, Organization } from "@prisma/client";
+import { Listing, Order, Cause, Organization, UserOrganization } from "@prisma/client";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { EmptyState } from "@/components/ui/empty-state";
 
@@ -18,10 +18,22 @@ type CauseWithOrg = Cause & {
 type ListingWithOrders = Listing & {
   orders: Order[];
   cause: CauseWithOrg;
+  isActive: boolean;
+  volunteerId: string | null;
 };
 
 type UserWithListings = {
+  id: string;
+  email: string;
+  name: string | null;
   managedListings: ListingWithOrders[];
+  userOrganizations: (UserOrganization & {
+    organization: Organization & {
+      causes: (Cause & {
+        listings: ListingWithOrders[];
+      })[];
+    };
+  })[];
 };
 
 export default async function VolunteerDashboard() {
@@ -49,21 +61,48 @@ export default async function VolunteerDashboard() {
             },
           },
         },
+        userOrganizations: {
+          include: {
+            organization: {
+              include: {
+                causes: {
+                  include: {
+                    listings: {
+                      include: {
+                        orders: true,
+                        cause: {
+                          include: {
+                            organization: true
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       },
-    }) as UserWithListings;
+    }) as UserWithListings | null;
 
     if (!user) {
       notFound();
     }
 
-    const totalListings = user?.managedListings?.length ?? 0;
-    const pendingOrders = user?.managedListings?.reduce(
-      (acc, listing) =>
+    const availableListings = user.userOrganizations[0]?.organization?.causes
+      .flatMap(cause => cause.listings.filter(listing => !listing.volunteerId && listing.isActive)) || [];
+
+    const listings = user.managedListings.length > 0 ? user.managedListings : availableListings;
+
+    const totalListings = listings.length;
+    const pendingOrders = listings.reduce(
+      (acc: number, listing: ListingWithOrders) =>
         acc + (listing.orders?.filter(order => order.fulfillmentStatus !== "FULFILLED")?.length || 0),
       0
     );
-    const fulfilledOrders = user?.managedListings?.reduce(
-      (acc, listing) =>
+    const fulfilledOrders = listings.reduce(
+      (acc: number, listing: ListingWithOrders) =>
         acc + (listing.orders?.filter(order => order.fulfillmentStatus === "FULFILLED")?.length || 0),
       0
     );
@@ -74,7 +113,9 @@ export default async function VolunteerDashboard() {
           <div>
             <h2 className="text-3xl font-bold tracking-tight text-gray-900">Volunteer Dashboard</h2>
             <p className="text-gray-900">
-              Manage your assigned listings and orders
+              {user.managedListings.length === 0 
+                ? "Available listings from your organization" 
+                : "Manage your assigned listings and orders"}
             </p>
           </div>
         </div>
@@ -85,7 +126,9 @@ export default async function VolunteerDashboard() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-900">Total Listings</p>
+                  <p className="text-sm font-medium text-gray-900">
+                    {user.managedListings.length === 0 ? "Available Listings" : "Total Listings"}
+                  </p>
                   <p className="text-2xl font-bold text-gray-900">{totalListings}</p>
                 </div>
                 <Package className="w-8 h-8 text-[#E55937]" />
@@ -120,12 +163,12 @@ export default async function VolunteerDashboard() {
 
         {/* Listings Grid */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {user?.managedListings?.length === 0 ? (
+          {listings.length === 0 ? (
             <div className="col-span-full">
-              <EmptyState text="You don't have any listings assigned yet" />
+              <EmptyState text="No listings are available at the moment" />
             </div>
           ) : (
-            user?.managedListings?.map((listing) => (
+            listings.map((listing) => (
               <Card key={listing.id} className="overflow-hidden bg-white">
                 {listing.imageUrl && (
                   <div className="relative h-48">
