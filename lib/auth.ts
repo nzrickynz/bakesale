@@ -118,9 +118,11 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
     async redirect({ url, baseUrl }) {
-      // Always redirect to /dashboard after login
-      if (url.startsWith(baseUrl)) return `${baseUrl}/dashboard`;
-      return baseUrl;
+      // If there's a specific URL to redirect to, use it
+      if (url.startsWith(baseUrl)) return url;
+      
+      // Default to regular dashboard
+      return `${baseUrl}/dashboard`;
     },
   },
 };

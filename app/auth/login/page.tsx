@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 function LoginForm() {
   const router = useRouter();
@@ -17,33 +19,44 @@ function LoginForm() {
 
   const from = searchParams.get('from') || '/dashboard';
 
-  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setIsLoading(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setError(null);
+    setIsLoading(true);
 
-    const formData = new FormData(event.currentTarget);
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
 
     try {
-      const result = await signIn('credentials', {
+      const response = await signIn('credentials', {
         email,
         password,
         redirect: false,
       });
 
-      if (result?.error) {
-        setError('Invalid email or password');
-      } else {
-        router.push(from);
+      if (response?.error) {
+        throw new Error(response.error);
       }
-    } catch (error) {
-      setError('An error occurred. Please try again.');
+
+      // Get the user's role from the session
+      const session = await getServerSession(authOptions);
+      const role = session?.user?.role;
+
+      // Redirect based on role
+      if (role === 'VOLUNTEER') {
+        router.push('/volunteer-dashboard');
+      } else if (role === 'ORG_ADMIN') {
+        router.push('/dashboard/organizations');
+      } else {
+        router.push('/dashboard');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred during login');
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Card className="w-full max-w-md">
@@ -53,7 +66,7 @@ function LoginForm() {
           Sign in to your account to continue
         </CardDescription>
       </CardHeader>
-      <form onSubmit={onSubmit}>
+      <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           {error && (
             <Alert variant="destructive">
