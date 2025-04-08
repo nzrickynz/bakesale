@@ -26,6 +26,7 @@ export async function POST(request: Request) {
       );
     }
 
+    console.log("Attempting to send email with Resend...");
     const { data, error } = await resend.emails.send({
       from: "BakeSale Contact <contact@bakesale.co.nz>",
       to: "hello@bakesale.co.nz",
@@ -41,18 +42,19 @@ export async function POST(request: Request) {
     });
 
     if (error) {
-      console.error("Resend API error:", error);
+      console.error("Resend API error details:", error);
       return NextResponse.json(
-        { error: "Failed to send email" },
+        { error: `Failed to send email: ${error.message}` },
         { status: 500 }
       );
     }
 
+    console.log("Email sent successfully:", data);
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Contact form error:", error);
+    console.error("Contact form error details:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: error instanceof Error ? error.message : "Internal server error" },
       { status: 500 }
     );
   }

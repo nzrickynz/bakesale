@@ -25,6 +25,7 @@ export default function ContactForm() {
     };
 
     try {
+      console.log("Submitting contact form...");
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: {
@@ -35,12 +36,14 @@ export default function ContactForm() {
 
       const result = await response.json();
 
-      if (response.ok) {
-        toast.success("Message sent successfully!");
-        router.push("/thank-you");
-      } else {
+      if (!response.ok) {
+        console.error("Contact form submission failed:", result);
         throw new Error(result.error || "Failed to send message");
       }
+
+      console.log("Contact form submitted successfully");
+      toast.success("Message sent successfully!");
+      router.push("/thank-you");
     } catch (error) {
       console.error("Error sending message:", error);
       toast.error(error instanceof Error ? error.message : "Failed to send message");

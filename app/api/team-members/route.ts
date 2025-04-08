@@ -8,7 +8,12 @@ import { randomBytes } from "crypto";
 import prisma from "@/lib/prisma";
 
 const userService = new UserService();
-const resend = new Resend(process.env.RESEND_API_KEY || 'ABC');
+
+if (!process.env.RESEND_API_KEY) {
+  console.error("RESEND_API_KEY environment variable is required");
+}
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request: Request) {
   try {
@@ -52,6 +57,8 @@ export async function POST(request: Request) {
     });
 
     if (!existingUser) {
+      console.log("Creating invitation for new user:", email);
+      
       // Generate an invitation token
       const token = randomBytes(32).toString('hex');
       
@@ -80,18 +87,37 @@ export async function POST(request: Request) {
       }
 
       // Send invitation email
-      await resend.emails.send({
-        from: "Bakesale <noreply@bakesale.co.nz>",
-        to: email,
-        subject: "You've been invited to join Bakesale",
-        html: `
-          <p>Hello,</p>
-          <p>You've been invited to join ${organization.name} on Bakesale as a team member.</p>
-          <p>Click the link below to create your account and get started:</p>
-          <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/invite/accept?token=${token}">Create Account</a></p>
-          <p>This invitation will expire in 7 days.</p>
-        `,
-      });
+      try {
+        console.log("Sending invitation email to:", email);
+        const { data, error } = await resend.emails.send({
+          from: "Bakesale <noreply@bakesale.co.nz>",
+          to: email,
+          subject: "You've been invited to join Bakesale",
+          html: `
+            <p>Hello,</p>
+            <p>You've been invited to join ${organization.name} on Bakesale as a team member.</p>
+            <p>Click the link below to create your account and get started:</p>
+            <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/invite/accept?token=${token}">Create Account</a></p>
+            <p>This invitation will expire in 7 days.</p>
+          `,
+        });
+
+        if (error) {
+          console.error("Failed to send invitation email:", error);
+          return NextResponse.json(
+            { error: "Failed to send invitation email" },
+            { status: 500 }
+          );
+        }
+
+        console.log("Invitation email sent successfully:", data);
+      } catch (emailError) {
+        console.error("Error sending invitation email:", emailError);
+        return NextResponse.json(
+          { error: "Failed to send invitation email" },
+          { status: 500 }
+        );
+      }
 
       return NextResponse.json({
         message: "Invitation sent successfully",
