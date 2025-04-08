@@ -183,14 +183,21 @@ export async function POST(request: Request) {
           )
         }
       }
-      throw error
+      console.error('[REGISTER]', error)
+      return NextResponse.json(
+        { 
+          success: false,
+          error: error instanceof Error ? error.message : 'Failed to create account' 
+        },
+        { status: 500 }
+      )
     }
   } catch (error) {
     console.error('[REGISTER]', error)
     return NextResponse.json(
       { 
         success: false,
-        error: 'Failed to create account' 
+        error: error instanceof Error ? error.message : 'Failed to create account' 
       },
       { status: 500 }
     )

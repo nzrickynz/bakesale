@@ -45,6 +45,7 @@ export default function InviteRegisterPage({
         }
         const data = await response.json();
         setInvitation(data.invitation);
+        setFormData(prev => ({ ...prev, email: data.invitation.email }));
       } catch (error) {
         console.error("Error fetching invitation:", error);
         toast.error("Invalid or expired invitation");
@@ -85,9 +86,14 @@ export default function InviteRegisterPage({
         throw new Error(data.error || "Failed to create account");
       }
 
+      if (!data.success) {
+        throw new Error(data.error || "Failed to create account");
+      }
+
       toast.success("Account created successfully!");
       router.push("/auth/login?message=account_created");
     } catch (error) {
+      console.error("Registration error:", error);
       setError(error instanceof Error ? error.message : "Something went wrong");
       toast.error(error instanceof Error ? error.message : "Failed to create account");
     } finally {
@@ -173,7 +179,7 @@ export default function InviteRegisterPage({
                 required
                 value={formData.email}
                 disabled
-                className="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                className="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 text-gray-900 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
               />
             </div>
 
