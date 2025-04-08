@@ -26,10 +26,10 @@ interface Listing {
 
 interface TeamMember {
   id: string;
-  name: string;
+  name: string | null;
   email: string;
   role: "ORG_ADMIN" | "VOLUNTEER";
-  assignments: {
+  assignments?: {
     id: string;
     name: string;
     type: "organization" | "listing";
@@ -58,7 +58,7 @@ export function TeamMembers({ organizationId, listings = [], organizations = [] 
         throw new Error("Failed to fetch team members");
       }
       const data = await response.json();
-      setTeamMembers(data || []);
+      setTeamMembers(data.teamMembers || []);
     } catch (error) {
       console.error("Failed to fetch team members:", error);
       toast.error("Failed to fetch team members");
@@ -120,7 +120,7 @@ export function TeamMembers({ organizationId, listings = [], organizations = [] 
         <CardTitle className="text-gray-900">Team Members</CardTitle>
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-[#F15A2B] text-white hover:bg-[#F15A2B]/90">
+            <Button className="bg-orange-600 text-white hover:bg-orange-700">
               <Plus className="mr-2 h-4 w-4" />
               Add Member
             </Button>
@@ -179,7 +179,7 @@ export function TeamMembers({ organizationId, listings = [], organizations = [] 
                   {assignments.length === 0 ? (
                     <p className="text-sm text-gray-900">No {role === "ORG_ADMIN" ? "organizations" : "listings"} available</p>
                   ) : (
-                    assignments.map((assignment: Organization | Listing) => (
+                    assignments.map((assignment) => (
                       <div key={assignment.id} className="flex items-center space-x-2">
                         <Checkbox
                           id={assignment.id}
@@ -202,7 +202,7 @@ export function TeamMembers({ organizationId, listings = [], organizations = [] 
                   )}
                 </div>
               </div>
-              <Button type="submit" className="w-full bg-[#F15A2B] text-white hover:bg-[#F15A2B]/90">
+              <Button type="submit" className="w-full bg-orange-600 text-white hover:bg-orange-700">
                 Add Member
               </Button>
             </form>
@@ -234,15 +234,15 @@ export function TeamMembers({ organizationId, listings = [], organizations = [] 
                   </td>
                 </tr>
               ) : (
-                teamMembers.map((member: TeamMember) => (
+                teamMembers.map((member) => (
                   <tr key={member.id} className="border-b">
-                    <td className="px-4 py-2 text-sm text-gray-900">{member.name}</td>
+                    <td className="px-4 py-2 text-sm text-gray-900">{member.name || "N/A"}</td>
                     <td className="px-4 py-2 text-sm text-gray-900">{member.email}</td>
                     <td className="px-4 py-2 text-sm text-gray-900 capitalize">
                       {member.role.toLowerCase().replace("_", " ")}
                     </td>
                     <td className="px-4 py-2 text-sm text-gray-900">
-                      {((member.assignments || [])).map((assignment) => assignment.name).join(", ") || "None"}
+                      {member.assignments?.map((assignment) => assignment.name).join(", ") || "None"}
                     </td>
                   </tr>
                 ))
