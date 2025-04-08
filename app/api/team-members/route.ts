@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { email, role } = body;
+    const { email, role, name } = body;
 
     if (!email || !role) {
       return NextResponse.json(
@@ -54,6 +54,14 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "User not found" },
         { status: 404 }
+      );
+    }
+
+    // Update user's name if provided
+    if (name) {
+      await userService.update(
+        { id: existingUser.id },
+        { name }
       );
     }
 

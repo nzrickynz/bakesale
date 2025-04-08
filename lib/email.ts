@@ -63,3 +63,30 @@ export async function sendTempPasswordEmail({
     `,
   });
 }
+
+export async function sendVolunteerAssignmentEmail({
+  to,
+  listingTitle,
+  causeTitle,
+  organizationName,
+}: {
+  to: string;
+  listingTitle: string;
+  causeTitle: string;
+  organizationName: string;
+}) {
+  await resend.emails.send({
+    from: "Bakesale <noreply@bakesale.co.nz>",
+    to,
+    subject: "You've been assigned to a new listing",
+    html: `
+      <p>Hello,</p>
+      <p>You've been assigned to manage a new listing on Bakesale:</p>
+      <p><strong>Listing:</strong> ${listingTitle}</p>
+      <p><strong>Cause:</strong> ${causeTitle}</p>
+      <p><strong>Organization:</strong> ${organizationName}</p>
+      <p>You can view and manage this listing in your volunteer dashboard.</p>
+      <p>Thank you for your support!</p>
+    `,
+  });
+}
