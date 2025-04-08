@@ -14,7 +14,6 @@ const publicRoutes = [
   "/causes",
   "/causes/[causeId]",
   "/causes/[causeId]/listings/[listingId]",
-  "/invite/register/[token]",
 ];
 
 export async function middleware(request: NextRequest) {
@@ -24,9 +23,10 @@ export async function middleware(request: NextRequest) {
   const isDashboardPage = request.nextUrl.pathname.startsWith("/dashboard");
   const isPublicRoute = publicRoutes.includes(request.nextUrl.pathname);
   const isApiRoute = request.nextUrl.pathname.startsWith("/api");
+  const isInviteRegisterRoute = request.nextUrl.pathname.startsWith("/invite/register/");
 
   // Allow public routes without any checks
-  if (isPublicRoute) {
+  if (isPublicRoute || isInviteRegisterRoute) {
     return null;
   }
 
