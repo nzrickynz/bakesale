@@ -121,7 +121,15 @@ export const authOptions: NextAuthOptions = {
       // If there's a specific URL to redirect to, use it
       if (url.startsWith(baseUrl)) return url;
       
-      // Default to regular dashboard
+      // Get the session to check user role
+      const session = await getServerSession(authOptions);
+      
+      // Redirect volunteers to their dashboard
+      if (session?.user?.role === "VOLUNTEER") {
+        return `${baseUrl}/volunteer-dashboard`;
+      }
+      
+      // Default to regular dashboard for other roles
       return `${baseUrl}/dashboard`;
     },
   },

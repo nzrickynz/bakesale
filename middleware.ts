@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 // Define public routes that don't require authentication
 const publicRoutes = [
@@ -82,6 +85,18 @@ export async function middleware(request: NextRequest) {
     // Volunteer-only routes
     if (path.startsWith("/volunteer-dashboard")) {
       if (userRole !== "VOLUNTEER") {
+        return NextResponse.redirect(new URL("/dashboard", request.url));
+      }
+      
+      // Check if volunteer has assigned listings
+      const user = await prisma.user.findUnique({
+        where: { id: token.id as string },
+        include: {
+          managedListings: true
+        }
+      });
+      
+      if (!user?.managedListings || user.managedListings.length === 0) {
         return NextResponse.redirect(new URL("/dashboard", request.url));
       }
     }

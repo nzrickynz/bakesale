@@ -64,28 +64,6 @@ export default async function VolunteerDashboard() {
             },
           },
         },
-        userOrganizations: {
-          include: {
-            organization: {
-              include: {
-                causes: {
-                  include: {
-                    listings: {
-                      include: {
-                        orders: true,
-                        cause: {
-                          include: {
-                            organization: true
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
       },
     }) as UserWithListings | null;
 
@@ -93,10 +71,12 @@ export default async function VolunteerDashboard() {
       redirect('/dashboard');
     }
 
-    const availableListings = user.userOrganizations[0]?.organization?.causes
-      .flatMap(cause => cause.listings.filter(listing => !listing.volunteerId && listing.isActive)) || [];
+    // Only show assigned listings
+    const listings = user.managedListings;
 
-    const listings = user.managedListings.length > 0 ? user.managedListings : availableListings;
+    if (listings.length === 0) {
+      redirect('/dashboard');
+    }
 
     const totalListings = listings.length;
     const pendingOrders = listings.reduce(
