@@ -47,11 +47,15 @@ export async function PUT(
         },
       },
       data: {
-        assignments: {
-          set: assignments.map((assignment: { id: string; type: string }) => ({
-            id: assignment.id,
-            type: assignment.type,
-          })),
+        assignedListings: {
+          set: assignments
+            .filter((assignment: { id: string; type: string }) => assignment.type === "listing")
+            .map((assignment: { id: string; type: string }) => ({ id: assignment.id })),
+        },
+        assignedOrganizations: {
+          set: assignments
+            .filter((assignment: { id: string; type: string }) => assignment.type === "organization")
+            .map((assignment: { id: string; type: string }) => ({ id: assignment.id })),
         },
       },
     });
