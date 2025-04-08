@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Menu } from "lucide-react";
+import Image from "next/image";
 
 export function Navbar() {
   const { data: session } = useSession();
@@ -20,10 +21,12 @@ export function Navbar() {
         <div className="flex justify-between h-16">
           <div className="flex">
             <Link href="/" className="flex items-center">
-              <img
-                src="https://ypogpkbzhgvdenmxnamt.supabase.co/storage/v1/object/public/publicimages//orange.png"
+              <Image
+                src="https://ypogpkbzhgvdenmxnamt.supabase.co/storage/v1/object/public/publicimages/orange.png"
                 alt="Bake Sale"
-                className="h-8 w-auto"
+                width={40}
+                height={40}
+                className="h-10 w-auto"
               />
             </Link>
           </div>

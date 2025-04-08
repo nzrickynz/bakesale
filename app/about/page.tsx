@@ -11,19 +11,11 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <div className="relative h-[400px] w-full">
-        <Image
-          src="/images/about-hero.jpg"
-          alt="Baking for a cause"
-          fill
-          className="object-cover"
-          priority
-        />
-        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-white text-center">
-            About BakeSale
-          </h1>
-        </div>
+      <div className="relative h-[400px] w-full bg-[#E55937] flex items-center justify-center">
+        <div className="absolute inset-0 bg-[url('/pattern.svg')] opacity-10"></div>
+        <h1 className="text-4xl md:text-5xl font-bold text-white text-center relative">
+          About BakeSale
+        </h1>
       </div>
 
       {/* Main Content */}

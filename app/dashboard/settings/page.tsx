@@ -86,27 +86,36 @@ export default async function SettingsPage() {
     );
   }
 
-  // Get all listings for the organization
+  // Get all listings for all organizations the user has access to
   const listings = await prisma.listing.findMany({
     where: {
       cause: {
-        organizationId: organization.id,
-      },
+        organizationId: {
+          in: transformedUser.adminOf.map(org => org.organization.id)
+        }
+      }
     },
     include: {
       cause: {
         select: {
           title: true,
-        },
-      },
-    },
+          organization: {
+            select: {
+              name: true
+            }
+          }
+        }
+      }
+    }
   });
 
-  // Get all causes for the organization
+  // Get all causes for all organizations
   const causes = await prisma.cause.findMany({
     where: {
-      organizationId: organization.id,
-    },
+      organizationId: {
+        in: transformedUser.adminOf.map(org => org.organization.id)
+      }
+    }
   });
 
   return (
@@ -129,7 +138,7 @@ export default async function SettingsPage() {
             <TeamMembers 
               organizationId={organization.id}
               listings={listings || []}
-              organizations={[organization]}
+              organizations={transformedUser.adminOf.map(org => org.organization)}
             />
           </CardContent>
         </Card>

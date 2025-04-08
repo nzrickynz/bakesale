@@ -23,11 +23,11 @@ export function DashboardHeader() {
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <Image
-              src="https://ypogpkbzhgvdenmxnamt.supabase.co/storage/v1/object/public/publicimages//orange.png"
+              src="https://ypogpkbzhgvdenmxnamt.supabase.co/storage/v1/object/public/publicimages/orange.png"
               alt="Bake Sale"
-              width={32}
-              height={32}
-              className="h-8 w-auto"
+              width={40}
+              height={40}
+              className="h-10 w-auto"
             />
           </Link>
         </div>

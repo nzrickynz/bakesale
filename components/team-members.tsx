@@ -112,7 +112,17 @@ export function TeamMembers({ organizationId, listings = [], organizations = [] 
     }
   };
 
-  const assignments = role === "ORG_ADMIN" ? organizations : listings;
+  const assignments = role === "ORG_ADMIN" 
+    ? organizations.map(org => ({
+        id: org.id,
+        name: org.name,
+        type: "organization"
+      }))
+    : listings.map(listing => ({
+        id: listing.id,
+        name: `${listing.title} (${listing.cause.title})`,
+        type: "listing"
+      }));
 
   return (
     <Card className="col-span-4 bg-white shadow-sm">
@@ -193,9 +203,7 @@ export function TeamMembers({ organizationId, listings = [], organizations = [] 
                           }}
                         />
                         <Label htmlFor={assignment.id} className="text-sm text-gray-900">
-                          {role === "ORG_ADMIN" 
-                            ? (assignment as Organization).name 
-                            : `${(assignment as Listing).title} (${(assignment as Listing).cause.title})`}
+                          {assignment.name}
                         </Label>
                       </div>
                     ))
