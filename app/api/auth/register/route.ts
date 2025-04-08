@@ -61,7 +61,13 @@ export async function POST(request: Request) {
       })
 
       if (existingUser) {
-        throw new Error('User already exists')
+        return NextResponse.json(
+          { 
+            success: false,
+            error: 'An account with this email already exists'
+          },
+          { status: 400 }
+        )
       }
 
       let existingOrg: Organization | null = null
@@ -75,75 +81,124 @@ export async function POST(request: Request) {
         })
 
         if (existingOrgCheck) {
-          throw new Error('Organization already exists')
+          return NextResponse.json(
+            { 
+              success: false,
+              error: 'An organization with this name already exists'
+            },
+            { status: 400 }
+          )
         }
 
-        const result = await userService.createWithOrganization({
-          email,
-          password,
-          name,
-          role: UserRole.ORG_ADMIN,
-          organization: {
-            name: organizationName,
-            description: organizationDescription || '',
-            websiteUrl,
-            facebookUrl,
-            instagramUrl,
-            logoUrl,
-          },
-        })
+        try {
+          const result = await userService.createWithOrganization({
+            email,
+            password,
+            name,
+            role: UserRole.ORG_ADMIN,
+            organization: {
+              name: organizationName,
+              description: organizationDescription || '',
+              websiteUrl,
+              facebookUrl,
+              instagramUrl,
+              logoUrl,
+            },
+          })
 
-        user = result.user
-        organization = result.organization
+          user = result.user
+          organization = result.organization
+        } catch (error) {
+          console.error('[REGISTER] Organization creation error:', error)
+          return NextResponse.json(
+            { 
+              success: false,
+              error: 'Failed to create organization'
+            },
+            { status: 500 }
+          )
+        }
       } else {
         // Create user without organization
-        const hashedPassword = await hash(password, 12)
-        user = await prisma.user.create({
-          data: {
-            email,
-            passwordHash: hashedPassword,
-            name,
-            role: UserRole.PUBLIC,
-          },
-        })
+        try {
+          const hashedPassword = await hash(password, 12)
+          user = await prisma.user.create({
+            data: {
+              email,
+              passwordHash: hashedPassword,
+              name,
+              role: UserRole.PUBLIC,
+            },
+          })
+        } catch (error) {
+          console.error('[REGISTER] User creation error:', error)
+          return NextResponse.json(
+            { 
+              success: false,
+              error: 'Failed to create user account'
+            },
+            { status: 500 }
+          )
+        }
       }
 
       // If there's an invitation token, handle the invitation
       if (invitationToken) {
-        const invitation = await prisma.volunteerInvitation.findFirst({
-          where: {
-            token: invitationToken,
-            status: 'PENDING',
-            expiresAt: {
-              gt: new Date()
+        try {
+          const invitation = await prisma.volunteerInvitation.findFirst({
+            where: {
+              token: invitationToken,
+              status: 'PENDING',
+              expiresAt: {
+                gt: new Date()
+              }
+            },
+            include: {
+              organization: true
             }
-          },
-          include: {
-            organization: true
+          })
+
+          if (!invitation) {
+            return NextResponse.json(
+              { 
+                success: false,
+                error: 'Invalid or expired invitation'
+              },
+              { status: 400 }
+            )
           }
-        })
 
-        if (invitation && invitation.organization) {
-          existingOrg = invitation.organization
+          if (invitation && invitation.organization) {
+            existingOrg = invitation.organization
 
-          // Add user to organization
-          await prisma.userOrganization.create({
-            data: {
-              userId: user.id,
-              organizationId: invitation.organizationId,
-              role: invitation.role
-            }
-          })
+            // Add user to organization
+            await prisma.userOrganization.create({
+              data: {
+                userId: user.id,
+                organizationId: invitation.organizationId,
+                role: invitation.role
+              }
+            })
 
-          // Update invitation
-          await prisma.volunteerInvitation.update({
-            where: { id: invitation.id },
-            data: {
-              status: 'ACCEPTED',
-              acceptedAt: new Date(),
-              invitedUserId: user.id
-            }
-          })
+            // Update invitation
+            await prisma.volunteerInvitation.update({
+              where: { id: invitation.id },
+              data: {
+                status: 'ACCEPTED',
+                acceptedAt: new Date(),
+                invitedUserId: user.id
+              }
+            })
+          }
+        } catch (error) {
+          console.error('[REGISTER] Invitation handling error:', error)
+          return NextResponse.json(
+            { 
+              success: false,
+              error: 'Failed to process invitation'
+            },
+            { status: 500 }
+          )
         }
       }
 
@@ -163,26 +218,6 @@ export async function POST(request: Request) {
 
       return NextResponse.json({ user: response });
     } catch (error) {
-      if (error instanceof Error) {
-        if (error.message === 'User already exists') {
-          return NextResponse.json(
-            { 
-              success: false,
-              error: error.message 
-            },
-            { status: 400 }
-          )
-        }
-        if (error.message === 'Organization already exists') {
-          return NextResponse.json(
-            { 
-              success: false,
-              error: error.message 
-            },
-            { status: 400 }
-          )
-        }
-      }
       console.error('[REGISTER]', error)
       return NextResponse.json(
         { 

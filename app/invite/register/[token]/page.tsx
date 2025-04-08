@@ -94,8 +94,9 @@ export default function InviteRegisterPage({
       router.push("/auth/login?message=account_created");
     } catch (error) {
       console.error("Registration error:", error);
-      setError(error instanceof Error ? error.message : "Something went wrong");
-      toast.error(error instanceof Error ? error.message : "Failed to create account");
+      const errorMessage = error instanceof Error ? error.message : "Something went wrong";
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
