@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Package, Clock, CheckCircle } from "lucide-react";
 import Image from "next/image";
 import { format } from "date-fns";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Listing, Order, Cause, Organization, UserOrganization } from "@prisma/client";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -41,7 +41,7 @@ export default async function VolunteerDashboard() {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      notFound();
+      redirect('/dashboard');
     }
 
     const user = await prisma.user.findFirst({
@@ -90,7 +90,7 @@ export default async function VolunteerDashboard() {
     }) as UserWithListings | null;
 
     if (!user) {
-      notFound();
+      redirect('/dashboard');
     }
 
     const availableListings = user.userOrganizations[0]?.organization?.causes

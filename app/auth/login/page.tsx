@@ -37,6 +37,9 @@ function LoginForm() {
         throw new Error(response.error);
       }
 
+      // Wait for session to be updated
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
       // Redirect to the intended page or volunteer dashboard
       const redirectPath = from === '/dashboard' || from === '/login' ? '/volunteer-dashboard' : from;
       router.push(redirectPath);
