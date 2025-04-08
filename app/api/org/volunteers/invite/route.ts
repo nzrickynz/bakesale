@@ -99,7 +99,7 @@ export async function POST(request: Request) {
     // Send the invitation email
     await sendInvitationEmail({
       to: email,
-      invitationId: invitation.id,
+      token: token,
       organizationName: userOrg.organization.name,
       role,
       invitedByName: session.user.name || "Organization Admin",

@@ -26,7 +26,7 @@ export async function sendInvitationEmail({
   role,
   invitedByName,
 }: InvitationEmailParams) {
-  const acceptUrl = `${process.env.NEXT_PUBLIC_APP_URL}/invite/register/${invitationId}`;
+  const acceptUrl = `${process.env.NEXT_PUBLIC_APP_URL}/invite/register/${token}`;
 
   await resend.emails.send({
     from: 'Bake Sale <noreply@bakesale.co.nz>',
