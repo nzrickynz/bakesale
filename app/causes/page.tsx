@@ -40,8 +40,8 @@ export default async function CausesPage() {
                     </div>
                   )}
                   <div>
-                    <CardTitle>{cause.organization.name}</CardTitle>
-                    <p className="text-sm text-gray-500">Organization</p>
+                    <CardTitle className="text-gray-900">{cause.organization.name}</CardTitle>
+                    <p className="text-sm text-gray-900">Organization</p>
                   </div>
                 </div>
               </CardHeader>
@@ -52,16 +52,21 @@ export default async function CausesPage() {
                 <p className="text-gray-600 mb-4 line-clamp-3">
                   {cause.description}
                 </p>
-                {cause.imageUrl && (
-                  <div className="relative h-48 rounded-lg overflow-hidden mb-4">
+                <div className="relative h-48 rounded-lg overflow-hidden mb-4">
+                  {cause.imageUrl ? (
                     <Image
                       src={cause.imageUrl}
                       alt={cause.title}
                       fill
                       className="object-cover"
+                      priority
                     />
-                  </div>
-                )}
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <span className="text-gray-400">No image</span>
+                    </div>
+                  )}
+                </div>
                 <Button
                   asChild
                   className="w-full bg-orange-500 hover:bg-orange-600 text-white"

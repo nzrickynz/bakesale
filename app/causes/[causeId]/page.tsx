@@ -82,16 +82,21 @@ export default async function CausePage({ params }: PageProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Cause Header */}
         <div className="mb-12">
-          {cause.imageUrl && (
-            <div className="relative h-96 rounded-lg overflow-hidden mb-8">
+          <div className="relative h-96 rounded-lg overflow-hidden mb-8">
+            {cause.imageUrl ? (
               <Image
                 src={cause.imageUrl}
                 alt={cause.title}
                 fill
                 className="object-cover"
+                priority
               />
-            </div>
-          )}
+            ) : (
+              <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                <span className="text-gray-400">No image</span>
+              </div>
+            )}
+          </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             {cause.title}
           </h1>
@@ -109,12 +114,27 @@ export default async function CausePage({ params }: PageProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {cause.listings.map((listing) => (
                 <Card key={listing.id} className="bg-white">
-                  <CardHeader>
-                    <CardTitle className="text-xl font-bold text-gray-900">
-                      {listing.title}
-                    </CardTitle>
+                  <CardHeader className="p-0">
+                    <div className="relative aspect-video w-full overflow-hidden rounded-t-lg">
+                      {listing.imageUrl ? (
+                        <Image
+                          src={listing.imageUrl}
+                          alt={listing.title}
+                          fill
+                          className="object-cover"
+                          priority
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                          <span className="text-gray-400">No image</span>
+                        </div>
+                      )}
+                    </div>
                   </CardHeader>
                   <CardContent>
+                    <CardTitle className="text-xl font-bold text-gray-900 mt-4">
+                      {listing.title}
+                    </CardTitle>
                     <p className="text-gray-600 mb-4">{listing.description}</p>
                     <p className="text-2xl font-bold text-gray-900 mb-4">
                       ${listing.price.toFixed(2)}
@@ -138,20 +158,21 @@ export default async function CausePage({ params }: PageProps) {
             <Card className="bg-white">
               <CardHeader>
                 <div className="flex items-center gap-3 mb-2">
-                  {cause.organization.logoUrl ? (
-                    <div className="relative w-12 h-12 rounded-full overflow-hidden">
+                  <div className="relative w-12 h-12 rounded-full overflow-hidden">
+                    {cause.organization.logoUrl ? (
                       <Image
                         src={cause.organization.logoUrl}
                         alt={cause.organization.name}
                         fill
                         className="object-cover"
+                        priority
                       />
-                    </div>
-                  ) : (
-                    <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-                      <span className="text-gray-400 text-sm">No logo</span>
-                    </div>
-                  )}
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-gray-400 text-sm">No logo</span>
+                      </div>
+                    )}
+                  </div>
                   <div>
                     <CardTitle className="text-gray-900">{cause.organization.name}</CardTitle>
                     <p className="text-sm text-gray-500">
