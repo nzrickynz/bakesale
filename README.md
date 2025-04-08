@@ -19,9 +19,8 @@ A platform for managing and organizing bake sales for charitable causes.
 - Next.js 14 (App Router)
 - TypeScript
 - Tailwind CSS
-- Supabase
+- Supabase (Database and Storage)
 - Vercel
-- Cloudinary for image hosting
 - NextAuth.js for authentication
 - Prisma ORM
 
@@ -60,19 +59,27 @@ A platform for managing and organizing bake sales for charitable causes.
 Required environment variables:
 
 ```bash
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+
 # Database
-SUPABASE_DATABASE_URL=
-SUPABASE_DIRECT_URL=
+DATABASE_URL=
 
 # Auth
 NEXTAUTH_URL=
 NEXTAUTH_SECRET=
 
-# Cloudinary
-NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=
-NEXT_PUBLIC_CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=
+# Google OAuth
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+
+# App URL
+NEXT_PUBLIC_APP_URL=
+
+# Email Configuration (Resend)
+RESEND_API_KEY=
 ```
 
 ## Contributing

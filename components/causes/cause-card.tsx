@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Cause, Listing, User } from "@prisma/client";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
+import Image from "next/image";
 
 interface CauseCardProps {
   cause: Cause & {
@@ -21,10 +22,12 @@ export function CauseCard({ cause }: CauseCardProps) {
       <CardHeader className="p-0">
         <div className="aspect-video relative">
           {cause.imageUrl ? (
-            <img
+            <Image
               src={cause.imageUrl}
               alt={cause.title}
-              className="object-cover w-full h-full"
+              fill
+              className="object-cover"
+              priority
             />
           ) : (
             <div className="w-full h-full bg-muted flex items-center justify-center">

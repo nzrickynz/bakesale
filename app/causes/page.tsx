@@ -36,6 +36,8 @@ export default async function CausesPage() {
                         alt={cause.organization.name}
                         fill
                         className="object-cover"
+                        priority
+                        unoptimized
                       />
                     </div>
                   )}
@@ -60,6 +62,7 @@ export default async function CausesPage() {
                       fill
                       className="object-cover"
                       priority
+                      unoptimized
                     />
                   ) : (
                     <div className="w-full h-full bg-gray-200 flex items-center justify-center">

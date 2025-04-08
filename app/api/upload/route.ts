@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     // Generate a unique filename
     const fileExt = file.name.split('.').pop();
     const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
-    const filePath = `publicimages/${fileName}`;
+    const filePath = `${fileName}`;
 
     // Upload the file to Supabase storage
     const { data, error } = await supabase.storage

@@ -82,7 +82,7 @@ export default async function CausePage({ params }: PageProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Cause Header */}
         <div className="mb-12">
-          <div className="relative h-96 rounded-lg overflow-hidden mb-8">
+          <div className="relative h-[400px] w-full overflow-hidden rounded-lg">
             {cause.imageUrl ? (
               <Image
                 src={cause.imageUrl}
@@ -90,6 +90,7 @@ export default async function CausePage({ params }: PageProps) {
                 fill
                 className="object-cover"
                 priority
+                unoptimized
               />
             ) : (
               <div className="w-full h-full bg-gray-200 flex items-center justify-center">
@@ -123,6 +124,7 @@ export default async function CausePage({ params }: PageProps) {
                           fill
                           className="object-cover"
                           priority
+                          unoptimized
                         />
                       ) : (
                         <div className="w-full h-full bg-gray-200 flex items-center justify-center">
@@ -166,6 +168,7 @@ export default async function CausePage({ params }: PageProps) {
                         fill
                         className="object-cover"
                         priority
+                        unoptimized
                       />
                     ) : (
                       <div className="w-full h-full bg-gray-200 flex items-center justify-center">
