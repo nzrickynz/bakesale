@@ -1,153 +1,111 @@
 import { NextResponse } from 'next/server'
+import { hash } from 'bcryptjs'
 import { z } from 'zod'
+import prisma from '@/lib/prisma'
+import { UserRole, User, Organization } from '@prisma/client'
 import { UserService } from '@/lib/services/user'
 import { OrganizationService } from '@/lib/services/organization'
-import { UserRole } from '@prisma/client'
-import { hash } from 'bcryptjs'
-import prisma from '@/lib/prisma'
 
-// Validation schema for registration input
+interface OrganizationResponse {
+  id: string;
+  name: string;
+}
+
+interface UserResponse {
+  id: string;
+  name: string | null;
+  email: string;
+  role: UserRole;
+  organization: OrganizationResponse | null;
+}
+
 const registerSchema = z.object({
-  email: z.string()
-    .email('Invalid email format')
-    .max(255, 'Email must be less than 255 characters'),
-  password: z.string()
-    .min(8, 'Password must be at least 8 characters long')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number')
-    .max(100, 'Password must be less than 100 characters'),
-  name: z.string()
-    .min(1, 'Name is required')
-    .max(100, 'Name must be less than 100 characters'),
-  role: z.enum([UserRole.ORG_ADMIN, UserRole.VOLUNTEER]).optional(),
-  organizationName: z.string()
-    .min(1, 'Organization name is required')
-    .max(100, 'Organization name must be less than 100 characters'),
-  organizationDescription: z.string()
-    .min(1, 'Organization description is required')
-    .max(1000, 'Organization description must be less than 1000 characters'),
-  websiteUrl: z.string().url().optional().nullable(),
-  facebookUrl: z.string().url().optional().nullable(),
-  instagramUrl: z.string().url().optional().nullable(),
-  logoUrl: z.string().url().optional().nullable(),
+  name: z.string().min(1),
+  email: z.string().email(),
+  password: z.string().min(6),
   invitationToken: z.string().optional(),
+  organizationName: z.string().optional(),
+  organizationDescription: z.string().optional(),
+  websiteUrl: z.string().url().optional(),
+  facebookUrl: z.string().url().optional(),
+  instagramUrl: z.string().url().optional(),
+  logoUrl: z.string().url().optional(),
 })
 
 const userService = new UserService()
-const organizationService = new OrganizationService()
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
   try {
-    // Validate request content type
-    const contentType = request.headers.get('content-type')
-    if (!contentType?.includes('application/json')) {
-      return NextResponse.json(
-        { 
-          success: false,
-          error: 'Content-Type must be application/json' 
-        },
-        { status: 400 }
-      )
-    }
-
-    // Parse and validate request body
-    let body
-    try {
-      body = await request.json()
-    } catch (parseError) {
-      return NextResponse.json(
-        { 
-          success: false,
-          error: 'Invalid JSON in request body' 
-        },
-        { status: 400 }
-      )
-    }
-
-    // Validate input using Zod schema
-    const validationResult = registerSchema.safeParse(body)
-    if (!validationResult.success) {
-      return NextResponse.json(
-        { 
-          success: false,
-          error: 'Validation failed',
-          details: validationResult.error.errors?.map(e => ({
-            field: e.path.join('.'),
-            message: e.message
-          }))
-        },
-        { status: 400 }
-      )
-    }
+    const json = await request.json()
+    const body = registerSchema.parse(json)
 
     const {
       email,
       password,
       name,
-      role = UserRole.ORG_ADMIN,
+      invitationToken,
       organizationName,
       organizationDescription,
       websiteUrl,
       facebookUrl,
       instagramUrl,
       logoUrl,
-      invitationToken
-    } = validationResult.data
+    } = body
 
     try {
-      // Check if user already exists
-      const existingUser = await userService.findByEmail(email)
+      // Check if user exists
+      const existingUser = await prisma.user.findUnique({
+        where: { email },
+      })
+
       if (existingUser) {
-        return NextResponse.json(
-          { 
-            success: false,
-            error: 'User already exists' 
-          },
-          { status: 400 }
-        )
+        throw new Error('User already exists')
       }
 
-      // Check if organization name already exists
-      const existingOrg = await organizationService.findByName(organizationName)
-      if (existingOrg) {
-        return NextResponse.json(
-          { 
-            success: false,
-            error: 'Organization already exists' 
-          },
-          { status: 400 }
-        )
-      }
+      let existingOrg: Organization | null = null
+      let organization: Organization | null = null
+      let user: User
 
-      // Hash password
-      const hashedPassword = await hash(password, 12)
+      // Create user with organization if organization details are provided
+      if (organizationName) {
+        const existingOrgCheck = await prisma.organization.findFirst({
+          where: { name: organizationName },
+        })
 
-      // Create user with organization
-      const { user, organization } = await userService.createWithOrganization({
-        email,
-        password,
-        name,
-        role: UserRole.ORG_ADMIN,
-        organization: {
-          name: organizationName,
-          description: organizationDescription,
-          websiteUrl,
-          facebookUrl,
-          instagramUrl,
-          logoUrl,
-        },
-      });
+        if (existingOrgCheck) {
+          throw new Error('Organization already exists')
+        }
 
-      // If there's an existing organization, add the user as an admin
-      if (existingOrg) {
-        await userService.addTeamMember({
-          userId: user.id,
-          organizationId: existingOrg.id,
+        const result = await userService.createWithOrganization({
+          email,
+          password,
+          name,
           role: UserRole.ORG_ADMIN,
-        });
+          organization: {
+            name: organizationName,
+            description: organizationDescription || '',
+            websiteUrl,
+            facebookUrl,
+            instagramUrl,
+            logoUrl,
+          },
+        })
+
+        user = result.user
+        organization = result.organization
+      } else {
+        // Create user without organization
+        const hashedPassword = await hash(password, 12)
+        user = await prisma.user.create({
+          data: {
+            email,
+            passwordHash: hashedPassword,
+            name,
+            role: UserRole.PUBLIC,
+          },
+        })
       }
 
       // If there's an invitation token, handle the invitation
@@ -159,10 +117,15 @@ export async function POST(request: Request) {
             expiresAt: {
               gt: new Date()
             }
+          },
+          include: {
+            organization: true
           }
         })
 
-        if (invitation) {
+        if (invitation && invitation.organization) {
+          existingOrg = invitation.organization
+
           // Add user to organization
           await prisma.userOrganization.create({
             data: {
@@ -184,21 +147,21 @@ export async function POST(request: Request) {
         }
       }
 
-      return NextResponse.json({
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          organization: existingOrg ? {
-            id: existingOrg.id,
-            name: existingOrg.name,
-          } : {
-            id: organization.id,
-            name: organization.name,
-          },
-        },
-      });
+      const response: UserResponse = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        organization: existingOrg ? {
+          id: existingOrg.id,
+          name: existingOrg.name,
+        } : organization ? {
+          id: organization.id,
+          name: organization.name,
+        } : null,
+      }
+
+      return NextResponse.json({ user: response });
     } catch (error) {
       if (error instanceof Error) {
         if (error.message === 'User already exists') {
