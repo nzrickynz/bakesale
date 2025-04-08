@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
+import { Plus, Edit, Trash2 } from "lucide-react";
 
 interface Organization {
   id: string;
@@ -52,6 +52,8 @@ export function TeamMembers({ organizationId, listings = [], organizations = [] 
   const [selectedAssignments, setSelectedAssignments] = useState<string[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const fetchTeamMembers = useCallback(async () => {
     try {
@@ -138,6 +140,64 @@ export function TeamMembers({ organizationId, listings = [], organizations = [] 
     } catch (error) {
       console.error("Failed to resend invitation:", error);
       toast.error(error instanceof Error ? error.message : "Failed to resend invitation");
+    }
+  };
+
+  const handleEditMember = (member: TeamMember) => {
+    setEditingMember(member);
+    setSelectedAssignments(member.assignments?.map(a => a.id) || []);
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateMember = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingMember) return;
+
+    try {
+      const response = await fetch(`/api/team-members/${editingMember.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          organizationId,
+          assignments: selectedAssignments.map(id => ({
+            id,
+            type: editingMember.role === "ORG_ADMIN" ? "organization" : "listing",
+          })),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update team member");
+      }
+
+      toast.success("Team member updated successfully");
+      setIsEditModalOpen(false);
+      fetchTeamMembers();
+    } catch (error) {
+      console.error("Failed to update team member:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to update team member");
+    }
+  };
+
+  const handleRemoveMember = async (memberId: string) => {
+    if (!confirm("Are you sure you want to remove this team member?")) return;
+
+    try {
+      const response = await fetch(`/api/team-members/${memberId}?organizationId=${organizationId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to remove team member");
+      }
+
+      toast.success("Team member removed successfully");
+      fetchTeamMembers();
+    } catch (error) {
+      console.error("Failed to remove team member:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to remove team member");
     }
   };
 
@@ -293,16 +353,38 @@ export function TeamMembers({ organizationId, listings = [], organizations = [] 
                       {member.assignments?.map((assignment) => assignment.name).join(", ") || "None"}
                     </td>
                     <td className="px-4 py-2 text-sm text-gray-900">
-                      {member.status === "PENDING" && member.invitationId && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleResendInvitation(member.invitationId!)}
-                          className="text-orange-600 border-orange-600 hover:bg-orange-50"
-                        >
-                          Resend Invitation
-                        </Button>
-                      )}
+                      <div className="flex items-center space-x-2">
+                        {member.status === "PENDING" && member.invitationId && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleResendInvitation(member.invitationId!)}
+                            className="text-orange-600 border-orange-600 hover:bg-orange-50"
+                          >
+                            Resend Invitation
+                          </Button>
+                        )}
+                        {member.status === "ACTIVE" && (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditMember(member)}
+                              className="text-gray-600 hover:text-gray-900"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveMember(member.id)}
+                              className="text-red-600 hover:text-red-900"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -311,6 +393,51 @@ export function TeamMembers({ organizationId, listings = [], organizations = [] 
           </table>
         </div>
       </CardContent>
+
+      {/* Edit Member Modal */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-gray-900">Edit Team Member</DialogTitle>
+          </DialogHeader>
+          {editingMember && (
+            <form onSubmit={handleUpdateMember} className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-900">
+                  Assignments
+                </Label>
+                <div className="max-h-[200px] overflow-y-auto space-y-2 border rounded-md p-2 bg-white">
+                  {assignments.length === 0 ? (
+                    <p className="text-sm text-gray-900">No {editingMember.role === "ORG_ADMIN" ? "organizations" : "listings"} available</p>
+                  ) : (
+                    assignments.map((assignment) => (
+                      <div key={assignment.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={assignment.id}
+                          checked={selectedAssignments.includes(assignment.id)}
+                          onCheckedChange={(checked: boolean) => {
+                            if (checked) {
+                              setSelectedAssignments([...selectedAssignments, assignment.id]);
+                            } else {
+                              setSelectedAssignments(selectedAssignments.filter(id => id !== assignment.id));
+                            }
+                          }}
+                        />
+                        <Label htmlFor={assignment.id} className="text-sm text-gray-900">
+                          {assignment.name}
+                        </Label>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+              <Button type="submit" className="w-full bg-orange-600 text-white hover:bg-orange-700">
+                Update Assignments
+              </Button>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 } 

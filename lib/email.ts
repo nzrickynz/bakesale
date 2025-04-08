@@ -26,7 +26,7 @@ export async function sendInvitationEmail({
   role,
   invitedByName,
 }: InvitationEmailParams) {
-  const acceptUrl = `${process.env.NEXT_PUBLIC_APP_URL}/invite/accept/${invitationId}`;
+  const acceptUrl = `${process.env.NEXT_PUBLIC_APP_URL}/invite/register/${invitationId}`;
 
   await resend.emails.send({
     from: 'Bake Sale <noreply@bakesale.co.nz>',
@@ -34,8 +34,9 @@ export async function sendInvitationEmail({
     subject: `You've been invited to join ${organizationName} on Bake Sale`,
     html: `
       <h1>You've been invited to join ${organizationName}</h1>
-      <p>${invitedByName} has invited you to join ${organizationName} on Bake Sale as a ${role.toLowerCase()}. Click the link below to accept the invitation:</p>
-      <p><a href="${acceptUrl}">Accept Invitation</a></p>
+      <p>${invitedByName} has invited you to join ${organizationName} on Bake Sale as a ${role.toLowerCase()}.</p>
+      <p>Click the link below to create your account and get started:</p>
+      <p><a href="${acceptUrl}">Create Account</a></p>
       <p>This invitation will expire in 7 days.</p>
       <p>If you didn't expect this invitation, you can safely ignore this email.</p>
     `,

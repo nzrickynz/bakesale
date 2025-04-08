@@ -3,6 +3,8 @@ import { z } from 'zod'
 import { UserService } from '@/lib/services/user'
 import { OrganizationService } from '@/lib/services/organization'
 import { UserRole } from '@prisma/client'
+import { hash } from 'bcryptjs'
+import prisma from '@/lib/prisma'
 
 // Validation schema for registration input
 const registerSchema = z.object({
@@ -29,6 +31,7 @@ const registerSchema = z.object({
   facebookUrl: z.string().url().optional().nullable(),
   instagramUrl: z.string().url().optional().nullable(),
   logoUrl: z.string().url().optional().nullable(),
+  invitationToken: z.string().optional(),
 })
 
 const userService = new UserService()
@@ -90,7 +93,8 @@ export async function POST(request: Request) {
       websiteUrl,
       facebookUrl,
       instagramUrl,
-      logoUrl
+      logoUrl,
+      invitationToken
     } = validationResult.data
 
     try {
@@ -118,34 +122,78 @@ export async function POST(request: Request) {
         )
       }
 
-      // Create user and organization
-      const result = await userService.createWithOrganization({
-        email,
-        password,
-        name,
-        role,
-        organization: {
-          name: organizationName,
-          description: organizationDescription,
-          websiteUrl,
-          facebookUrl,
-          instagramUrl,
-          logoUrl,
+      // Hash password
+      const hashedPassword = await hash(password, 12)
+
+      // Create user
+      const user = await prisma.user.create({
+        data: {
+          name,
+          email,
+          passwordHash: hashedPassword,
+          role: role === UserRole.ORG_ADMIN ? UserRole.ORG_ADMIN : UserRole.VOLUNTEER,
+          organization: {
+            connectOrCreate: {
+              where: { name: organizationName },
+              create: {
+                name: organizationName,
+                description: organizationDescription,
+                websiteUrl,
+                facebookUrl,
+                instagramUrl,
+                logoUrl,
+              }
+            }
+          }
         }
       })
+
+      // If there's an invitation token, handle the invitation
+      if (invitationToken) {
+        const invitation = await prisma.volunteerInvitation.findFirst({
+          where: {
+            token: invitationToken,
+            status: 'PENDING',
+            expiresAt: {
+              gt: new Date()
+            }
+          }
+        })
+
+        if (invitation) {
+          // Add user to organization
+          await prisma.userOrganization.create({
+            data: {
+              userId: user.id,
+              organizationId: invitation.organizationId,
+              role: invitation.role
+            }
+          })
+
+          // Update invitation
+          await prisma.volunteerInvitation.update({
+            where: { id: invitation.id },
+            data: {
+              status: 'ACCEPTED',
+              acceptedAt: new Date(),
+              invitedUserId: user.id
+            }
+          })
+        }
+      }
 
       return NextResponse.json({
         success: true,
         data: {
           user: {
-            id: result.user.id,
-            email: result.user.email,
-            name: result.user.name,
-            role: result.user.role
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role
           },
           organization: {
-            id: result.organization.id,
-            name: result.organization.name
+            id: existingOrg.id,
+            name: existingOrg.name
           }
         }
       })
