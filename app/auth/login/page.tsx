@@ -37,8 +37,9 @@ function LoginForm() {
         throw new Error(response.error);
       }
 
-      // Redirect to the intended page or dashboard
-      router.push(from);
+      // Redirect to the intended page or volunteer dashboard
+      const redirectPath = from === '/dashboard' || from === '/login' ? '/volunteer-dashboard' : from;
+      router.push(redirectPath);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred during login');

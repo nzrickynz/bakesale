@@ -78,6 +78,13 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL("/dashboard", request.url));
       }
     }
+
+    // Volunteer-only routes
+    if (path.startsWith("/volunteer-dashboard")) {
+      if (userRole !== "VOLUNTEER") {
+        return NextResponse.redirect(new URL("/dashboard", request.url));
+      }
+    }
   }
 
   return null;

@@ -44,8 +44,11 @@ export default async function VolunteerDashboard() {
       notFound();
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+    const user = await prisma.user.findFirst({
+      where: { 
+        email: session.user.email,
+        role: 'VOLUNTEER'
+      },
       include: {
         managedListings: {
           include: {
