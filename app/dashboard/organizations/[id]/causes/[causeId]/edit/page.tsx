@@ -56,6 +56,7 @@ export default async function EditCausePage({ params }: PageProps) {
               imageUrl: cause.imageUrl,
             }}
             mode="edit"
+            organizationId={params.id}
             onSubmit={async (data) => {
               'use server';
               try {

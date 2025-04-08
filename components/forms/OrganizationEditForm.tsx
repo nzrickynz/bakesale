@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Image } from '@/components/ui/image';
 import { Upload } from 'lucide-react';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 const organizationSchema = z.object({
   name: z.string().min(1, 'Organization name is required'),
@@ -38,6 +39,7 @@ interface OrganizationEditFormProps {
 export function OrganizationEditForm({ organization, onSubmit }: OrganizationEditFormProps) {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(organization.logoUrl);
+  const router = useRouter();
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<OrganizationFormData>({
     resolver: zodResolver(organizationSchema),
@@ -87,9 +89,11 @@ export function OrganizationEditForm({ organization, onSubmit }: OrganizationEdi
         const { url } = await uploadResponse.json();
         await onSubmit({ ...data, logoUrl: url });
         toast.success('Organization updated successfully');
+        router.push('/dashboard/organizations');
       } else {
         await onSubmit(data);
         toast.success('Organization updated successfully');
+        router.push('/dashboard/organizations');
       }
     } catch (error) {
       console.error('Error submitting form:', error);

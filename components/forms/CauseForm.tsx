@@ -31,9 +31,10 @@ interface CauseFormProps {
   mode: "create" | "edit";
   onSubmit: (data: CauseFormValues) => Promise<void>;
   isSubmitting: boolean;
+  organizationId: string;
 }
 
-export function CauseForm({ cause, mode, onSubmit, isSubmitting }: CauseFormProps) {
+export function CauseForm({ cause, mode, onSubmit, isSubmitting, organizationId }: CauseFormProps) {
   const router = useRouter();
   const [imageUrl, setImageUrl] = useState<string | null>(cause?.imageUrl || null);
 
@@ -53,7 +54,7 @@ export function CauseForm({ cause, mode, onSubmit, isSubmitting }: CauseFormProp
         imageUrl,
       });
       toast.success(`Cause ${mode === "create" ? "created" : "updated"} successfully`);
-      router.refresh();
+      router.push(`/dashboard/organizations/${organizationId}/causes`);
     } catch (error) {
       console.error(`Failed to ${mode} cause:`, error);
       toast.error(`Failed to ${mode} cause`);

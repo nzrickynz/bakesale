@@ -9,11 +9,14 @@ export function Toaster() {
       toastOptions={{
         duration: 5000,
         style: {
-          background: "hsl(var(--background))",
-          color: "hsl(var(--foreground))",
-          border: "1px solid hsl(var(--border))",
+          background: "white",
+          color: "#374151", // text-gray-700
+          border: "1px solid #E5E7EB", // border-gray-200
         },
+        className: "toast",
       }}
+      theme="light"
+      richColors
     />
   );
 } 
