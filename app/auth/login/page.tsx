@@ -8,8 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 
 function LoginForm() {
   const router = useRouter();
@@ -39,18 +37,9 @@ function LoginForm() {
         throw new Error(response.error);
       }
 
-      // Get the user's role from the session
-      const session = await getServerSession(authOptions);
-      const role = session?.user?.role;
-
-      // Redirect based on role
-      if (role === 'VOLUNTEER') {
-        router.push('/volunteer-dashboard');
-      } else if (role === 'ORG_ADMIN') {
-        router.push('/dashboard/organizations');
-      } else {
-        router.push('/dashboard');
-      }
+      // Redirect to the intended page or dashboard
+      router.push(from);
+      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred during login');
     } finally {
