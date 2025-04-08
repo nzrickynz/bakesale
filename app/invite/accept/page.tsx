@@ -42,7 +42,7 @@ export default async function AcceptInvitationPage({
 
   if (!session?.user?.email) {
     // If user is not logged in, redirect to login page with return URL
-    redirect(`/auth/login?callbackUrl=${encodeURIComponent(`/invite/accept?token=${token}`)}`);
+    redirect(`/auth/login?callbackUrl=${encodeURIComponent(`/invite/register/${token}`)}`);
   }
 
   const user = await prisma.user.findUnique({

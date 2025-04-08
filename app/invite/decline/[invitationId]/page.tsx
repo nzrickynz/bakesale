@@ -200,10 +200,10 @@ export default function DeclineInvitationPage({
 
           <div className="mt-4 text-center">
             <Link
-              href={`/invite/accept/${params.invitationId}`}
-              className="text-sm text-primary hover:text-primary-dark"
+              href={`/invite/register/${params.invitationId}`}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
             >
-              Accept Invitation Instead
+              Accept Invitation
             </Link>
           </div>
         </div>

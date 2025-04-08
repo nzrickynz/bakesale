@@ -131,7 +131,7 @@ export async function POST(request: Request) {
               <p>Hello,</p>
               <p>You've been invited to join ${organization.name} on Bakesale as a team member.</p>
               <p>Click the link below to create your account and get started:</p>
-              <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/invite/accept?token=${token}">Create Account</a></p>
+              <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/invite/register/${token}">Create Account</a></p>
               <p>This invitation will expire in 7 days.</p>
             `,
           });
@@ -353,7 +353,7 @@ export async function PUT(request: Request) {
         <p>Hello,</p>
         <p>You've been invited to join ${invitation.organization.name} on Bakesale as a team member.</p>
         <p>Click the link below to create your account and get started:</p>
-        <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/invite/accept?token=${token}">Create Account</a></p>
+        <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/invite/register/${token}">Create Account</a></p>
         <p>This invitation will expire in 7 days.</p>
       `,
     });
