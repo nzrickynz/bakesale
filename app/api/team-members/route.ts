@@ -17,8 +17,11 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request: Request) {
   try {
+    console.log("Starting team member addition process...");
+    
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
+      console.error("No session or user ID found");
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
@@ -26,9 +29,11 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
+    console.log("Request body:", body);
     const { email, role, name, organizationId } = body;
 
     if (!organizationId) {
+      console.error("No organization ID provided");
       return NextResponse.json(
         { error: "Organization ID is required" },
         { status: 400 }
@@ -36,6 +41,7 @@ export async function POST(request: Request) {
     }
 
     if (!email || !role) {
+      console.error("Missing required fields:", { email, role });
       return NextResponse.json(
         { error: "Email and role are required" },
         { status: 400 }
@@ -43,8 +49,10 @@ export async function POST(request: Request) {
     }
 
     // Verify the user has admin access
+    console.log("Verifying admin access for user:", session.user.id);
     const hasAdminAccess = await userService.hasAdminAccess(session.user.id, organizationId);
     if (!hasAdminAccess) {
+      console.error("User does not have admin access:", session.user.id);
       return NextResponse.json(
         { error: "Unauthorized to add team members" },
         { status: 403 }
@@ -52,6 +60,7 @@ export async function POST(request: Request) {
     }
 
     // Check if the user already exists
+    console.log("Checking for existing user with email:", email);
     const existingUser = await userService.findUnique({
       where: { email },
     });
@@ -62,72 +71,85 @@ export async function POST(request: Request) {
       // Generate an invitation token
       const token = randomBytes(32).toString('hex');
       
-      // Store the invitation in the database
-      const invitation = await prisma.volunteerInvitation.create({
-        data: {
-          email,
-          token,
-          organizationId,
-          role: role as UserRole,
-          invitedById: session.user.id,
-          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-        },
-      });
-
-      // Get organization details for the email
-      const organization = await prisma.organization.findUnique({
-        where: { id: organizationId },
-      });
-
-      if (!organization) {
-        return NextResponse.json(
-          { error: "Organization not found" },
-          { status: 404 }
-        );
-      }
-
-      // Send invitation email
       try {
-        console.log("Sending invitation email to:", email);
-        const { data, error } = await resend.emails.send({
-          from: "Bakesale <noreply@bakesale.co.nz>",
-          to: email,
-          subject: "You've been invited to join Bakesale",
-          html: `
-            <p>Hello,</p>
-            <p>You've been invited to join ${organization.name} on Bakesale as a team member.</p>
-            <p>Click the link below to create your account and get started:</p>
-            <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/invite/accept?token=${token}">Create Account</a></p>
-            <p>This invitation will expire in 7 days.</p>
-          `,
+        // Store the invitation in the database
+        console.log("Creating invitation record in database");
+        const invitation = await prisma.volunteerInvitation.create({
+          data: {
+            email,
+            token,
+            organizationId,
+            role: role as UserRole,
+            invitedById: session.user.id,
+            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+          },
         });
 
-        if (error) {
-          console.error("Failed to send invitation email:", error);
+        // Get organization details for the email
+        console.log("Fetching organization details");
+        const organization = await prisma.organization.findUnique({
+          where: { id: organizationId },
+        });
+
+        if (!organization) {
+          console.error("Organization not found:", organizationId);
+          return NextResponse.json(
+            { error: "Organization not found" },
+            { status: 404 }
+          );
+        }
+
+        // Send invitation email
+        try {
+          console.log("Sending invitation email to:", email);
+          const { data, error } = await resend.emails.send({
+            from: "Bakesale <noreply@bakesale.co.nz>",
+            to: email,
+            subject: "You've been invited to join Bakesale",
+            html: `
+              <p>Hello,</p>
+              <p>You've been invited to join ${organization.name} on Bakesale as a team member.</p>
+              <p>Click the link below to create your account and get started:</p>
+              <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/invite/accept?token=${token}">Create Account</a></p>
+              <p>This invitation will expire in 7 days.</p>
+            `,
+          });
+
+          if (error) {
+            console.error("Failed to send invitation email:", error);
+            return NextResponse.json(
+              { error: "Failed to send invitation email" },
+              { status: 500 }
+            );
+          }
+
+          console.log("Invitation email sent successfully:", data);
+        } catch (emailError) {
+          console.error("Error sending invitation email:", emailError);
           return NextResponse.json(
             { error: "Failed to send invitation email" },
             { status: 500 }
           );
         }
 
-        console.log("Invitation email sent successfully:", data);
-      } catch (emailError) {
-        console.error("Error sending invitation email:", emailError);
+        return NextResponse.json({
+          message: "Invitation sent successfully",
+          status: "invitation_sent"
+        });
+      } catch (dbError) {
+        console.error("Database error creating invitation:", dbError);
         return NextResponse.json(
-          { error: "Failed to send invitation email" },
+          { error: "Failed to create invitation" },
           { status: 500 }
         );
       }
-
-      return NextResponse.json({
-        message: "Invitation sent successfully",
-        status: "invitation_sent"
-      });
     }
 
     // Check if the user is already a member of the organization
+    console.log("Checking if user is already a team member");
     const isTeamMember = await userService.isTeamMember(existingUser.id, organizationId);
     if (isTeamMember) {
+      console.error("User is already a team member:", existingUser.id);
       return NextResponse.json(
         { error: "User is already a member of this organization" },
         { status: 400 }
@@ -135,26 +157,36 @@ export async function POST(request: Request) {
     }
 
     // Add the user to the organization
-    const newMember = await userService.addTeamMember({
-      userId: existingUser.id,
-      organizationId,
-      role: role as UserRole,
-    });
+    try {
+      console.log("Adding user to organization:", { userId: existingUser.id, organizationId, role });
+      const newMember = await userService.addTeamMember({
+        userId: existingUser.id,
+        organizationId,
+        role: role as UserRole,
+      });
 
-    return NextResponse.json({
-      message: "Team member added successfully",
-      teamMember: {
-        id: newMember.user.id,
-        name: newMember.user.name,
-        email: newMember.user.email,
-        role: newMember.role,
-        createdAt: newMember.createdAt,
-      },
-    });
+      console.log("Team member added successfully:", newMember);
+      return NextResponse.json({
+        message: "Team member added successfully",
+        teamMember: {
+          id: newMember.user.id,
+          name: newMember.user.name,
+          email: newMember.user.email,
+          role: newMember.role,
+          createdAt: newMember.createdAt,
+        },
+      });
+    } catch (addMemberError) {
+      console.error("Error adding team member:", addMemberError);
+      return NextResponse.json(
+        { error: "Failed to add team member to organization" },
+        { status: 500 }
+      );
+    }
   } catch (error) {
     console.error("[TEAM_MEMBERS] Error:", error);
     return NextResponse.json(
-      { error: "Failed to add team member" },
+      { error: error instanceof Error ? error.message : "Failed to add team member" },
       { status: 500 }
     );
   }
