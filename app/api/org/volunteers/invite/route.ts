@@ -32,14 +32,29 @@ export async function POST(request: Request) {
       );
     }
 
-    const { email, role } = await request.json();
+    const { email, role, listingId } = await request.json();
 
-    if (!email || !role) {
+    if (!email || !role || !listingId) {
       return NextResponse.json(
-        { message: "Email and role are required" },
+        { message: "Email, role, and listing ID are required" },
         { status: 400 }
       );
     }
+
+    // Check if the listing exists
+    const listing = await prisma.listing.findUnique({
+      where: { id: listingId },
+    });
+
+    if (!listing) {
+      return NextResponse.json(
+        { message: "Listing not found" },
+        { status: 404 }
+      );
+    }
+
+    // Use listing.organizationId for organizationId
+    const organizationId = listing.organizationId;
 
     // Check if the user already exists
     const existingUser = await prisma.user.findUnique({
@@ -49,17 +64,21 @@ export async function POST(request: Request) {
     });
 
     if (existingUser) {
-      // Check if the user is already a volunteer
+      // Check if the user is already a volunteer for the listing
       const existingVolunteer = await prisma.userOrganization.findFirst({
         where: {
           userId: existingUser.id,
-          organizationId: userOrg.organizationId,
+          assignedListings: {
+            some: {
+              id: listingId,
+            },
+          },
         },
       });
 
       if (existingVolunteer) {
         return NextResponse.json(
-          { message: "This user is already a volunteer in your organization" },
+          { message: "This user is already a volunteer for this listing" },
           { status: 400 }
         );
       }
@@ -69,8 +88,8 @@ export async function POST(request: Request) {
     const existingInvitation = await prisma.volunteerInvitation.findFirst({
       where: {
         email,
-        organizationId: userOrg.organizationId,
         status: "PENDING",
+        organizationId: organizationId, // Use the correct organizationId
       },
     });
 
@@ -90,7 +109,7 @@ export async function POST(request: Request) {
         email,
         role,
         token,
-        organizationId: userOrg.organizationId,
+        organizationId: organizationId, // Use the correct organizationId
         invitedById: session.user.id,
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
       },
@@ -100,7 +119,7 @@ export async function POST(request: Request) {
     await sendInvitationEmail({
       to: email,
       token: token,
-      organizationName: userOrg.organization.name,
+      organizationName: listing.title, // Use listing title for context
       role,
       invitedByName: session.user.name || "Organization Admin",
     });

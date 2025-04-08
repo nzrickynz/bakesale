@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
@@ -96,9 +98,7 @@ export default async function VolunteerDashboard() {
           <div>
             <h2 className="text-3xl font-bold tracking-tight text-gray-900">Volunteer Dashboard</h2>
             <p className="text-gray-900">
-              {user.managedListings.length === 0 
-                ? "Available listings from your organization" 
-                : "Manage your assigned listings and orders"}
+              {user.managedListings.length === 0 ? "Available listings from your organization" : "Manage your assigned listings and orders"}
             </p>
           </div>
         </div>

@@ -15,7 +15,6 @@ enum UserRole {
   SUPER_ADMIN
   ORG_ADMIN
   VOLUNTEER
-  PUBLIC
 }
 
 model User {
@@ -25,7 +24,7 @@ model User {
   emailVerified DateTime?
   image         String?
   passwordHash  String
-  role          UserRole  @default(PUBLIC)
+  role          UserRole  @default(ORG_ADMIN)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -69,6 +68,9 @@ model Organization {
   invitations       VolunteerInvitation[]
   assignedAdmins    UserOrganization[]   @relation("OrganizationAdmin")
 
+  // Add relation to listings
+  listings          Listing[]
+
   @@map("organizations")
 }
 
@@ -110,6 +112,10 @@ model Listing {
   volunteerId String
   orders      Order[]
   assignedVolunteers UserOrganization[] @relation("ListingVolunteer")
+
+  // Add organizationId to establish relationship with Organization
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String
 
   @@map("listings")
 }

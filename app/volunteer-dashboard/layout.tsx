@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { DashboardNav } from "@/components/dashboard/nav";
+import { UserRole } from "@prisma/client";
 
 export default async function VolunteerDashboardLayout({
   children,
@@ -20,11 +21,11 @@ export default async function VolunteerDashboardLayout({
     where: { email: session.user.email },
   });
 
-  if (!user) {
+  if (!user || user.role !== UserRole.VOLUNTEER) {
     notFound();
   }
 
-  // Check if user is a volunteer
+  // Check if user has any assigned listings
   const volunteerListings = await prisma.listing.findMany({
     where: {
       volunteerId: user.id,

@@ -88,17 +88,8 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL("/dashboard", request.url));
       }
       
-      // Check if volunteer has assigned listings
-      const user = await prisma.user.findUnique({
-        where: { id: token.id as string },
-        include: {
-          managedListings: true
-        }
-      });
-      
-      if (!user?.managedListings || user.managedListings.length === 0) {
-        return NextResponse.redirect(new URL("/dashboard", request.url));
-      }
+      // Allow access even if no listings are assigned
+      // Volunteers can see a message like "no assigned listings"
     }
   }
 
