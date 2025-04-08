@@ -66,6 +66,27 @@ export async function POST(request: Request) {
     });
 
     if (!existingUser) {
+      console.log("Checking for existing invitation");
+      // Check for existing invitation
+      const existingInvitation = await prisma.volunteerInvitation.findFirst({
+        where: {
+          email,
+          organizationId,
+          status: "PENDING",
+          expiresAt: {
+            gt: new Date(),
+          },
+        },
+      });
+
+      if (existingInvitation) {
+        console.log("Found existing pending invitation");
+        return NextResponse.json(
+          { error: "An invitation has already been sent to this email address" },
+          { status: 400 }
+        );
+      }
+
       console.log("Creating invitation for new user:", email);
       
       // Generate an invitation token
