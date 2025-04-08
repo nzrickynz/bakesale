@@ -222,7 +222,10 @@ export async function POST(request: Request) {
         } : null,
       }
 
-      return NextResponse.json({ user: response });
+      return NextResponse.json({ 
+        success: true,
+        user: response 
+      });
     } catch (error) {
       console.error('[REGISTER]', error)
       return NextResponse.json(
