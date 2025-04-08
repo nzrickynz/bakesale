@@ -60,6 +60,7 @@ export default async function NewCausePage({ params }: PageProps) {
         <CardContent>
           <CauseForm
             mode="create"
+            organizationId={params.id}
             onSubmit={handleSubmit}
             isSubmitting={false}
           />

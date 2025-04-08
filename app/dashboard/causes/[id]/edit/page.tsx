@@ -58,6 +58,7 @@ export default async function EditCausePage({ params }: PageProps) {
           <CauseForm
             cause={fullCause}
             mode="edit"
+            organizationId={cause.organizationId}
             onSubmit={async (data) => {
               'use server';
               try {
