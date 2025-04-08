@@ -139,7 +139,7 @@ export default function ListingsPage() {
                         </div>
                         <div className="flex items-center space-x-2">
                           <Button variant="ghost" size="icon" asChild>
-                            <Link href={`/dashboard/listings/${listing.id}/edit`}>
+                            <Link href={`/dashboard/organizations/${org.id}/causes/${cause.id}/listings/${listing.id}/edit`}>
                               <Edit className="h-4 w-4 text-gray-700" />
                             </Link>
                           </Button>

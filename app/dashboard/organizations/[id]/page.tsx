@@ -83,7 +83,11 @@ export default async function OrganizationPage({ params }: PageProps) {
         organizationId: params.id,
       },
       include: {
-        organization: true,
+        organization: {
+          include: {
+            causes: true
+          }
+        },
       },
     }) as UserOrganization | null;
 

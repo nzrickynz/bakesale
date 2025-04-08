@@ -14,20 +14,33 @@ interface PageProps {
 }
 
 export default async function EditCausePage({ params }: PageProps) {
-  const userRole = await requireOrganizationAccess(params.id);
+  const cause = await prisma.cause.findUnique({
+    where: {
+      id: params.id,
+    },
+    select: {
+      organizationId: true,
+    },
+  });
+
+  if (!cause) {
+    notFound();
+  }
+
+  const userRole = await requireOrganizationAccess(cause.organizationId);
   
   // Only allow ORG_ADMIN to edit causes
   if (userRole !== UserRole.ORG_ADMIN) {
     notFound();
   }
 
-  const cause = await prisma.cause.findUnique({
+  const fullCause = await prisma.cause.findUnique({
     where: {
       id: params.id,
     },
   });
 
-  if (!cause) {
+  if (!fullCause) {
     notFound();
   }
 
@@ -43,7 +56,7 @@ export default async function EditCausePage({ params }: PageProps) {
         </CardHeader>
         <CardContent>
           <CauseForm
-            cause={cause}
+            cause={fullCause}
             mode="edit"
             onSubmit={async (data) => {
               'use server';
