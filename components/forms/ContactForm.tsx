@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Send } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,14 +33,17 @@ export default function ContactForm() {
         body: JSON.stringify(data),
       });
 
+      const result = await response.json();
+
       if (response.ok) {
+        toast.success("Message sent successfully!");
         router.push("/thank-you");
       } else {
-        throw new Error("Failed to send message");
+        throw new Error(result.error || "Failed to send message");
       }
     } catch (error) {
       console.error("Error sending message:", error);
-      alert("Failed to send message. Please try again.");
+      toast.error(error instanceof Error ? error.message : "Failed to send message");
     } finally {
       setIsSubmitting(false);
     }

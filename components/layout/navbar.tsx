@@ -60,11 +60,12 @@ export function Navbar() {
                   href={session.user?.role === "VOLUNTEER" ? "/volunteer-dashboard" : "/dashboard"}
                   className="text-gray-800 hover:text-orange-500"
                 >
-                  <Button>View Dashboard</Button>
+                  <Button className="text-white">View Dashboard</Button>
                 </Link>
                 <Button 
                   variant="ghost" 
                   onClick={() => signOut({ callbackUrl: "/" })}
+                  className="text-gray-700"
                 >
                   Sign out
                 </Button>

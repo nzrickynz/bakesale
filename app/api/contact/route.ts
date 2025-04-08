@@ -7,6 +7,13 @@ export async function POST(request: Request) {
   try {
     const { name, email, subject, message } = await request.json();
 
+    if (!name || !email || !subject || !message) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
     const { data, error } = await resend.emails.send({
       from: "BakeSale Contact <contact@bakesale.co.nz>",
       to: "hello@bakesale.co.nz",
@@ -22,11 +29,19 @@ export async function POST(request: Request) {
     });
 
     if (error) {
-      return NextResponse.json({ error }, { status: 500 });
+      console.error("Resend API error:", error);
+      return NextResponse.json(
+        { error: "Failed to send email" },
+        { status: 500 }
+      );
     }
 
-    return NextResponse.json({ data });
+    return NextResponse.json({ success: true });
   } catch (error) {
-    return NextResponse.json({ error }, { status: 500 });
+    console.error("Contact form error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 } 

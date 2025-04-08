@@ -90,13 +90,14 @@ export function TeamMembers({ organizationId, listings = [], organizations = [] 
           name,
           email,
           role,
-          assignments: selectedAssignments,
           organizationId,
         }),
       });
 
+      const result = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to add team member");
+        throw new Error(result.error || "Failed to add team member");
       }
 
       toast.success("Team member added successfully");
@@ -108,7 +109,7 @@ export function TeamMembers({ organizationId, listings = [], organizations = [] 
       fetchTeamMembers(); // Refresh the list
     } catch (error) {
       console.error("Failed to add team member:", error);
-      toast.error("Failed to add team member");
+      toast.error(error instanceof Error ? error.message : "Failed to add team member");
     }
   };
 

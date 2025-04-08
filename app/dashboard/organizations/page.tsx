@@ -35,7 +35,7 @@ export default async function OrganizationsPage() {
           Create Organization
         </Link>
       </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="space-y-4">
         {userOrganizations.map(({ organization }: UserOrgWithOrg) => (
           <Link
             key={organization.id}

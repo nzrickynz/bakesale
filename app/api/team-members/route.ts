@@ -16,12 +16,19 @@ export async function POST(request: Request) {
       );
     }
 
-    const { searchParams } = new URL(request.url);
-    const organizationId = searchParams.get("organizationId");
+    const body = await request.json();
+    const { email, role, name, organizationId } = body;
 
     if (!organizationId) {
       return NextResponse.json(
         { error: "Organization ID is required" },
+        { status: 400 }
+      );
+    }
+
+    if (!email || !role) {
+      return NextResponse.json(
+        { error: "Email and role are required" },
         { status: 400 }
       );
     }
@@ -32,16 +39,6 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "Unauthorized to add team members" },
         { status: 403 }
-      );
-    }
-
-    const body = await request.json();
-    const { email, role, name } = body;
-
-    if (!email || !role) {
-      return NextResponse.json(
-        { error: "Email and role are required" },
-        { status: 400 }
       );
     }
 
