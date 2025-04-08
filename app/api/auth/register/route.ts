@@ -171,6 +171,12 @@ export async function POST(request: Request) {
           if (invitation && invitation.organization) {
             existingOrg = invitation.organization
 
+            // Update user role to VOLUNTEER
+            user = await prisma.user.update({
+              where: { id: user.id },
+              data: { role: 'VOLUNTEER' }
+            })
+
             // Add user to organization
             await prisma.userOrganization.create({
               data: {
