@@ -1,6 +1,10 @@
 import { Resend } from "resend";
 import { NextResponse } from "next/server";
 
+if (!process.env.RESEND_API_KEY) {
+  console.error("RESEND_API_KEY environment variable is required");
+}
+
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request: Request) {
@@ -11,6 +15,14 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
+      );
+    }
+
+    if (!process.env.RESEND_API_KEY) {
+      console.error("RESEND_API_KEY is not configured");
+      return NextResponse.json(
+        { error: "Email service is not configured" },
+        { status: 500 }
       );
     }
 

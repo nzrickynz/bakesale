@@ -3,8 +3,12 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { UserService } from "@/lib/services/user";
 import { UserRole } from "@prisma/client";
+import { Resend } from "resend";
+import { randomBytes } from "crypto";
+import prisma from "@/lib/prisma";
 
 const userService = new UserService();
+const resend = new Resend(process.env.RESEND_API_KEY || 'ABC');
 
 export async function POST(request: Request) {
   try {
@@ -48,18 +52,51 @@ export async function POST(request: Request) {
     });
 
     if (!existingUser) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
-    }
+      // Generate an invitation token
+      const token = randomBytes(32).toString('hex');
+      
+      // Store the invitation in the database
+      const invitation = await prisma.volunteerInvitation.create({
+        data: {
+          email,
+          token,
+          organizationId,
+          role: role as UserRole,
+          invitedById: session.user.id,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+        },
+      });
 
-    // Update user's name if provided
-    if (name) {
-      await userService.update(
-        { id: existingUser.id },
-        { name }
-      );
+      // Get organization details for the email
+      const organization = await prisma.organization.findUnique({
+        where: { id: organizationId },
+      });
+
+      if (!organization) {
+        return NextResponse.json(
+          { error: "Organization not found" },
+          { status: 404 }
+        );
+      }
+
+      // Send invitation email
+      await resend.emails.send({
+        from: "Bakesale <noreply@bakesale.co.nz>",
+        to: email,
+        subject: "You've been invited to join Bakesale",
+        html: `
+          <p>Hello,</p>
+          <p>You've been invited to join ${organization.name} on Bakesale as a team member.</p>
+          <p>Click the link below to create your account and get started:</p>
+          <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/invite/accept?token=${token}">Create Account</a></p>
+          <p>This invitation will expire in 7 days.</p>
+        `,
+      });
+
+      return NextResponse.json({
+        message: "Invitation sent successfully",
+        status: "invitation_sent"
+      });
     }
 
     // Check if the user is already a member of the organization
