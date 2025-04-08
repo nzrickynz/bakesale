@@ -39,26 +39,11 @@ export async function PUT(
     }
 
     // Update team member assignments
-    await prisma.userOrganization.update({
-      where: {
-        userId_organizationId: {
-          userId: params.memberId,
-          organizationId,
-        },
-      },
-      data: {
-        assignedListings: {
-          set: assignments
-            .filter((assignment: { id: string; type: string }) => assignment.type === "listing")
-            .map((assignment: { id: string; type: string }) => ({ id: assignment.id })),
-        },
-        assignedOrganizations: {
-          set: assignments
-            .filter((assignment: { id: string; type: string }) => assignment.type === "organization")
-            .map((assignment: { id: string; type: string }) => ({ id: assignment.id })),
-        },
-      },
-    });
+    await userService.updateTeamMemberAssignments(
+      params.memberId,
+      organizationId,
+      assignments
+    );
 
     return NextResponse.json({ message: "Team member updated successfully" });
   } catch (error) {

@@ -265,4 +265,51 @@ export class UserService {
       },
     });
   }
+
+  async updateTeamMemberAssignments(
+    userId: string,
+    organizationId: string,
+    assignments: { id: string; type: string }[]
+  ) {
+    const listingIds = assignments
+      .filter(a => a.type === "listing")
+      .map(a => a.id);
+
+    const organizationIds = assignments
+      .filter(a => a.type === "organization")
+      .map(a => a.id);
+
+    // First, get the UserOrganization record
+    const userOrg = await prisma.userOrganization.findUnique({
+      where: {
+        userId_organizationId: {
+          userId,
+          organizationId,
+        },
+      },
+    });
+
+    if (!userOrg) {
+      throw new Error("Team member not found");
+    }
+
+    // Then update the assignments
+    return prisma.userOrganization.update({
+      where: {
+        id: userOrg.id,
+      },
+      data: {
+        assignedListings: {
+          set: listingIds.map(id => ({ id })),
+        },
+        assignedOrganizations: {
+          set: organizationIds.map(id => ({ id })),
+        },
+      },
+      include: {
+        assignedListings: true,
+        assignedOrganizations: true,
+      },
+    });
+  }
 } 
