@@ -9,7 +9,7 @@ const resend = new Resend(process.env.RESEND_API_KEY || 'ABC');
 interface InvitationEmailParams {
   to: string;
   organizationName: string;
-  invitationId: string;
+  token: string;
   role: string;
   invitedByName: string;
 }
@@ -22,7 +22,7 @@ interface TempPasswordEmailParams {
 export async function sendInvitationEmail({
   to,
   organizationName,
-  invitationId,
+  token,
   role,
   invitedByName,
 }: InvitationEmailParams) {

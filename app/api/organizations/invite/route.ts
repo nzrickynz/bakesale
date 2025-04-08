@@ -105,7 +105,7 @@ export async function POST(request: Request) {
     await sendInvitationEmail({
       to: validatedData.email,
       organizationName: organization.name,
-      invitationId: invitation.id,
+      token: token,
       role: "ORG_ADMIN",
       invitedByName: user.name || "Organization Admin",
     });
