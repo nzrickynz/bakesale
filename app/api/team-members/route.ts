@@ -245,19 +245,134 @@ export async function GET(request: Request) {
     // Get all team members for the organization
     const teamMembers = await userService.getTeamMembers(organizationId);
 
+    // Get all pending invitations for the organization
+    const pendingInvitations = await prisma.volunteerInvitation.findMany({
+      where: {
+        organizationId,
+        status: "PENDING",
+        expiresAt: {
+          gt: new Date(),
+        },
+      },
+    });
+
+    // Combine team members and pending invitations
+    const membersWithStatus = teamMembers?.map((member) => ({
+      id: member.user.id,
+      name: member.user.name,
+      email: member.user.email,
+      role: member.role,
+      createdAt: member.createdAt,
+      status: "ACTIVE",
+    })) || [];
+
+    const invitationsWithStatus = pendingInvitations.map((invitation) => ({
+      id: invitation.id,
+      name: null,
+      email: invitation.email,
+      role: invitation.role,
+      createdAt: invitation.createdAt,
+      status: "PENDING",
+      invitationId: invitation.id,
+    }));
+
     return NextResponse.json({
-      teamMembers: teamMembers?.map((member) => ({
-        id: member.user.id,
-        name: member.user.name,
-        email: member.user.email,
-        role: member.role,
-        createdAt: member.createdAt,
-      })),
+      teamMembers: [...membersWithStatus, ...invitationsWithStatus],
     });
   } catch (error) {
     console.error("[TEAM_MEMBERS] Error:", error);
     return NextResponse.json(
       { error: "Failed to fetch team members" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(request: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json();
+    const { invitationId, organizationId } = body;
+
+    if (!invitationId || !organizationId) {
+      return NextResponse.json(
+        { error: "Invitation ID and organization ID are required" },
+        { status: 400 }
+      );
+    }
+
+    // Verify the user has admin access
+    const hasAdminAccess = await userService.hasAdminAccess(session.user.id, organizationId);
+    if (!hasAdminAccess) {
+      return NextResponse.json(
+        { error: "Unauthorized to resend invitations" },
+        { status: 403 }
+      );
+    }
+
+    // Get the invitation
+    const invitation = await prisma.volunteerInvitation.findUnique({
+      where: { id: invitationId },
+      include: {
+        organization: true,
+      },
+    });
+
+    if (!invitation) {
+      return NextResponse.json(
+        { error: "Invitation not found" },
+        { status: 404 }
+      );
+    }
+
+    // Generate a new token
+    const token = randomBytes(32).toString('hex');
+
+    // Update the invitation with new token and expiration
+    await prisma.volunteerInvitation.update({
+      where: { id: invitationId },
+      data: {
+        token,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      },
+    });
+
+    // Send the invitation email
+    const { data, error } = await resend.emails.send({
+      from: "Bakesale <noreply@bakesale.co.nz>",
+      to: invitation.email,
+      subject: "You've been invited to join Bakesale",
+      html: `
+        <p>Hello,</p>
+        <p>You've been invited to join ${invitation.organization.name} on Bakesale as a team member.</p>
+        <p>Click the link below to create your account and get started:</p>
+        <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/invite/accept?token=${token}">Create Account</a></p>
+        <p>This invitation will expire in 7 days.</p>
+      `,
+    });
+
+    if (error) {
+      console.error("Failed to send invitation email:", error);
+      return NextResponse.json(
+        { error: "Failed to send invitation email" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      message: "Invitation resent successfully",
+    });
+  } catch (error) {
+    console.error("[TEAM_MEMBERS] Error:", error);
+    return NextResponse.json(
+      { error: "Failed to resend invitation" },
       { status: 500 }
     );
   }

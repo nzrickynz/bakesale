@@ -29,6 +29,8 @@ interface TeamMember {
   name: string | null;
   email: string;
   role: "ORG_ADMIN" | "VOLUNTEER";
+  status: "ACTIVE" | "PENDING";
+  invitationId?: string;
   assignments?: {
     id: string;
     name: string;
@@ -110,6 +112,32 @@ export function TeamMembers({ organizationId, listings = [], organizations = [] 
     } catch (error) {
       console.error("Failed to add team member:", error);
       toast.error(error instanceof Error ? error.message : "Failed to add team member");
+    }
+  };
+
+  const handleResendInvitation = async (invitationId: string) => {
+    try {
+      const response = await fetch("/api/team-members", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          invitationId,
+          organizationId,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to resend invitation");
+      }
+
+      toast.success("Invitation resent successfully");
+    } catch (error) {
+      console.error("Failed to resend invitation:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to resend invitation");
     }
   };
 
@@ -226,19 +254,21 @@ export function TeamMembers({ organizationId, listings = [], organizations = [] 
                 <th className="px-4 py-2 text-left text-sm font-medium text-gray-900">Name</th>
                 <th className="px-4 py-2 text-left text-sm font-medium text-gray-900">Email</th>
                 <th className="px-4 py-2 text-left text-sm font-medium text-gray-900">Role</th>
+                <th className="px-4 py-2 text-left text-sm font-medium text-gray-900">Status</th>
                 <th className="px-4 py-2 text-left text-sm font-medium text-gray-900">Assignments</th>
+                <th className="px-4 py-2 text-left text-sm font-medium text-gray-900">Actions</th>
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-2 text-center text-sm text-gray-500">
+                  <td colSpan={6} className="px-4 py-2 text-center text-sm text-gray-500">
                     Loading...
                   </td>
                 </tr>
               ) : teamMembers.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-2 text-center text-sm text-gray-500">
+                  <td colSpan={6} className="px-4 py-2 text-center text-sm text-gray-500">
                     No team members found
                   </td>
                 </tr>
@@ -251,7 +281,28 @@ export function TeamMembers({ organizationId, listings = [], organizations = [] 
                       {member.role.toLowerCase().replace("_", " ")}
                     </td>
                     <td className="px-4 py-2 text-sm text-gray-900">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        member.status === "ACTIVE" 
+                          ? "bg-green-100 text-green-800" 
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}>
+                        {member.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2 text-sm text-gray-900">
                       {member.assignments?.map((assignment) => assignment.name).join(", ") || "None"}
+                    </td>
+                    <td className="px-4 py-2 text-sm text-gray-900">
+                      {member.status === "PENDING" && member.invitationId && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleResendInvitation(member.invitationId!)}
+                          className="text-orange-600 border-orange-600 hover:bg-orange-50"
+                        >
+                          Resend Invitation
+                        </Button>
+                      )}
                     </td>
                   </tr>
                 ))
