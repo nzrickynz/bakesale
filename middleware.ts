@@ -14,6 +14,7 @@ const publicRoutes = [
   "/causes",
   "/causes/[causeId]",
   "/causes/[causeId]/listings/[listingId]",
+  "/invite/register/[token]",
 ];
 
 export async function middleware(request: NextRequest) {
