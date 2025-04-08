@@ -164,7 +164,10 @@ export class UserService {
     return !!userOrg;
   }
 
-  async createWithOrganization(input: CreateWithOrganizationInput) {
+  async createWithOrganization(input: CreateWithOrganizationInput): Promise<{
+    user: User;
+    organization: Organization;
+  }> {
     const { email, password, name, role, organization } = input;
 
     // Hash password

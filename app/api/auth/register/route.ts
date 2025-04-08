@@ -125,28 +125,30 @@ export async function POST(request: Request) {
       // Hash password
       const hashedPassword = await hash(password, 12)
 
-      // Create user
-      const user = await prisma.user.create({
-        data: {
-          name,
-          email,
-          passwordHash: hashedPassword,
-          role: role === UserRole.ORG_ADMIN ? UserRole.ORG_ADMIN : UserRole.VOLUNTEER,
-          organization: {
-            connectOrCreate: {
-              where: { name: organizationName },
-              create: {
-                name: organizationName,
-                description: organizationDescription,
-                websiteUrl,
-                facebookUrl,
-                instagramUrl,
-                logoUrl,
-              }
-            }
-          }
-        }
-      })
+      // Create user with organization
+      const { user, organization } = await userService.createWithOrganization({
+        email,
+        password,
+        name,
+        role: UserRole.ORG_ADMIN,
+        organization: {
+          name: organizationName,
+          description: organizationDescription,
+          websiteUrl,
+          facebookUrl,
+          instagramUrl,
+          logoUrl,
+        },
+      });
+
+      // If there's an existing organization, add the user as an admin
+      if (existingOrg) {
+        await userService.addTeamMember({
+          userId: user.id,
+          organizationId: existingOrg.id,
+          role: UserRole.ORG_ADMIN,
+        });
+      }
 
       // If there's an invitation token, handle the invitation
       if (invitationToken) {
@@ -183,20 +185,20 @@ export async function POST(request: Request) {
       }
 
       return NextResponse.json({
-        success: true,
-        data: {
-          user: {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role
-          },
-          organization: {
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          organization: existingOrg ? {
             id: existingOrg.id,
-            name: existingOrg.name
-          }
-        }
-      })
+            name: existingOrg.name,
+          } : {
+            id: organization.id,
+            name: organization.name,
+          },
+        },
+      });
     } catch (error) {
       if (error instanceof Error) {
         if (error.message === 'User already exists') {

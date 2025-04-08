@@ -39,11 +39,56 @@ export async function PUT(
     }
 
     // Update team member assignments
-    await userService.updateTeamMemberAssignments(
-      params.memberId,
-      organizationId,
-      assignments
-    );
+    await prisma.$transaction(async (tx) => {
+      // First, get the UserOrganization record
+      const userOrg = await tx.userOrganization.findUnique({
+        where: {
+          userId_organizationId: {
+            userId: params.memberId,
+            organizationId,
+          },
+        },
+      });
+
+      if (!userOrg) {
+        throw new Error("Team member not found");
+      }
+
+      // Handle listing assignments
+      const listingAssignments = assignments
+        .filter((assignment: { id: string; type: string }) => assignment.type === "listing")
+        .map((assignment: { id: string }) => assignment.id);
+
+      // Handle organization assignments
+      const organizationAssignments = assignments
+        .filter((assignment: { id: string; type: string }) => assignment.type === "organization")
+        .map((assignment: { id: string }) => assignment.id);
+
+      // Update listing assignments
+      await tx.listing.updateMany({
+        where: {
+          id: {
+            in: listingAssignments,
+          },
+        },
+        data: {
+          volunteerId: params.memberId,
+        },
+      });
+
+      // Update organization assignments
+      await tx.userOrganization.updateMany({
+        where: {
+          userId: params.memberId,
+          organizationId: {
+            in: organizationAssignments,
+          },
+        },
+        data: {
+          role: "ORG_ADMIN",
+        },
+      });
+    });
 
     return NextResponse.json({ message: "Team member updated successfully" });
   } catch (error) {

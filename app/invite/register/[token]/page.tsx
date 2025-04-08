@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -36,7 +36,7 @@ export default function InviteRegisterPage({
   });
 
   // Fetch invitation details when component mounts
-  useState(() => {
+  useEffect(() => {
     async function fetchInvitation() {
       try {
         const response = await fetch(`/api/invitations/token/${params.token}`);
@@ -45,13 +45,14 @@ export default function InviteRegisterPage({
         }
         const data = await response.json();
         setInvitation(data.invitation);
-        setFormData(prev => ({ ...prev, email: data.invitation.email }));
       } catch (error) {
-        setError(error instanceof Error ? error.message : "Failed to load invitation");
+        console.error("Error fetching invitation:", error);
+        toast.error("Invalid or expired invitation");
+        router.push("/login");
       }
     }
     fetchInvitation();
-  }, [params.token]);
+  }, [params.token, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
