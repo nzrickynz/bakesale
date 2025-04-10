@@ -16,20 +16,17 @@ export async function POST(request: Request) {
     }
 
     // Get the user's organization
-    const userOrg = await prisma.userOrganization.findUnique({
+    const userOrg = await prisma.userOrganization.findFirst({
       where: {
-        userId_organizationId: {
-          userId: session.user.id,
-          organizationId: session.user.organizationId,
-        }
-      }
+        userId: session.user.id,
+      },
+      include: {
+        organization: true,
+      },
     });
 
     if (!userOrg) {
-      return NextResponse.json(
-        { message: "You must be part of an organization to send invitations" },
-        { status: 403 }
-      );
+      return new NextResponse("User not found in any organization", { status: 404 });
     }
 
     const { email, role, listingId } = await request.json();

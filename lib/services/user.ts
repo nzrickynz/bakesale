@@ -316,15 +316,24 @@ export class UserService {
     });
   }
 
-  async assignVolunteerToListing(userId: string, listingId: string) {
-    const listing = await prisma.listing.update({
-      where: { id: listingId },
+  async assignVolunteerToOrganization(userId: string, organizationId: string) {
+    const userOrg = await prisma.userOrganization.update({
+      where: {
+        userId_organizationId: {
+          userId,
+          organizationId,
+        },
+      },
       data: {
-        volunteerId: userId
-      }
+        role: "VOLUNTEER",
+      },
+      include: {
+        organization: true,
+        user: true,
+      },
     });
 
-    return listing;
+    return userOrg;
   }
 
   async getVolunteerAssignments(userId: string) {
