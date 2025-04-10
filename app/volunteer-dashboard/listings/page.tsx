@@ -41,7 +41,9 @@ export default async function ListingsPage() {
 
     const listings = await prisma.listing.findMany({
       where: {
-        volunteerId: user.id,
+        volunteer: {
+          id: user.id,
+        },
       },
       include: {
         cause: {
