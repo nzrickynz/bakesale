@@ -339,15 +339,15 @@ export class UserService {
   async getVolunteerAssignments(userId: string) {
     return prisma.listing.findMany({
       where: {
-        volunteerId: userId
+        volunteerId: userId,
       },
       include: {
         cause: {
           include: {
-            organization: true
-          }
-        }
-      }
+            organization: true,
+          },
+        },
+      },
     });
   }
 } 

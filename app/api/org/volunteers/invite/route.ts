@@ -68,23 +68,16 @@ export async function POST(request: Request) {
     });
 
     if (existingUser) {
-      // Check if the user is already a volunteer for the listing
-      const existingVolunteer = await prisma.userOrganization.findFirst({
+      // Check if the user is already assigned to this listing
+      const existingAssignment = await prisma.listing.findFirst({
         where: {
-          userId: existingUser.id,
-          assignedListings: {
-            some: {
-              id: listingId,
-            },
-          },
-        },
+          id: listingId,
+          volunteerId: existingUser.id,
+        }
       });
 
-      if (existingVolunteer) {
-        return NextResponse.json(
-          { message: "This user is already a volunteer for this listing" },
-          { status: 400 }
-        );
+      if (existingAssignment) {
+        return new NextResponse("User is already assigned to this listing", { status: 400 });
       }
     }
 
@@ -126,6 +119,24 @@ export async function POST(request: Request) {
       organizationName: listing.title, // Use listing title for context
       role,
       invitedByName: session.user.name || "Organization Admin",
+    });
+
+    // Create or update the user organization relationship
+    const userOrganization = await prisma.userOrganization.upsert({
+      where: {
+        userId_organizationId: {
+          userId: session.user.id,
+          organizationId,
+        },
+      },
+      create: {
+        userId: session.user.id,
+        organizationId,
+        role: "VOLUNTEER",
+      },
+      update: {
+        role: "VOLUNTEER",
+      },
     });
 
     return NextResponse.json({ message: "Invitation sent successfully" });
