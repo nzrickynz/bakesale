@@ -57,7 +57,7 @@ const items = [
 const volunteerItems = [
   {
     title: "My Listings",
-    href: "/volunteer-dashboard",
+    href: "/volunteer-dashboard/listings",
     icon: Package,
   },
   {
