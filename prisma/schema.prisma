@@ -50,27 +50,25 @@ model User {
 }
 
 model Organization {
-  id           String   @id @default(cuid())
-  name         String   @unique
-  logoUrl      String?
-  description  String
-  facebookUrl  String?
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  logoUrl     String?
+  facebookUrl String?
   instagramUrl String?
-  websiteUrl   String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  websiteUrl  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Relationships
-  admin             User                  @relation("OrganizationAdmin", fields: [adminId], references: [id])
-  adminId           String
-  causes            Cause[]
+  admin      User     @relation("OrganizationAdmin", fields: [adminId], references: [id], onDelete: Cascade)
+  adminId    String
+  causes     Cause[]
   userOrganizations UserOrganization[]
-  invitations       VolunteerInvitation[]
-  assignedAdmins    UserOrganization[]   @relation("OrganizationAdmin")
+  assignedAdmins UserOrganization[] @relation("OrganizationAdmin")
+  invitations VolunteerInvitation[]
 
-  // Add relation to listings
-  listings          Listing[]
-
+  @@index([adminId])
   @@map("organizations")
 }
 
@@ -87,7 +85,7 @@ model Cause {
   updatedAt   DateTime    @updatedAt
 
   // Relationships
-  organization   Organization @relation(fields: [organizationId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   organizationId String
   listings       Listing[]
 
@@ -106,17 +104,15 @@ model Listing {
   updatedAt   DateTime @updatedAt
 
   // Relationships
-  cause       Cause   @relation(fields: [causeId], references: [id])
+  cause       Cause   @relation(fields: [causeId], references: [id], onDelete: Cascade)
   causeId     String
-  volunteer   User    @relation("ListingVolunteer", fields: [volunteerId], references: [id])
+  volunteer   User    @relation("ListingVolunteer", fields: [volunteerId], references: [id], onDelete: Cascade)
   volunteerId String
   orders      Order[]
   assignedVolunteers UserOrganization[] @relation("ListingVolunteer")
 
-  // Add organizationId to establish relationship with Organization
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  organizationId String
-
+  @@index([causeId])
+  @@index([volunteerId])
   @@map("listings")
 }
 
@@ -128,11 +124,14 @@ model Order {
   updatedAt         DateTime    @updatedAt
 
   // Relationships
-  listing   Listing @relation(fields: [listingId], references: [id])
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
   listingId String
-  creator   User    @relation("OrderCreator", fields: [creatorId], references: [id])
+  creator   User    @relation("OrderCreator", fields: [creatorId], references: [id], onDelete: Cascade)
   creatorId String
 
+  @@unique([buyerEmail, listingId])
+  @@index([listingId])
+  @@index([creatorId])
   @@map("orders")
 }
 
@@ -153,6 +152,8 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
 }
 
 model Session {
@@ -161,6 +162,9 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
 }
 
 model VerificationToken {
@@ -169,21 +173,27 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+  @@map("verification_tokens")
 }
 
 model UserOrganization {
-  id             String       @id @default(cuid())
-  userId         String
+  id          String   @id @default(cuid())
+  userId      String
   organizationId String
-  role           UserRole     @default(VOLUNTEER)
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  role        UserRole @default(VOLUNTEER)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   assignedListings Listing[]  @relation("ListingVolunteer")
   assignedOrganizations Organization[] @relation("OrganizationAdmin")
 
   @@unique([userId, organizationId])
+  @@index([userId])
+  @@index([organizationId])
+  @@map("user_organizations")
 }
 
 enum CauseStatus {
@@ -202,42 +212,48 @@ enum InvitationStatus {
 
 enum OrderStatus {
   ORDERED
-  IN_PROGRESS
-  READY
   FULFILLED
+  CANCELLED
 }
 
 model VolunteerInvitation {
-  id         String           @id @default(cuid())
-  email      String
-  token      String           @unique
-  status     InvitationStatus @default(PENDING)
-  role       UserRole         @default(VOLUNTEER)
-  expiresAt  DateTime
-  acceptedAt DateTime?
-  declinedAt DateTime?
-  createdAt  DateTime         @default(now())
-  updatedAt  DateTime         @updatedAt
+  id          String   @id @default(cuid())
+  email       String
+  token       String   @unique
+  role        UserRole @default(VOLUNTEER)
+  status      InvitationStatus @default(PENDING)
+  organizationId String
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  declinedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Relationships
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  organizationId String
-  invitedBy      User         @relation("InvitedBy", fields: [invitedById], references: [id])
-  invitedById    String
-  invitedUser    User?        @relation("InvitedUser", fields: [invitedUserId], references: [id])
-  invitedUserId  String?
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invitedBy    User        @relation("InvitedBy", fields: [invitedById], references: [id], onDelete: Cascade)
+  invitedById  String
+  invitedUser  User?       @relation("InvitedUser", fields: [invitedUserId], references: [id], onDelete: SetNull)
+  invitedUserId String?
 
   @@unique([email, organizationId])
+  @@index([organizationId])
+  @@index([invitedById])
+  @@index([invitedUserId])
   @@map("volunteer_invitations")
 }
 
 model PasswordReset {
   id        String   @id @default(cuid())
-  userId    String
   token     String   @unique
-  expires   DateTime
+  userId    String
+  expiresAt DateTime
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([token])
+  @@index([userId])
+  @@map("password_resets")
 }
