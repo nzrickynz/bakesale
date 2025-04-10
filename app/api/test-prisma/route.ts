@@ -10,50 +10,63 @@ export async function GET() {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    // Get all listings with their relationships
-    const allListings = await prisma.listing.findMany({
+    // First, get the user with basic info
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+      },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // Then get the user's listings
+    const listings = await prisma.listing.findMany({
+      where: {
+        OR: [
+          { volunteerId: user.id },
+          {
+            cause: {
+              organization: {
+                userOrganizations: {
+                  some: {
+                    userId: user.id,
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
       include: {
         cause: {
           include: {
             organization: true,
           },
         },
-        volunteer: true,
         orders: true,
       },
     });
 
-    // Get current user's details
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      include: {
-        managedListings: true,
-        userOrganizations: {
-          include: {
-            organization: {
-              include: {
-                causes: {
-                  include: {
-                    listings: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    });
-
-    return NextResponse.json({ 
-      allListings,
+    return NextResponse.json({
       user,
-      message: "This shows all listings in the database and your user details"
+      listings,
+      message: "Successfully retrieved user and listings data",
     });
   } catch (error) {
     console.error("[TEST_PRISMA_ERROR]", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { 
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : "Unknown error"
+      },
       { status: 500 }
     );
   }
 }
+
