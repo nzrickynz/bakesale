@@ -247,7 +247,7 @@ model PasswordReset {
   id        String   @id @default(cuid())
   token     String   @unique
   userId    String
-  expiresAt DateTime
+  expires   DateTime
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
