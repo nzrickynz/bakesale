@@ -10,6 +10,20 @@ export async function GET() {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
+    // Get all listings with their relationships
+    const allListings = await prisma.listing.findMany({
+      include: {
+        cause: {
+          include: {
+            organization: true,
+          },
+        },
+        volunteer: true,
+        orders: true,
+      },
+    });
+
+    // Get current user's details
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
       include: {
@@ -30,7 +44,11 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json({ user });
+    return NextResponse.json({ 
+      allListings,
+      user,
+      message: "This shows all listings in the database and your user details"
+    });
   } catch (error) {
     console.error("[TEST_PRISMA_ERROR]", error);
     return NextResponse.json(
