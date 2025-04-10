@@ -25,17 +25,6 @@ export default async function VolunteerDashboardLayout({
     notFound();
   }
 
-  // Check if user has any assigned listings
-  const volunteerListings = await prisma.listing.findMany({
-    where: {
-      volunteerId: user.id,
-    },
-  });
-
-  if (volunteerListings.length === 0) {
-    notFound();
-  }
-
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
       <DashboardHeader />

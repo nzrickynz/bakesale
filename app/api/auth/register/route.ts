@@ -127,7 +127,7 @@ export async function POST(request: Request) {
               email,
               passwordHash: hashedPassword,
               name,
-              role: UserRole.PUBLIC,
+              role: UserRole.VOLUNTEER,
             },
           })
         } catch (error) {
