@@ -28,6 +28,7 @@ type UserWithListings = {
   id: string;
   email: string;
   name: string | null;
+  role: string;
   managedListings: ListingWithOrders[];
   userOrganizations: (UserOrganization & {
     organization: Organization & {
@@ -46,10 +47,9 @@ export default async function VolunteerDashboard() {
       redirect('/dashboard');
     }
 
-    const user = await prisma.user.findFirst({
+    const user = await prisma.user.findUnique({
       where: { 
-        email: session.user.email,
-        role: 'VOLUNTEER'
+        id: session.user.id,
       },
       include: {
         managedListings: {
@@ -69,7 +69,7 @@ export default async function VolunteerDashboard() {
       },
     }) as UserWithListings | null;
 
-    if (!user) {
+    if (!user || user.role !== 'VOLUNTEER') {
       redirect('/dashboard');
     }
 
