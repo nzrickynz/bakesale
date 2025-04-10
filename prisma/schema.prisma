@@ -109,7 +109,6 @@ model Listing {
   volunteer   User    @relation("ListingVolunteer", fields: [volunteerId], references: [id], onDelete: Cascade)
   volunteerId String
   orders      Order[]
-  assignedVolunteers UserOrganization[] @relation("ListingVolunteer")
 
   @@index([causeId])
   @@index([volunteerId])
@@ -187,7 +186,6 @@ model UserOrganization {
   // Relationships
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  assignedListings Listing[]  @relation("ListingVolunteer")
   assignedOrganizations Organization[] @relation("OrganizationAdmin")
 
   @@unique([userId, organizationId])
