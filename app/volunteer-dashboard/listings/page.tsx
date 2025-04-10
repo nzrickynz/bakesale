@@ -27,32 +27,46 @@ type ListingWithOrders = Listing & {
 export default async function ListingsPage() {
   try {
     const session = await getServerSession(authOptions);
+    console.log("[VOLUNTEER_LISTINGS] Session:", session?.user?.id);
+    
     if (!session?.user?.id) {
+      console.log("[VOLUNTEER_LISTINGS] No session found, redirecting to login");
       redirect("/auth/login");
     }
 
+    // First, get the user with their organization associations
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
+      include: {
+        userOrganizations: {
+          select: {
+            organizationId: true,
+          },
+        },
+      },
     });
+    console.log("[VOLUNTEER_LISTINGS] User:", user?.id, user?.role, "Org associations:", user?.userOrganizations?.length);
 
     if (!user || user.role !== UserRole.VOLUNTEER) {
+      console.log("[VOLUNTEER_LISTINGS] User not found or not a volunteer");
       notFound();
     }
 
+    // Get the organization IDs the user is associated with
+    const userOrgIds = user.userOrganizations.map(org => org.organizationId);
+    console.log("[VOLUNTEER_LISTINGS] User organization IDs:", userOrgIds);
+
+    // Query listings with more specific conditions
     const listings = await prisma.listing.findMany({
       where: {
         OR: [
           // Listings where user is the volunteer
-          { volunteer: { id: user.id } },
+          { volunteerId: user.id },
           // Listings from organizations the user is part of
           {
             cause: {
-              organization: {
-                userOrganizations: {
-                  some: {
-                    userId: user.id,
-                  },
-                },
+              organizationId: {
+                in: userOrgIds,
               },
             },
           },
@@ -77,6 +91,7 @@ export default async function ListingsPage() {
         createdAt: "desc",
       },
     });
+    console.log("[VOLUNTEER_LISTINGS] Found listings:", listings.length);
 
     if (listings.length === 0) {
       return (
@@ -155,6 +170,10 @@ export default async function ListingsPage() {
     );
   } catch (error) {
     console.error("[VOLUNTEER_LISTINGS_ERROR]", error);
+    // Log the full error stack trace
+    if (error instanceof Error) {
+      console.error("[VOLUNTEER_LISTINGS_ERROR_STACK]", error.stack);
+    }
     return (
       <div className="flex-1 space-y-4 p-8 pt-6">
         <div className="flex items-center justify-between space-y-2">

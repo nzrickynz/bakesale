@@ -118,26 +118,40 @@ export async function POST(request: Request) {
       );
     }
 
-    const userOrg = await prisma.userOrganization.findUnique({
+    const body = await request.json();
+    const validatedData = causeSchema.safeParse(body);
+    
+    if (!validatedData.success) {
+      return NextResponse.json(
+        { error: "Invalid request data", details: validatedData.error.errors },
+        { status: 400 }
+      );
+    }
+
+    // Check if user has access to the organization
+    const userOrg = await prisma.userOrganization.findFirst({
       where: {
-        userId_organizationId: {
-          userId: user.id,
-          organizationId: user.id,
-        },
+        userId: user.id,
+        organizationId: validatedData.data.organizationId,
       },
     });
 
     if (!userOrg) {
       return NextResponse.json(
-        { error: "Organization not found" },
-        { status: 404 }
+        { error: "You don't have access to this organization" },
+        { status: 403 }
       );
     }
 
-    const body = await request.json();
     const cause = await causeService.create({
-      ...body,
-      organizationId: userOrg.organizationId,
+      data: {
+        ...validatedData.data,
+        organization: {
+          connect: {
+            id: validatedData.data.organizationId,
+          },
+        },
+      },
     });
 
     return NextResponse.json(cause);

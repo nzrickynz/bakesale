@@ -198,7 +198,6 @@ enum CauseStatus {
   DRAFT
   ACTIVE
   COMPLETED
-  CANCELLED
 }
 
 enum InvitationStatus {
@@ -210,6 +209,7 @@ enum InvitationStatus {
 
 enum OrderStatus {
   ORDERED
+  IN_PROGRESS
   FULFILLED
   CANCELLED
 }

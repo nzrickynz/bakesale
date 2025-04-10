@@ -24,6 +24,11 @@ type Cause = PrismaCause & {
   currentAmount?: number;
 };
 
+type DashboardData = {
+  organizations: UserOrganization[];
+  causes: Cause[];
+};
+
 export default function DashboardPage() {
   const { status, data: session } = useSession({
     required: true,
@@ -39,22 +44,17 @@ export default function DashboardPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [orgsResponse, causesResponse] = await Promise.all([
-          fetch("/api/organizations"),
-          fetch("/api/causes"),
-        ]);
+        const response = await fetch("/api/dashboard");
 
-        if (!orgsResponse.ok || !causesResponse.ok) {
-          throw new Error("Failed to fetch data");
+        if (!response.ok) {
+          throw new Error("Failed to fetch dashboard data");
         }
 
-        const orgsData = await orgsResponse.json();
-        const causesData = await causesResponse.json();
-
-        setUserOrganizations(orgsData.organizations);
-        setCauses(causesData.causes);
+        const data: DashboardData = await response.json();
+        setUserOrganizations(data.organizations);
+        setCauses(data.causes);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching dashboard data:", error);
       } finally {
         setIsLoading(false);
       }
