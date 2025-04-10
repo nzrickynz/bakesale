@@ -76,6 +76,7 @@ export default async function NewListingPage({ params }: PageProps) {
                     imageUrl: data.imageUrl,
                     causeId: params.causeId,
                     volunteerId: user.id,
+                    organizationId: params.id,
                   },
                 });
               } catch (error) {

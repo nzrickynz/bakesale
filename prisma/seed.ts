@@ -106,27 +106,18 @@ async function main() {
   for (const cause of createdCauses) {
     const listings = [
       {
-        title: `Homemade Brownies for ${cause.title}`,
-        description: 'Delicious homemade brownies made with love.',
+        title: 'Chocolate Chip Cookies',
+        description: 'Freshly baked chocolate chip cookies.',
         imageUrl: 'https://placehold.co/300x300',
         price: 25,
-        quantity: 10,
-        paymentLink: 'https://example.com/payment/brownies',
+        quantity: 20,
+        paymentLink: 'https://example.com/payment/cookies',
         causeId: cause.id,
         volunteerId: volunteers[0].id,
+        organizationId: organization.id,
       },
       {
-        title: `Custom Cake for ${cause.title}`,
-        description: 'Beautiful custom cake with your choice of flavors.',
-        imageUrl: 'https://placehold.co/300x300',
-        price: 50,
-        quantity: 5,
-        paymentLink: 'https://example.com/payment/cake',
-        causeId: cause.id,
-        volunteerId: volunteers[1].id,
-      },
-      {
-        title: `Cookie Box for ${cause.title}`,
+        title: 'Assorted Cookie Box',
         description: 'Assorted cookies in a beautiful gift box.',
         imageUrl: 'https://placehold.co/300x300',
         price: 35,
@@ -134,6 +125,7 @@ async function main() {
         paymentLink: 'https://example.com/payment/cookies',
         causeId: cause.id,
         volunteerId: volunteers[0].id,
+        organizationId: organization.id,
       },
     ];
 
