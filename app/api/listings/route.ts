@@ -77,7 +77,6 @@ export async function POST(request: Request) {
         causeId,
         volunteerId,
         paymentLink,
-        organizationId: cause.organizationId,
       },
     });
 

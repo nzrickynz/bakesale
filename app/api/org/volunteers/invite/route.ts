@@ -16,13 +16,13 @@ export async function POST(request: Request) {
     }
 
     // Get the user's organization
-    const userOrg = await prisma.userOrganization.findFirst({
+    const userOrg = await prisma.userOrganization.findUnique({
       where: {
-        userId: session.user.id,
-      },
-      include: {
-        organization: true,
-      },
+        userId_organizationId: {
+          userId: session.user.id,
+          organizationId: session.user.organizationId,
+        }
+      }
     });
 
     if (!userOrg) {
@@ -44,6 +44,13 @@ export async function POST(request: Request) {
     // Check if the listing exists
     const listing = await prisma.listing.findUnique({
       where: { id: listingId },
+      include: {
+        cause: {
+          include: {
+            organization: true
+          }
+        }
+      }
     });
 
     if (!listing) {
@@ -53,8 +60,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Use listing.organizationId for organizationId
-    const organizationId = listing.organizationId;
+    // Use listing.cause.organization.id for organizationId
+    const organizationId = listing.cause.organization.id;
 
     // Check if the user already exists
     const existingUser = await prisma.user.findUnique({

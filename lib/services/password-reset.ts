@@ -3,6 +3,7 @@ import type { Prisma } from "@prisma/client";
 import { randomBytes } from "crypto";
 import { hash } from "bcryptjs";
 import { z } from "zod";
+import { addHours } from "date-fns";
 
 type PasswordResetWithUser = Prisma.PasswordResetGetPayload<{
   include: {
@@ -31,16 +32,16 @@ export class PasswordResetService {
     });
   }
 
-  async create(params: {
-    data: Prisma.PasswordResetCreateInput;
-    include?: Prisma.PasswordResetInclude;
-  }): Promise<PasswordResetWithUser> {
+  async create(userId: string) {
     return prisma.passwordReset.create({
-      ...params,
-      include: {
-        ...params.include,
-        user: true,
+      data: {
+        userId,
+        token: randomBytes(32).toString("hex"),
+        expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
       },
+      include: {
+        user: true
+      }
     });
   }
 
@@ -61,38 +62,24 @@ export class PasswordResetService {
 
     // Generate reset token
     const token = randomBytes(32).toString("hex");
-    const expires = new Date(Date.now() + 3600000); // 1 hour from now
+    const expires = addHours(new Date(), 24);
 
     // Save reset token
-    return this.create({
-      data: {
-        user: {
-          connect: { id: user.id }
-        },
-        token,
-        expires,
-      },
-      include: {
-        user: true,
-      },
-    });
+    return this.create(user.id);
   }
 
-  async verifyToken(token: string): Promise<PasswordResetWithUser | null> {
-    const reset = await this.findUnique({
+  async findValidToken(token: string) {
+    const reset = await prisma.passwordReset.findUnique({
       where: { token },
-      include: {
-        user: true,
-      },
+      include: { user: true },
     });
 
     if (!reset) {
       return null;
     }
 
-    // Check if token has expired
     if (reset.expires < new Date()) {
-      await this.delete({ token });
+      await this.deleteToken(token);
       return null;
     }
 
@@ -106,7 +93,7 @@ export class PasswordResetService {
       throw new Error(validationResult.error.errors[0].message);
     }
 
-    const reset = await this.verifyToken(token);
+    const reset = await this.findValidToken(token);
     if (!reset) {
       throw new Error("Invalid or expired reset token");
     }
@@ -123,28 +110,24 @@ export class PasswordResetService {
     });
 
     // Delete the used reset token
-    await this.delete({ token });
+    await this.deleteToken(token);
 
     return reset.user;
   }
 
-  async cleanupExpiredTokens() {
-    const now = new Date();
-    const expiredTokens = await prisma.passwordReset.findMany({
+  async deleteExpiredTokens() {
+    return prisma.passwordReset.deleteMany({
       where: {
         expires: {
-          lt: now,
+          lt: new Date(),
         },
       },
     });
+  }
 
-    // Delete all expired tokens
-    await Promise.all(
-      expiredTokens.map((token) =>
-        this.delete({ token: token.token })
-      )
-    );
-
-    return expiredTokens.length;
+  async deleteToken(token: string) {
+    return prisma.passwordReset.delete({
+      where: { token },
+    });
   }
 } 

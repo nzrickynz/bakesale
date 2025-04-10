@@ -1,34 +1,22 @@
 import { OrderService } from '@/lib/services/order';
-import { OrderStatus } from '@prisma/client';
-import prisma from '@/lib/prisma';
+import { PrismaClient, OrderStatus } from '@prisma/client';
+import { mockDeep, mockReset, DeepMockProxy } from 'jest-mock-extended';
 
-// Mock Prisma client
-jest.mock('@prisma/client', () => ({
-  PrismaClient: jest.fn().mockImplementation(() => ({
-    order: {
-      create: jest.fn(),
-      update: jest.fn(),
-      findUnique: jest.fn(),
-    },
-    cause: {
-      findUnique: jest.fn(),
-    },
-  })),
-  OrderStatus: {
-    PENDING: 'PENDING',
-    PAID: 'PAID',
-    CANCELLED: 'CANCELLED',
-  },
+jest.mock('@/lib/prisma', () => ({
+  __esModule: true,
+  default: mockDeep<PrismaClient>(),
 }));
 
-jest.mock('@/lib/prisma');
+import prisma from '@/lib/prisma';
+
+const prismaMock = prisma as unknown as DeepMockProxy<PrismaClient>;
 
 describe('OrderService', () => {
   let orderService: OrderService;
 
   beforeEach(() => {
+    mockReset(prismaMock);
     orderService = new OrderService();
-    jest.clearAllMocks();
   });
 
   describe('create', () => {
@@ -43,7 +31,7 @@ describe('OrderService', () => {
         updatedAt: new Date(),
       };
 
-      (prisma.order.create as jest.Mock).mockResolvedValue(mockOrder);
+      (prismaMock.order.create as jest.Mock).mockResolvedValue(mockOrder);
 
       const result = await orderService.create({
         buyerEmail: 'test@example.com',
@@ -52,7 +40,7 @@ describe('OrderService', () => {
       });
 
       expect(result).toEqual(mockOrder);
-      expect(prisma.order.create).toHaveBeenCalled();
+      expect(prismaMock.order.create).toHaveBeenCalled();
     });
   });
 
@@ -60,18 +48,23 @@ describe('OrderService', () => {
     it('should update order status', async () => {
       const mockOrder = {
         id: '1',
-        fulfillmentStatus: OrderStatus.IN_PROGRESS,
+        buyerEmail: 'test@example.com',
+        fulfillmentStatus: OrderStatus.ORDERED,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        listingId: '1',
+        creatorId: '1',
       };
 
-      (prisma.order.update as jest.Mock).mockResolvedValue(mockOrder);
+      prismaMock.order.update.mockResolvedValue(mockOrder);
 
-      const result = await orderService.updateStatus('1', OrderStatus.IN_PROGRESS);
+      const result = await orderService.updateStatus('1', OrderStatus.FULFILLED);
 
-      expect(result).toEqual(mockOrder);
-      expect(prisma.order.update).toHaveBeenCalledWith({
+      expect(prismaMock.order.update).toHaveBeenCalledWith({
         where: { id: '1' },
-        data: { fulfillmentStatus: OrderStatus.IN_PROGRESS },
+        data: { fulfillmentStatus: OrderStatus.FULFILLED },
       });
+      expect(result).toEqual(mockOrder);
     });
   });
 
@@ -85,8 +78,8 @@ describe('OrderService', () => {
         fulfillmentStatus: OrderStatus.ORDERED,
       };
 
-      (prisma.order.findUnique as jest.Mock).mockResolvedValue(mockOrder);
-      (prisma.order.update as jest.Mock).mockResolvedValue({
+      (prismaMock.order.findUnique as jest.Mock).mockResolvedValue(mockOrder);
+      (prismaMock.order.update as jest.Mock).mockResolvedValue({
         ...mockOrder,
         fulfillmentStatus: OrderStatus.FULFILLED,
       });
@@ -94,7 +87,7 @@ describe('OrderService', () => {
       const result = await orderService.fulfillOrder('1', 'volunteer-1');
 
       expect(result.fulfillmentStatus).toBe(OrderStatus.FULFILLED);
-      expect(prisma.order.update).toHaveBeenCalled();
+      expect(prismaMock.order.update).toHaveBeenCalled();
     });
 
     it('should throw error if volunteer is not authorized', async () => {
@@ -105,7 +98,7 @@ describe('OrderService', () => {
         },
       };
 
-      (prisma.order.findUnique as jest.Mock).mockResolvedValue(mockOrder);
+      (prismaMock.order.findUnique as jest.Mock).mockResolvedValue(mockOrder);
 
       await expect(
         orderService.fulfillOrder('1', 'unauthorized-volunteer')

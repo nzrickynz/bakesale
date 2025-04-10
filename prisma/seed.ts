@@ -17,13 +17,14 @@ async function main() {
     },
   });
 
-  // Create an organization with enhanced data
+  // Create or get organization
   const organization = await prisma.organization.upsert({
-    where: { name: 'Bake for Good' },
+    where: { id: 'org_bake_for_good' },
     update: {},
     create: {
+      id: 'org_bake_for_good',
       name: 'Bake for Good',
-      description: 'A community-driven organization focused on making a difference through baking.',
+      description: 'A non-profit organization dedicated to baking for charitable causes.',
       logoUrl: 'https://placehold.co/300x300',
       facebookUrl: 'https://facebook.com/bakeforgood',
       instagramUrl: 'https://instagram.com/bakeforgood',
@@ -148,7 +149,7 @@ async function main() {
         },
         {
           buyerEmail: 'customer2@example.com',
-          fulfillmentStatus: OrderStatus.IN_PROGRESS,
+          fulfillmentStatus: OrderStatus.ORDERED,
           listingId: listing.id,
           creatorId: volunteers[1].id,
         },
@@ -179,6 +180,21 @@ async function main() {
       })
     )
   );
+
+  // Create orders
+  await prisma.order.create({
+    data: {
+      id: 'order_1',
+      buyerEmail: 'buyer1@example.com',
+      fulfillmentStatus: OrderStatus.ORDERED,
+      listing: {
+        connect: { id: 'listing_1' },
+      },
+      creator: {
+        connect: { id: 'user_1' },
+      },
+    },
+  });
 
   console.log('Seed data created successfully');
 }

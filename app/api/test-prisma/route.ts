@@ -50,6 +50,13 @@ export async function GET() {
           },
         },
         orders: true,
+        volunteer: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
       },
     });
 

@@ -67,16 +67,15 @@ export default async function NewListingPage({ params }: PageProps) {
             onSubmit={async (data) => {
               'use server';
               try {
-                await prisma.listing.create({
+                const listing = await prisma.listing.create({
                   data: {
                     title: data.title,
                     description: data.description,
                     price: parseFloat(data.price),
-                    paymentLink: data.paymentLink || null,
                     imageUrl: data.imageUrl,
                     causeId: params.causeId,
                     volunteerId: user.id,
-                    organizationId: params.id,
+                    paymentLink: data.paymentLink,
                   },
                 });
               } catch (error) {

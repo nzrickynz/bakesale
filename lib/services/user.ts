@@ -315,4 +315,30 @@ export class UserService {
       },
     });
   }
+
+  async assignVolunteerToListing(userId: string, listingId: string) {
+    const listing = await prisma.listing.update({
+      where: { id: listingId },
+      data: {
+        volunteerId: userId
+      }
+    });
+
+    return listing;
+  }
+
+  async getVolunteerAssignments(userId: string) {
+    return prisma.listing.findMany({
+      where: {
+        volunteerId: userId
+      },
+      include: {
+        cause: {
+          include: {
+            organization: true
+          }
+        }
+      }
+    });
+  }
 } 

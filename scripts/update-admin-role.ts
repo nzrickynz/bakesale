@@ -23,13 +23,14 @@ async function main() {
 
   // Create an organization if it doesn't exist
   const organization = await prisma.organization.upsert({
-    where: { name: "BakeSale Admin Organization" },
-    update: {},
+    where: { id: "bakesale-admin-org" },
     create: {
+      id: "bakesale-admin-org",
       name: "BakeSale Admin Organization",
-      description: "Main organization for BakeSale administrators",
+      description: "Organization for BakeSale administrators",
       adminId: user.id,
     },
+    update: {},
   });
 
   // Create a UserOrganization relationship

@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import type { Prisma } from "@prisma/client";
+import { Organization, UserRole } from "@prisma/client";
 
 export class OrganizationService {
   async findMany(params?: {
@@ -14,9 +15,15 @@ export class OrganizationService {
     return prisma.organization.findUnique({ where });
   }
 
-  async findByName(name: string) {
+  async findByName(name: string): Promise<Organization | null> {
+    return prisma.organization.findFirst({
+      where: { name },
+    });
+  }
+
+  async findById(id: string): Promise<Organization | null> {
     return prisma.organization.findUnique({
-      where: { name }
+      where: { id },
     });
   }
 
