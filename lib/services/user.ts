@@ -274,15 +274,6 @@ export class UserService {
     organizationId: string,
     assignments: { id: string; type: string }[]
   ) {
-    const listingIds = assignments
-      .filter(a => a.type === "listing")
-      .map(a => a.id);
-
-    const organizationIds = assignments
-      .filter(a => a.type === "organization")
-      .map(a => a.id);
-
-    // First, get the UserOrganization record
     const userOrg = await prisma.userOrganization.findUnique({
       where: {
         userId_organizationId: {
@@ -293,24 +284,25 @@ export class UserService {
     });
 
     if (!userOrg) {
-      throw new Error("Team member not found");
+      throw new Error("User organization not found");
     }
 
-    // Then update the assignments
+    // Split assignments by type
+    const organizationIds = assignments
+      .filter((a) => a.type === "organization")
+      .map((a) => a.id);
+
+    // Update the user organization
     return prisma.userOrganization.update({
       where: {
         id: userOrg.id,
       },
       data: {
-        assignedListings: {
-          set: listingIds.map(id => ({ id })),
-        },
         assignedOrganizations: {
           set: organizationIds.map(id => ({ id })),
         },
       },
       include: {
-        assignedListings: true,
         assignedOrganizations: true,
       },
     });
